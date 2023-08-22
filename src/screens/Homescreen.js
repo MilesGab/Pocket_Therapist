@@ -6,7 +6,7 @@ import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
 
   const [selectedId, setSelectedId] = React.useState();
 
@@ -98,6 +98,7 @@ const HomeScreen = () => {
           <Text style={styles.servicesText}>Services</Text>
               <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center'}}>
               <IconButton
+                onPress={() => navigation.navigate('Contact')}
                 style={{
                   backgroundColor: '#DCEDF9',
                   width: 80,

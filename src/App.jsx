@@ -2,13 +2,14 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from './components/Homescreen.js';
-import Schedule from './components/Schedule.js';
-import Contact from './components/Contact.js';
-import Notifications from './components/Notifications.js';
+import HomeScreen from './screens/Homescreen.js';
+import Schedule from './screens/Schedule.js';
+import Contact from './screens/Contact.js';
+import Notifications from './screens/Notifications.js';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
@@ -49,7 +50,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 function MyTabs() {
   return (
     <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
+      initialRouteName="Home" tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tab.Screen
         name="Home"
@@ -115,7 +116,10 @@ const styles = StyleSheet.create({
 export default function App() {
   return (
     <NavigationContainer>
-      <MyTabs />
+      <Stack.Navigator>
+        <Stack.Screen name="MyTabs" component={MyTabs}/>
+        <Stack.Screen name="Contact" component={Contact}/>
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
