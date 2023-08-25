@@ -8,6 +8,7 @@ import Contact from './screens/Contact.js';
 import Notifications from './screens/Notifications.js';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Login from './screens/Login.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -117,6 +118,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
+        <Stack.Screen name="Login" component={Login}/>
         <Stack.Screen name="MyTabs" component={MyTabs}/>
         <Stack.Screen name="Contact" component={Contact}/>
       </Stack.Navigator>
