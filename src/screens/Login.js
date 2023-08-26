@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase";
-const backImage = require("../assets/backImage.png");
+// import { auth } from "../../config/firebase.js";
+const backImage = require("../../assets/images/pt_icon.png");
 
 export default function Login({ navigation }) {
 
@@ -10,17 +10,21 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
 
   const onHandleLogin = () => {
-    if (email !== "" && password !== "") {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success"))
-        .catch((err) => Alert.alert("Login error", err.message));
-    }
+    // if (email !== "" && password !== "") {
+    //   signInWithEmailAndPassword(auth, email, password)
+    //     .then(() => console.log("Login success"))
+    //     .catch((err) => Alert.alert("Login error", err.message));
+    // }
+
+    navigation.navigate('MyTabs')
   };
   
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
-        <Image source={backImage} style={styles.backImage} />
+        <View style={styles.image_container}>
+          <Image source={backImage} style={styles.backImage} />
+        </View>
         <View style={styles.whiteSheet} />
         <SafeAreaView style={styles.form}>
           <Text style={styles.title}>Log In</Text>
@@ -79,11 +83,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
   },
+  image_container: {
+    backgroundColor: 'blue',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   backImage: {
-    width: "100%",
-    height: 340,
+    display: 'flex',
+    alignItems: 'center',   // Center horizontally
+    justifyContent: 'center',   // Center vertically
+    width: 160,
+    height: 150,
     position: "absolute",
-    top: 0,
+    top: 16,
     resizeMode: 'cover',
   },
   whiteSheet: {
@@ -93,7 +107,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     width: '100%',
     height: '75%',
-    position: "absolute",
+    position: "absolute", 
     bottom: 0,
     backgroundColor: '#fff',
     borderTopLeftRadius: 60,
