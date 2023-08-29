@@ -1,68 +1,67 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Button, TextInput, Image, SafeAreaView, TouchableOpacity, StatusBar, Alert, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-// import { auth } from "../../config/firebase.js";
-const backImage = require("../../assets/images/pt_icon.png");
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import Toast from 'react-native-toast-message';
-import { AppContext } from "../../contexts/AppContext";
 
-export default function Login({ navigation, setUserName }) {
 
-  const context = React.useContext(AppContext);
+export default function Register({ navigation }) {
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const onHandleLogin = () => {
-    if (email !== '' && password !== '') {
-      auth()
-        .signInWithEmailAndPassword(email, password)
-        .then(async (userCredential) => {
-          console.log('Login successful!');
-          const uid = userCredential.user.uid;
-          const userSnapshot = await firestore().collection('users').doc(uid).get();
-          const userData = userSnapshot.data();
-          if (userData) {
-            // context.updateUser({ ...userData });
-            console.log(context.name);
-          }
-          navigation.navigate('MyTabs');
-        })
-        .catch(error => {
-          if (error.code === 'auth/user-not-found') {
-            console.log('User not found. Please sign up.');
-          } else if (error.code === 'auth/wrong-password') {
-            console.log('Wrong password. Please try again.');
-          } else if (error.code === 'auth/invalid-email') {
-            console.log('Invalid email format.');
-          } else {
-            console.error(error);
-          }
-        });
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: 'Missing Information',
-        text2: 'Please enter an email and password',
-        visibilityTime: 3000,
+  const onHandleSignUp = async () => {
+    try {
+      // Create user account using Firebase Authentication
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+
+      // Get the user's UID
+      const uid = userCredential.user.uid;
+
+      // Store user information in Firestore
+      await firestore().collection('users').doc(uid).set({
+        name,
+        email,
       });
-      console.log("NO EMAIL AND PASS");
+
+      console.log('User account created & signed up!');
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error creating account:', error);
     }
+  };
+
+  const onHandleLogin = () => {
+    // if (email !== "" && password !== "") {
+    //   signInWithEmailAndPassword(auth, email, password)
+    //     .then(() => console.log("Login success"))
+    //     .catch((err) => Alert.alert("Login error", err.message));
+    // }
+
+    navigation.navigate('Login')
   };
   
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
+        
         <View style={styles.image_container}>
         </View>
+
         <View style={styles.whiteSheet} />
         <SafeAreaView style={styles.form}>
-          <Toast
-            position='bottom'
-            bottomOffset={50}
-          />
-          <Text style={styles.title}>Log In</Text>
+          <Text style={styles.title}>Sign Up</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter name"
+          autoCapitalize="none"
+          keyboardType="default"
+          textContentType="name"
+          autoFocus={false}
+          value={name}
+          onChangeText={(text) => setName(text)}
+        />
         <TextInput
           style={styles.input}
           placeholder="Enter email"
@@ -83,13 +82,13 @@ export default function Login({ navigation, setUserName }) {
           value={password}
           onChangeText={(text) => setPassword(text)}
         />
-        <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
-          <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}> Log In</Text>
+        <TouchableOpacity style={styles.button} onPress={onHandleSignUp}>
+          <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}>Sign Up</Text>
         </TouchableOpacity>
         <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
-          <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-            <Text style={{color: '#6fa8dc', fontWeight: '600', fontSize: 14}}> Sign Up</Text>
+          <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Alreadt have an accout? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={{color: '#f57c00', fontWeight: '600', fontSize: 14}}> Sign In</Text>
           </TouchableOpacity>
         </View>
         </SafeAreaView>
@@ -101,7 +100,7 @@ export default function Login({ navigation, setUserName }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f57c00",
+    backgroundColor: "#6fa8dc",
   },
   title: {
     fontSize: 36,
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
     // alignItems: 'center',
     // justifyContent: 'center',
   },
-  // backImage: {6fa8dc
+  // backImage: {
   //   display: 'flex',
   //   alignItems: 'center',   // Center horizontally
   //   justifyContent: 'center',   // Center vertically
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   button: {
-    backgroundColor: '#6fa8dc',
+    backgroundColor: '#f57c00',
     height: 58,
     borderRadius: 10,
     justifyContent: 'center',

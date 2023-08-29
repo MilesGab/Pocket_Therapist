@@ -4,9 +4,11 @@ import { Avatar, IconButton, Box } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({ navigation, route }) => {
+  const  user  = route.params.user;
 
   const [selectedId, setSelectedId] = React.useState();
 
@@ -78,6 +80,19 @@ const HomeScreen = ({navigation}) => {
     console.log('Hello!');
   }
 
+  const handleLogout = () => {
+    auth()
+      .signOut()
+      .then(() => {
+        console.log('Logout successful!');
+        navigation.navigate('Login');
+      })
+      .catch(error => {
+        console.error('Error logging out:', error);
+      });
+  };
+
+
   return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -87,10 +102,10 @@ const HomeScreen = ({navigation}) => {
               fontFamily: 'Nunito Sans', 
               fontSize: 28, 
               color: 'black', 
-              fontWeight: 'bold'}}>Mico Ruiz D. Linco</Text>
+              fontWeight: 'bold'}}>{user || '---'}</Text>
           </View>
-          <TouchableOpacity onPress={() => {}}>
-            <Avatar label="Mico Linco" />
+          <TouchableOpacity onPress={handleLogout}>
+            <Avatar label={user} />
           </TouchableOpacity>
         </View>
 
@@ -108,6 +123,7 @@ const HomeScreen = ({navigation}) => {
                 icon={props => <Icon name="clipboard-outline" color={'#1C6BA4'} size={36} />}
               />
               <IconButton
+                onPress={() => {console.log(user)}}
                 style={{
                   backgroundColor: '#F2E3E9',
                   width: 80,

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "473959584342",
+    "project_id": "pocket-therapist-ddbb0",
+    "storage_bucket": "pocket-therapist-ddbb0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473959584342:android:a706570729d7aca27521f7",
+        "android_client_info": {
+          "package_name": "com.pocket_therapist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473959584342-adv3qnrq0r58npbb7kc9mumba4b5oi5n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEeDrDhnyjOzH5JA3b0IppX1wfV83wsDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473959584342-adv3qnrq0r58npbb7kc9mumba4b5oi5n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -9,119 +9,32 @@ import Notifications from './screens/Notifications.js';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Login from './screens/Login.js';
+import Register from './screens/Register.js';
+import auth from '@react-native-firebase/auth';
+import Routes from './navigation/Routes.js';
 
-const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
-
-const CustomTabBar = ({ state, descriptors, navigation }) => {
-  return (
-    <View style={styles.tabBarContainer}>
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const label = options.tabBarLabel || route.name;
-        const isFocused = state.index === index;
-
-        return (
-          <TouchableOpacity
-            key={index}
-            onPress={() => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
-
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
-              }
-            }}
-            style={styles.tabItemContainer}
-          >
-            {options.tabBarIcon({ color: isFocused ? '#007bff' : '#ccc', size: 30 })}
-            <Text style={[styles.tabLabel, { color: isFocused ? '#007bff' : '#ccc' }]}>
-              {label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-};
-
-function MyTabs() {
-  return (
-    <Tab.Navigator
-      initialRouteName="Home" tabBar={(props) => <CustomTabBar {...props} />}
-    >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Icon name="home-outline" color={color} size={size} />,
-          tabBarLabel: 'Home',
-        }}
-      />
-
-      <Tab.Screen
-        name="Schedule"
-        component={Schedule}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Icon name="calendar" color={color} size={size} />,
-          tabBarLabel: 'Schedule',
-        }}
-      />
-      <Tab.Screen
-        name="Contact"
-        component={Contact}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Icon name="chatbox-ellipses-outline" color={color} size={size} />,
-          tabBarLabel: 'Contact',
-        }}
-      />
-      <Tab.Screen
-        name="Notifications"
-        component={Notifications}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Icon name="notifications" color={color} size={size} />,
-          tabBarLabel: 'Notifications',
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
-
-const styles = StyleSheet.create({
-  tabBarContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingTop: 10
-  },
-  tabItemContainer: {
-    alignItems: 'center',
-  },
-  tabLabel: {
-    fontSize: 12,
-    marginTop: 2,
-    marginBottom: 10
-  },
-});
 
 export default function App() {
+  // Set an initializing state whilst Firebase connects
+  const [initializing, setInitializing] = React.useState(true);
+  const [user, setUser] = React.useState();
+
+  // Handle user state changes
+  function onAuthStateChanged(user) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  React.useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
+
+  if (initializing) return null;
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={Login} options={{headerShown: false}}/>
-        <Stack.Screen name="MyTabs" component={MyTabs} options={{headerShown: false}}/>
-        <Stack.Screen name="Contact" component={Contact}/>
-      </Stack.Navigator>
+      <Routes user={user}/>
     </NavigationContainer>
   );
 }
