@@ -10,6 +10,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Login from '../screens/Login.js';
 import Register from '../screens/Register.js';
+import Profile from '../screens/Profile.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
 
 const Routes = (props) => {
 
-    const [user, setUserName] = React.useState('Miles');
+    const [user, setUserName] = React.useState('Charles');
 
     return(
         <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>
@@ -129,6 +130,7 @@ const Routes = (props) => {
             <Stack.Screen name="MyTabs">
                 {(props) => <MyTabs {...props} user={user} />}
             </Stack.Screen>
+            <Stack.Screen name="Profile" component={Profile} />
         </Stack.Navigator>
     )
 }

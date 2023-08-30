@@ -112,8 +112,9 @@ const HomeScreen = ({ navigation, route }) => {
         <View style={styles.services}>
           <Text style={styles.servicesText}>Services</Text>
               <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center'}}>
+              {/* 1st button */}
               <IconButton
-                onPress={() => navigation.navigate('Contact')}
+                onPress={() => navigation.navigate('Profile')}
                 style={{
                   backgroundColor: '#DCEDF9',
                   width: 80,
@@ -122,6 +123,7 @@ const HomeScreen = ({ navigation, route }) => {
                 }}
                 icon={props => <Icon name="clipboard-outline" color={'#1C6BA4'} size={36} />}
               />
+              {/* 2nd button */}
               <IconButton
                 onPress={() => {console.log(user)}}
                 style={{
@@ -132,7 +134,9 @@ const HomeScreen = ({ navigation, route }) => {
                 }}
                 icon={props => <Icon name="accessibility-outline" color={'#9D4C6C'} size={36} />}
               />
+              {/* 3rd button */}
               <IconButton
+                onPress={() => navigation.navigate('Profile')}
                 style={{
                   backgroundColor: '#DCEDF9',
                   width: 80,
@@ -141,7 +145,9 @@ const HomeScreen = ({ navigation, route }) => {
                 }}
                 icon={props => <Icon name="clipboard-outline" color={'#1C6BA4'} size={36} />}
               />
+              {/* 4th button */}
               <IconButton
+                onPress={() => navigation.navigate('Profile')}
                 style={{
                   backgroundColor: '#DCEDF9',
                   width: 80,
