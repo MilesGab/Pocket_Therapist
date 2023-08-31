@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/Homescreen.js';
+import HomeScreen from '../screens/Homescreen/Homescreen.js';
 import Schedule from '../screens/Schedule.js';
 import Contact from '../screens/Contact.js'
 import Notifications from '../screens/Notifications.js';
@@ -50,14 +50,13 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
   );
 };
 
-function MyTabs({ user }) {
+function MyTabs() {
   return (
     <Tab.Navigator
       initialRouteName="Home" tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tab.Screen
         name="Home"
-        initialParams={{ user: user }}
         component={HomeScreen}
         options={{
           headerShown: false,
@@ -119,17 +118,11 @@ const styles = StyleSheet.create({
 
 const Routes = (props) => {
 
-    const [user, setUserName] = React.useState('Charles');
-
     return(
         <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login">
-                {(props) => <Login {...props} setUserName={setUserName} />}
-            </Stack.Screen>
+            <Stack.Screen name="Login" component={Login}/>
             <Stack.Screen name="Register" component={Register} />
-            <Stack.Screen name="MyTabs">
-                {(props) => <MyTabs {...props} user={user} />}
-            </Stack.Screen>
+            <Stack.Screen name="MyTabs" component={MyTabs}/>
             <Stack.Screen name="Profile" component={Profile} />
         </Stack.Navigator>
     )
