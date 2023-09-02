@@ -131,6 +131,7 @@ const Routes = (props) => {
                 {(props) => <MyTabs {...props} user={user} />}
             </Stack.Screen>
             <Stack.Screen name="Profile" component={Profile} />
+                {/*{(props) => <Profile {...props} user={user} />}*/}
         </Stack.Navigator>
     )
 }

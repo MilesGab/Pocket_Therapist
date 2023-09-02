@@ -54,8 +54,7 @@ export default function Login({ navigation, setUserName }) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
-        <View style={styles.image_container}>
-        </View>
+        <View style={styles.image_container}/>
         <View style={styles.whiteSheet} />
         <SafeAreaView style={styles.form}>
           <Toast
@@ -139,7 +138,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3,
     width: '100%',
-    height: 640,
+    height: 600,
     position: "absolute", 
     bottom: 0,
     backgroundColor: '#fff',
