@@ -11,40 +11,63 @@ import { useUserContext } from '../../../../contexts/UserContext';
 
 const DoctorScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
+  const trimmedUid = "Pkw5kI5F8tQ6MA4TP5eccSAwB503";
+  //Pkw5kI5F8tQ6MA4TP5eccSAwB503
 
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
+  const [appointmentsCount, setAppointmentsCount] = React.useState(0); 
+
+  const countAppointments = async () => {
+    try {
+      const querySnapshot = await firestore()
+      .collection('appointments')
+      .where('doctor_assigned', '==', trimmedUid)
+      .where('status', '==', 1)
+      .get();
+        
+        const count = querySnapshot.size;
+        setAppointmentsCount(count);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    countAppointments();
+  }, []);
 
   React.useEffect(() => {
     const fetchAppointments = async () => {
       try {
         const appointmentsSnapshot = await firestore()
           .collection('appointments')
+          .where('doctor_assigned', '==', trimmedUid)
           .get();
-
-        const appointmentsData = await Promise.all(
-          appointmentsSnapshot.docs.map(async doc => {
-            const appointmentData = doc.data();
-            const doctorSnapshot = await firestore()
-              .collection('users')
-              .doc(appointmentData.doctor_assigned)
-              .get();
-            const patientSnapshot = await firestore()
-              .collection('users')
-              .doc(appointmentData.patient_assigned)
-              .get();
-            
-            const doctorData = doctorSnapshot.data();
-            const patientData = patientSnapshot.data();
-            
-            return {
-              ...appointmentData,
-              doctorName: doctorData.firstName,
-              patientName: patientData.firstName,
-            };
-          })
-        );
-
+  
+          const appointmentsData = await Promise.all(
+            appointmentsSnapshot.docs.map(async doc => {
+              const appointmentData = doc.data();
+              const doctorId = appointmentData.doctor_assigned; // Get the doctor ID from appointment data
+              const patientId = appointmentData.patient_assigned; // Get the patient ID from appointment data
+    
+              // Fetch doctor and patient data separately
+              const [doctorSnapshot, patientSnapshot] = await Promise.all([
+                firestore().collection('users').doc(doctorId).get(),
+                firestore().collection('users').doc(patientId).get(),
+              ]);
+    
+              const doctorData = doctorSnapshot.data();
+              const patientData = patientSnapshot.data();
+    
+              return {
+                ...appointmentData,
+                doctorName: doctorData.firstName,
+                patientName: patientData.firstName,
+              };
+            })
+          );
+  
         setAppointmentList(appointmentsData);
       } catch (error) {
         console.error('Error fetching appointments:', error);
@@ -199,7 +222,7 @@ const DoctorScreen = ({ navigation }) => {
                             <Text style={{marginTop:8, color: 'black', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
                             <Icon style={{fontWeight:'bold', fontSize:18, color:'black'}} name="chevron-down-outline"/>
                         </View>
-                    <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>2</Text>
+                    <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
                 </Box>
               </Box>
               {/* 3rd button */}

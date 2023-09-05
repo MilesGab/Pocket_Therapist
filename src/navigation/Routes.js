@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Login from '../screens/Login.js';
 import Register from '../screens/Register.js';
 import Profile from '../screens/Profile.js';
+import AssessmentScreen from '../screens/Assessment/AssessmentScreen.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -124,6 +125,7 @@ const Routes = (props) => {
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="MyTabs" component={MyTabs}/>
             <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="AssessmentScreen" component={AssessmentScreen} />
         </Stack.Navigator>
     )
 }

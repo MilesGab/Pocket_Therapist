@@ -15,6 +15,8 @@ const PatientScreen = ({ navigation }) => {
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
 
+  const trimmedUid = userData.uid.trim();
+
   React.useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -31,7 +33,7 @@ const PatientScreen = ({ navigation }) => {
               .get();
             const patientSnapshot = await firestore()
               .collection('users')
-              .doc(appointmentData.patient_assigned)
+              .doc(trimmedUid)
               .get();
             
             const doctorData = doctorSnapshot.data();
@@ -152,7 +154,7 @@ const PatientScreen = ({ navigation }) => {
               />
               {/* 2nd button */}
               <IconButton
-                onPress={() => {console.log(user)}}
+                onPress={() => navigation.navigate('AssessmentScreen')}
                 style={{
                   backgroundColor: '#F2E3E9',
                   width: 80,
