@@ -7,7 +7,9 @@ import firestore from '@react-native-firebase/firestore';
 
 export default function Register({ navigation }) {
 
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -21,8 +23,12 @@ export default function Register({ navigation }) {
 
       // Store user information in Firestore
       await firestore().collection('users').doc(uid).set({
-        name,
+        uid,
+        firstName,
+        lastName,
+        contact,
         email,
+        role: 0
       });
 
       console.log('User account created & signed up!');
@@ -30,16 +36,6 @@ export default function Register({ navigation }) {
     } catch (error) {
       console.error('Error creating account:', error);
     }
-  };
-
-  const onHandleLogin = () => {
-    // if (email !== "" && password !== "") {
-    //   signInWithEmailAndPassword(auth, email, password)
-    //     .then(() => console.log("Login success"))
-    //     .catch((err) => Alert.alert("Login error", err.message));
-    // }
-
-    navigation.navigate('Login')
   };
   
   return (
@@ -52,19 +48,41 @@ export default function Register({ navigation }) {
         <View style={styles.whiteSheet} />
         <SafeAreaView style={styles.form}>
           <Text style={styles.title}>Sign Up</Text>
+        <View style={{display:'flex', flexDirection:'row'}}>
+            <TextInput
+              style={[styles.input, { marginRight: 0, width: 160, alignSelf: 'flex-start'}]}
+              placeholder="First name"
+              autoCapitalize="none"
+              keyboardType="default"
+              textContentType="name"
+              autoFocus={false}
+              value={firstName}
+              onChangeText={(text) => setFirstName(text)}
+            />
+            <TextInput
+              style={[styles.input, {width: 180, justifyContent: 'flex-end', alignContent: 'flex-end', alignSelf: 'flex-end'}]}
+              placeholder="Last name"
+              autoCapitalize="none"
+              keyboardType="default"
+              textContentType="name"
+              autoFocus={false}
+              value={lastName}
+              onChangeText={(text) => setLastName(text)}
+            />
+        </View>
         <TextInput
           style={styles.input}
-          placeholder="Enter name"
+          placeholder="Contact Number"
           autoCapitalize="none"
           keyboardType="default"
-          textContentType="name"
+          textContentType="telephoneNumber"
           autoFocus={false}
-          value={name}
-          onChangeText={(text) => setName(text)}
+          value={contact}
+          onChangeText={(text) => setContact(text)}
         />
         <TextInput
           style={styles.input}
-          placeholder="Enter email"
+          placeholder="Email"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
@@ -74,7 +92,7 @@ export default function Register({ navigation }) {
         />
         <TextInput
           style={styles.input}
-          placeholder="Enter password"
+          placeholder="Password"
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry={true}
@@ -116,6 +134,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderRadius: 10,
     padding: 12,
+    borderBottomWidth: 0.5
   },
   image_container: {
     // backgroundColor: 'blue',
@@ -138,7 +157,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3,
     width: '100%',
-    height: 640,
+    height: 740,
     position: "absolute", 
     bottom: 0,
     backgroundColor: '#fff',

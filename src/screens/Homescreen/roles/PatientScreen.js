@@ -5,65 +5,94 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 
-const HomeScreen = ({ navigation, route }) => {
-  const  user  = route.params.user;
+const PatientScreen = ({ navigation }) => {
+  const { userData, updateUser } = useUserContext();
 
   const [selectedId, setSelectedId] = React.useState();
+  const [appointmentList, setAppointmentList] = React.useState([]);
 
-  const getRandomColor = () => {
-    const colors = ['#fc9079', '#3498DB', '#5bba83', '#ebc68d', '#b681cc'];
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex];
-  };
+  const trimmedUid = userData.uid.trim();
 
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'Consultation',
-      date: '25',
-      day: 'Fri',
-      doctor: 'Dr. Mim Akhter',
-      time: '03:00 PM'
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Catch up',
-      date: '28',
-      day: 'Mon',
-      doctor: 'Dr. Mim Akhter',
-      time: '03:00 PM'
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Consultation',
-      date: '31',
-      day: 'Thu',
-      doctor: 'Dr. Mim Akhter',
-      time: '03:00 PM'
-    },
-  ];
+  React.useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const appointmentsSnapshot = await firestore()
+          .collection('appointments')
+          .get();
 
-  const Item = ({item, onPress, backgroundColor, textColor}) => (
+        const appointmentsData = await Promise.all(
+          appointmentsSnapshot.docs.map(async doc => {
+            const appointmentData = doc.data();
+            const doctorSnapshot = await firestore()
+              .collection('users')
+              .doc(appointmentData.doctor_assigned)
+              .get();
+            const patientSnapshot = await firestore()
+              .collection('users')
+              .doc(trimmedUid)
+              .get();
+            
+            const doctorData = doctorSnapshot.data();
+            const patientData = patientSnapshot.data();
+            
+            return {
+              ...appointmentData,
+              doctorName: doctorData.lastName,
+              patientName: patientData.firstName,
+            };
+          })
+        );
+
+        setAppointmentList(appointmentsData);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const Item = ({item, onPress, backgroundColor, textColor}) => {
     
-    <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
-      <View style={{display: 'flex', flexDirection: 'row', justifyContent:'flex-start', paddingHorizontal: 12, paddingVertical: 18,gap: 12}}>
-        <Box style={{borderRadius: 20, paddingVertical: 12, paddingHorizontal: 16}}>
-          <Text style={[styles.title,{color:textColor, fontSize: 32, fontWeight: 'bold'}]}>{item.date}</Text>
-          <Text style={[styles.title,{color:textColor, fontSize: 20, textAlign: 'center'}]}>{item.day}</Text>
-        </Box>
-        <Box style={{paddingVertical: 8}}>
-          <Text style={[styles.title, {color:textColor}]}>{item.time}</Text>
-          <Text style={[styles.title, {color:textColor, fontWeight: 'bold'}]}>{item.doctor}</Text>
-          <Text style={[styles.title, {color: textColor}]}>{item.title}</Text>
-        </Box>
-      </View>
-    </TouchableOpacity>
-  );
+    const timestamp = new Date(
+        item.date.seconds * 1000 + item.date.nanoseconds / 1000000
+      );
+    
+    const formattedDate = timestamp.toLocaleDateString('en-US', {
+        weekday: 'long',
+        day: '2-digit',
+      });
+
+    const formattedTime = timestamp.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      });
+
+    return(
+        <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
+        <View style={{display: 'flex', flexDirection: 'row', justifyContent:'flex-start', paddingHorizontal: 12, paddingVertical: 18,gap: 12}}>
+            <Box style={{borderRadius: 20, paddingVertical: 8, paddingLeft:20}}>
+            <Text style={[styles.title, { color: textColor, fontSize: 32, fontWeight: 'bold', width: 50}]}>
+                {formattedDate}
+            </Text>          
+            </Box>
+            <Box style={{paddingVertical: 8}}>
+            <Text style={[styles.title, {color:textColor}]}>{formattedTime}</Text>
+            <Text style={[styles.title, {color:textColor, fontWeight: 'bold'}]}>Dr. {item.doctorName}</Text>
+            <Text style={[styles.title, {color: textColor}]}>{item.name}</Text>
+            </Box>
+        </View>
+        </TouchableOpacity>
+        )
+    };
 
   const renderItem = ({item}) => {
-    const backgroundColor = item.id === selectedId ? '#1C6BA4' : getRandomColor();
+    const backgroundColor = item.id === selectedId ? '#1C6BA4' : '#257cba';
     const color = item.id === selectedId ? 'white' : 'black';
 
     return (
@@ -77,7 +106,7 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const onPressFunction = () => {
-    console.log('Hello!');
+    console.log(userData);
   }
 
   const handleLogout = () => {
@@ -102,10 +131,10 @@ const HomeScreen = ({ navigation, route }) => {
               fontFamily: 'Nunito Sans', 
               fontSize: 28, 
               color: 'black', 
-              fontWeight: 'bold'}}>{user || '---'}</Text>
+              fontWeight: 'bold'}}>{userData?.firstName || '---'}</Text>
           </View>
           <TouchableOpacity onPress={handleLogout}>
-            <Avatar label={user} />
+            <Avatar label={userData?.firstName} />
           </TouchableOpacity>
         </View>
 
@@ -125,7 +154,7 @@ const HomeScreen = ({ navigation, route }) => {
               />
               {/* 2nd button */}
               <IconButton
-                onPress={() => {console.log(user)}}
+                onPress={() => navigation.navigate('AssessmentScreen')}
                 style={{
                   backgroundColor: '#F2E3E9',
                   width: 80,
@@ -176,9 +205,9 @@ const HomeScreen = ({ navigation, route }) => {
           <Text style={styles.footerText}>Upcoming Appointments</Text>
             <FlatList
               horizontal={true}
-              data={DATA}
+              data={appointmentList}
               renderItem={renderItem}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item.uid}
               extraData={selectedId}
               showsHorizontalScrollIndicator={false}
             />
@@ -240,4 +269,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default HomeScreen;
+export default PatientScreen;

@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TextInput, SafeAreaView, TouchableOpacity, StatusBar, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-// import { auth } from "../../config/firebase.js";
-const backImage = require("../../assets/images/pt_icon.png");
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
-import { AppContext } from "../../contexts/AppContext";
+import { useUserContext } from "../../contexts/UserContext";
+const backImage = require("../../assets/images/pt_icon.png");
 
-export default function Login({ navigation, setUserName }) {
 
-  const context = React.useContext(AppContext);
+export default function Login({ navigation }) {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { userLogin, updateUser } = useUserContext();
 
   const onHandleLogin = () => {
     if (email !== '' && password !== '') {
@@ -24,8 +24,8 @@ export default function Login({ navigation, setUserName }) {
           const userSnapshot = await firestore().collection('users').doc(uid).get();
           const userData = userSnapshot.data();
           if (userData) {
-            // context.updateUser({ ...userData });
-            console.log(context.name);
+            updateUser(userData);
+            console.log('saved! @Login');
           }
           navigation.navigate('MyTabs');
         })

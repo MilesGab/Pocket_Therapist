@@ -13,12 +13,12 @@ export default function Contact() {
     setMessages([
       {
         _id: 1,
-        text: 'Hello developer',
+        text: `Hello ${userData.firstName}`,
         createdAt: new Date(),
         user: {
           _id: 2,
           name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
+          avatar: 'https://55knots.com.au/wp-content/uploads/2021/01/Zanj-Avatar-scaled.jpg',
         },
       },
     ])
