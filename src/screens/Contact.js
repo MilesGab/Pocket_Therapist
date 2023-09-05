@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { GiftedChat } from 'react-native-gifted-chat'
+import { GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
@@ -31,8 +31,30 @@ export default function Contact() {
     )
   }, [])
 
+  {/*toolbar customization*/}
+  const customInputToolbar = props => {
+    return (
+      <InputToolbar
+        {...props}
+        containerStyle={styles.inputToolbar}
+      />
+    );
+  };
+
+  {/*send button customization*/}
+  const renderSend = props => {
+    return (
+      <Send {...props} containerStyle = {{borderWidth:0}}>
+        <Icon
+          name="send"
+          style={styles.sendIcon}
+        />
+      </Send>
+    );
+  }
+
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
       <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn}>
@@ -48,20 +70,24 @@ export default function Contact() {
           </TouchableOpacity>
         </View>
       </View>
-
-    <GiftedChat
-      messages={messages}
-      onSend={messages => onSend(messages)}
-      user={{_id: 1,}}
-      />
+      <View style = {styles.toolbarContainer}>
+          <GiftedChat
+            messages={messages}
+            onSend={messages => onSend(messages)}
+            user={{_id: 1,}}
+            renderSend={props => renderSend(props)}
+            renderInputToolbar={props => customInputToolbar(props)}
+            alwaysShowSend={true}
+          />
+      </View>
     </View>
-    </TouchableWithoutFeedback>
+  </TouchableWithoutFeedback>
   )
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFFFFF',
     flex: 1,
     justifyContent: 'center',
   },
@@ -116,6 +142,29 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     paddingHorizontal: 10,
+  },
+
+  toolbarContainer:{
+    flex:1,
+    paddingTop: 15,
+    paddingBottom:15,
+  },
+
+  inputToolbar: {
+    marginLeft: 10,
+    marginRight: 10,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 20,
+
+  },
+
+  sendIcon: {
+    fontSize: 25,
+    color: '#3A97F9',
+    padding: 10,
+    marginRight: 5,
+    borderColor: 'white',
   },
 
 });
