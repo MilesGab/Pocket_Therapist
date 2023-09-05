@@ -4,10 +4,14 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard} from 'react
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useUserContext } from '../../contexts/UserContext';
 
 export default function Contact() {
 
+
   const [messages, setMessages] = useState([])
+
+  const {userData, updateUser} = useUserContext();
 
   useEffect(() => {
     setMessages([
@@ -62,7 +66,7 @@ export default function Contact() {
           </TouchableOpacity>
         <View style={styles.profileOptions}>
           <TouchableOpacity style = {styles.profileAndOptions}>
-            <Avatar label={"Miles Gabriel Macabeo"} size={55}/>
+            <Avatar label={'${userData.firstName}'} size={55}/>
               <View style = {styles.nameAndClass}>
                 <Text style={styles.username}>Miles Gabriel Macabeo</Text>
                 <Text style={styles.class}>Orthopedic Doctor (St. Lukes Hospital)</Text>
