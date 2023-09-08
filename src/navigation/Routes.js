@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Login from '../screens/Login.js';
 import Register from '../screens/Register.js';
 import Profile from '../screens/Profile.js';
+import Messages from '../screens/Messages.js';
 import AssessmentScreen from '../screens/Assessment/AssessmentScreen.js';
 
 const Stack = createStackNavigator();
@@ -75,13 +76,14 @@ function MyTabs() {
           tabBarLabel: 'Schedule',
         }}
       />
+      {/*changed route to 'Messages' first to check if it displays correctly*/}
       <Tab.Screen
-        name="Contact"
-        component={Contact}
+        name="Messages"
+        component={Messages}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Icon name="chatbox-ellipses-outline" color={color} size={size} />,
-          tabBarLabel: 'Contact',
+          tabBarLabel: 'Messages',
         }}
       />
       <Tab.Screen
