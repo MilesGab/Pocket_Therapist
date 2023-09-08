@@ -12,6 +12,7 @@ import Login from '../screens/Login.js';
 import Register from '../screens/Register.js';
 import Profile from '../screens/Profile.js';
 import AssessmentScreen from '../screens/Assessment/AssessmentScreen.js';
+import Questionnaire from '../screens/Assessment/Questionnaire.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -126,6 +127,7 @@ const Routes = (props) => {
             <Stack.Screen name="MyTabs" component={MyTabs}/>
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="AssessmentScreen" component={AssessmentScreen} />
+            <Stack.Screen name="Questionnaire" component={Questionnaire} />
         </Stack.Navigator>
     )
 }
