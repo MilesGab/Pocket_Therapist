@@ -33,7 +33,8 @@
     "react-native-screens": "^3.24.0",
     "react-native-sensor-fusion": "^0.0.4",
     "react-native-toast-message": "^2.1.6",
-    "react-native-vector-icons": "^10.0.0"
+    "react-native-vector-icons": "^10.0.0",
+    "styled-components": "^6.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
