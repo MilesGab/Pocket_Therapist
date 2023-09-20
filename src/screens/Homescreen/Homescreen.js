@@ -9,7 +9,6 @@ import { useUserContext } from '../../../contexts/UserContext';
 import PatientScreen from './roles/PatientScreen';
 import DoctorScreen from './roles/DoctorScreen';
 
-
 const HomeScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
 

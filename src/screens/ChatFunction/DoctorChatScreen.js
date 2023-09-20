@@ -4,9 +4,9 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard} from 'react
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useUserContext } from '../../contexts/UserContext';
+import { useUserContext } from '../../../contexts/UserContext';
 
-export default function Contact() {
+export default function DoctorChatScreen() {
 
 
   const [messages, setMessages] = useState([])
@@ -60,20 +60,6 @@ export default function Contact() {
   return (
   <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
-      <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn}>
-            <Icon name = "angle-left" size={20}/>
-          </TouchableOpacity>
-        <View style={styles.profileOptions}>
-          <TouchableOpacity style = {styles.profileAndOptions}>
-            <Avatar label={'${userData.firstName}'} size={55}/>
-              <View style = {styles.nameAndClass}>
-                <Text style={styles.username}>Miles Gabriel Macabeo</Text>
-                <Text style={styles.class}>Orthopedic Doctor (St. Lukes Hospital)</Text>
-              </View>
-          </TouchableOpacity>
-        </View>
-      </View>
       <View style = {styles.toolbarContainer}>
           <GiftedChat
             messages={messages}
@@ -88,6 +74,7 @@ export default function Contact() {
   </TouchableWithoutFeedback>
   )
 };
+
 
 const styles = StyleSheet.create({
   container: {

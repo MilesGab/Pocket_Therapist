@@ -1,21 +1,24 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, {useEffect} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/Homescreen/Homescreen.js';
 import Schedule from '../screens/Schedule.js';
-import Contact from '../screens/Contact.js'
 import Notifications from '../screens/Notifications.js';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Login from '../screens/Login.js';
 import Register from '../screens/Register.js';
 import Profile from '../screens/Profile.js';
-import Messages from '../screens/Messages.js';
+import PatientMessages from '../screens/ChatFunction/PatientMessages.js';
+import DoctorMessages from '../screens/ChatFunction/DoctorMessages.js';
 import AssessmentScreen from '../screens/Assessment/AssessmentScreen.js';
+import { useUserContext } from "../../contexts/UserContext";
+import DoctorChatScreen from '../screens/ChatFunction/DoctorChatScreen.js';
+import Media from '../screens/Media.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
@@ -76,10 +79,9 @@ function MyTabs() {
           tabBarLabel: 'Schedule',
         }}
       />
-      {/*changed route to 'Messages' first to check if it displays correctly*/}
       <Tab.Screen
         name="Messages"
-        component={Messages}
+        component={MessageStack}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Icon name="chatbox-ellipses-outline" color={color} size={size} />,
@@ -95,9 +97,64 @@ function MyTabs() {
           tabBarLabel: 'Notifications',
         }}
       />
+      <Tab.Screen
+        name="Media"
+        component={Media}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Icon name="images-outline" color={color} size={size} />,
+          tabBarLabel: 'Media',
+        }}
+      />
     </Tab.Navigator>
   );
 }
+
+const MessageStack = () => {
+  const { userData, updateUser } = useUserContext();
+  useEffect(() => {
+    if (userData) {
+      if (userData.role === 0) {
+        // Perform actions for patient users
+        console.log('Chat accessed as patient');
+      } else if (userData.role === 1) {
+        // Perform actions for doctor users
+        console.log('Chat accessed as doctor');
+      }
+    }
+  }, [userData]);
+
+return (
+  <Stack.Navigator>
+    {userData?.role === 0 ? (
+      <Stack.Screen
+        name="PatientMessaging"
+        component={PatientMessages}
+        options={{headerShown: false, initialParams: { role: 0 } }}
+      />
+    ) : (
+      <Stack.Screen
+        name="DoctorMessaging"
+        component={DoctorMessages} // Use the imported component
+        options={{headerShown: false, initialParams: { role: 1 } }} // role 1 is for doctors
+      />
+    )}
+    <Stack.Screen 
+    name= "DoctorChatScreen" 
+    component={DoctorChatScreen} 
+    options={({route}) => ({
+      headerTitle: `${userData.firstName}`,
+        headerStyle: {
+          backgroundColor:'#DCEDF9',
+          height: 80
+        },
+    }
+    )
+  } 
+    />
+  </Stack.Navigator>
+);
+};
 
 const styles = StyleSheet.create({
   tabBarContainer: {
@@ -121,14 +178,14 @@ const styles = StyleSheet.create({
 
 const Routes = (props) => {
 
-    return(
-        <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login" component={Login}/>
-            <Stack.Screen name="Register" component={Register} />
-            <Stack.Screen name="MyTabs" component={MyTabs}/>
-            <Stack.Screen name="Profile" component={Profile} />
-            <Stack.Screen name="AssessmentScreen" component={AssessmentScreen} />
-        </Stack.Navigator>
+  return(
+    <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="MyTabs" component={MyTabs} />
+      <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="AssessmentScreen" component={AssessmentScreen} />
+    </Stack.Navigator>
     )
 }
 
