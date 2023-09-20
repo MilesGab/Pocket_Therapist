@@ -15,7 +15,8 @@ const PatientScreen = ({ navigation }) => {
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
 
-  const trimmedUid = userData.uid.trim();
+  const trimmedUid = "Pkw5kI5F8tQ6MA4TP5eccSAwB503";
+  //userData.uid.trim();
 
   React.useEffect(() => {
     const fetchAppointments = async () => {
