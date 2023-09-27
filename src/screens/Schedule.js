@@ -26,8 +26,6 @@ const AppointmentCard = ( props ) => {
   const doctor_name = props.doctorName;
   const date = props.date;
 
-
-  
   const timestamp = new Date(
     date.seconds * 1000 + date.nanoseconds / 1000000
   );
@@ -141,6 +139,7 @@ const AddAppointment = (props) => {
       hour12: true,
     });
 
+    //POST REQUEST
     const createAppointmentRequest = async () => {
       const trimmedUid = userData.uid.trim();
 
@@ -162,6 +161,12 @@ const AddAppointment = (props) => {
         props.fetchList();
       }
     };
+
+    const onSetAppoint = () => {
+      props.setVisible(false); 
+      createAppointmentRequest(); 
+      setVisible(true)
+    }
 
   return (
     <>
@@ -205,7 +210,7 @@ const AddAppointment = (props) => {
             title="Confirm"
             compact
             variant="text"
-            onPress={() => {props.setVisible(false); createAppointmentRequest(); setVisible(true)}}
+            onPress={onSetAppoint}
           />
         </DialogActions>
       </Dialog>

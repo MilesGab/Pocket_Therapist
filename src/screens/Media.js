@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, StatusBar, ScrollView} from 'reac
 import {Avatar} from "@react-native-material/core";
 import Icon from "react-native-vector-icons/Ionicons";
 
-const Profile = () => {
+const Media = () => {
 
   return (
     <View style={styles.container}>
@@ -108,4 +108,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default Profile;
+export default Media;

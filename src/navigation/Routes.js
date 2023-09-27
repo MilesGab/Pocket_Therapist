@@ -12,9 +12,11 @@ import Profile from '../screens/Profile.js';
 import PatientMessages from '../screens/ChatFunction/PatientMessages.js';
 import DoctorMessages from '../screens/ChatFunction/DoctorMessages.js';
 import AssessmentScreen from '../screens/Assessment/AssessmentScreen.js';
-import { useUserContext } from "../../contexts/UserContext";
-import DoctorChatScreen from '../screens/ChatFunction/DoctorChatScreen.js';
+import Questionnaire from '../screens/Assessment/Questionnaire.js';
 import Media from '../screens/Media.js';
+import JointAssessment from '../screens/Assessment/JointAssessment.js';
+import Results from '../screens/Assessment/Results.js';
+import Assessment from '../screens/Assessment/Assessment.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -178,14 +180,17 @@ const styles = StyleSheet.create({
 
 const Routes = (props) => {
 
-  return(
-    <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="Register" component={Register} />
-      <Stack.Screen name="MyTabs" component={MyTabs} />
-      <Stack.Screen name="Profile" component={Profile} />
-      <Stack.Screen name="AssessmentScreen" component={AssessmentScreen} />
-    </Stack.Navigator>
+    return(
+        <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login" component={Login}/>
+            <Stack.Screen name="Register" component={Register} />
+            <Stack.Screen name="MyTabs" component={MyTabs}/>
+            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="Assessment" component={Assessment} />
+            {/* <Stack.Screen name="Questionnaire" component={Questionnaire} />
+            <Stack.Screen name="JointAssessment" component={JointAssessment} />
+            <Stack.Screen name="Results" component={Results} /> */}
+        </Stack.Navigator>
     )
 }
 
