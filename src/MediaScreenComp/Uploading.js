@@ -14,16 +14,7 @@ export function Uploading({ image, video, progress }) {
         style={StyleSheet.absoluteFill}
       ></BlurView>
       
-      <BlurView
-        style={{
-          width:'70%',
-          height: 200,
-          alignItems: 'center',
-          paddingVertical: 16,
-          marginVertical: 12, // Replaced rowGap with marginVertical
-        }}
-        blurType="light"
-      >
+      <View style={styles.box}>
         {image && (
           <Image
             source={{uri:image}}
@@ -43,26 +34,49 @@ export function Uploading({ image, video, progress }) {
             controls={true}
           />
         )}
-        
-        <Text style={{fontSize: 12}}>Uploading...</Text>
-        
-        <View 
-          style={{ 
-            height: 1,
-            borderWidth: StyleSheet.hairlineWidth,
-            width: "100%",
-            borderColor: "black"
-          }}
-        />
+        <Text style={styles.upldTxt}>Uploading...</Text>
+        <ProgressBar progress={progress}/>
+        <View style={styles.seperator}></View>
         
         <TouchableOpacity>
-          <Text style={{fontSize: 15, fontWeight: '500', color:'#3478f6'}}>Cancel</Text>
+          <Text style={styles.cancelTxt}>Cancel</Text>
         </TouchableOpacity>
-      </BlurView>
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+
+  box:{
+    width:'70%',
+    alignItems: 'center',
+    paddingVertical: 16,
+    marginVertical: 12, // Replaced rowGap with marginVertical
+    backgroundColor: 'white',
+    borderRadius: 20
+  },
+
+  upldTxt:{
+    fontSize: 16,
+    paddingBottom: 10,
+    color: 'black',
+    fontWeight: '400'
+  },
+
+  seperator:{
+    height: 1,
+    borderWidth: StyleSheet.hairlineWidth,
+    width: "100%",
+    borderColor: "black",
+  },
+
+  cancelTxt:{
+    fontSize: 15, 
+    fontWeight: '600', 
+    color:'#3478f6',
+    paddingTop: 10
+  }
+
 
 })
