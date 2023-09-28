@@ -13,9 +13,10 @@ import { useNavigation } from '@react-navigation/native';
 const InformationSection = (props) => {
   const { userData, updateUser } = useUserContext();
   const fullName = userData.firstName + " " + userData.lastName;
+  const [date, setDate] = React.useState(userData?.dateOfBirth);
   
   const timestamp = new Date(
-    userData?.dateOfBirth.seconds * 1000 + userData?.dateOfBirth.nanoseconds / 1000000
+     date.seconds * 1000 + date.nanoseconds / 1000000
   );
 
   const formattedDate = timestamp.toLocaleDateString('en-US', {
@@ -35,6 +36,7 @@ const InformationSection = (props) => {
   const sexMap = {
     male: 'Male',
     female: 'Female',
+    others: 'Others'
   };
 
   return (
@@ -122,6 +124,7 @@ const EditSection = (props) => {
       .catch((error) => {
         console.error('Error updating user data:', error);
       });
+
   };
 
   const handleSave = () => {

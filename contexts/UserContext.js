@@ -21,14 +21,16 @@ export function UserProvider({ children }) {
     loadUserData();
   }, []);
 
+  React.useEffect(() => {
+    console.log(userData);
+  }, [userData]);
+
   const updateUser = async (newUserData) => {
     setUserData(newUserData);
     try {
       await AsyncStorage.setItem('userData', JSON.stringify(newUserData));
     } catch (error) {
       console.error('Error saving user data:', error);
-    } finally {
-      console.log(userData);
     }
   };
 

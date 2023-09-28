@@ -1,56 +1,118 @@
 
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList, Text, Image} from 'react-native';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
+
+import Sana from '../../assets/images/user1.png';
+import Kim from '../../assets/images/user2.png';
 import { Avatar} from "@react-native-material/core";
-
-const MessagesData = [
-    
-    //hardcoded database data
-    {
-        id: '1',
-        userName: 'Sana Minatozaki',
-     
-        messageTime: '4 minutes ago',
-        messageText: 'Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum'
-
-    },
-
-    {
-        id: '2',
-        userName: 'Chaewon Kim',
-       
-        messageTime: '5 minutes ago',
-        messageText: 'Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum'
-    },
-]
-
+import { useUserContext } from '../../../contexts/UserContext';
 
 const DoctorMessages = ({navigation}) => {
 
+    const { userData, updateUser } = useUserContext();
+    const trimmedUid = userData?.uid.trim();
+    const [patientList, setPatientList] = React.useState([]);
+
+    const fetchPatients = async () => {
+        try {
+            const querySnapshot = await firestore()
+              .collection('users')
+              .where('role', '==', 0)
+              .where('doctor', '==', trimmedUid)
+              .get();
+        
+            const patientData = [];
+        
+            for (const doc of querySnapshot.docs) {
+              const patient = {
+                id: doc.id,
+                firstName: doc.data().firstName,
+                lastName: doc.data().lastName,
+                userImg: null,
+              };
+        
+              const latestMessageSnapshot = await firestore()
+                .collection('messages')
+                .where('user._id', '==', doc.id)
+                .limit(1)
+                .get();
+        
+              if (!latestMessageSnapshot.empty) {
+                const latestMessageData = latestMessageSnapshot.docs[0].data();
+                const latestMessageTime = formatMessageTime(latestMessageData.createdAt.toDate());
+        
+                // Add the latest message information to the patient data
+                patient.messageTime = latestMessageTime;
+                patient.messageText = latestMessageData.text;
+              } else {
+                // Handle the case where no messages are found for the patient
+                patient.messageTime = 'No messages';
+                patient.messageText = '';
+              }
+        
+              const userImageRef = storage().ref().child(`users/7b574a23f46c10a63c1b5061249c92ab.jpg`);
+              const userImageUrl = await userImageRef.getDownloadURL();
+              patient.userImg = Sana;
+
+              patientData.push(patient);
+            }
+        
+            setPatientList(patientData);
+      } catch(error){
+        console.error('Error fetching patients: ', error);
+      }
+    }
+  
+    const formatMessageTime = (messageDate) => {
+        const now = new Date();
+        const diffInMilliseconds = now - messageDate;
+      
+        const seconds = Math.floor(diffInMilliseconds / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+      
+        if (seconds < 60) {
+          return seconds === 1 ? '1 second ago' : `${seconds} seconds ago`;
+        } else if (minutes < 60) {
+          return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
+        } else if (hours < 24) {
+          return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+        } else {
+          return days === 1 ? '1 day ago' : `${days} days ago`;
+        }
+      };
+
+    React.useEffect(()=>{
+        fetchPatients();
+    }, []);
+    
     return(
         <View style = {styles.container}>
             <View style={styles.header}>
                 <Text style ={styles.headerTxt}>Messages</Text>
             </View>
             <FlatList
-                data={MessagesData}
+                data={patientList}
                 keyExtractor={item => item.id}
                 renderItem={({item}) => (
-            <TouchableOpacity onPress={() => navigation.navigate('DoctorChatScreen', {userName: item.userName})} style={styles.cardStyle}>
-            <View style = {styles.userInfo}>
-                <View style = {styles.userImgWrapper}>
-                  <Image style = {styles. userImgStyle} source={item.userImg} />
-                </View>
-                <View style = {styles.messageSection}>
-                  <View style ={styles.messageDetails}>
-                    <Text style = {styles.userName}>{item.userName}</Text>
-                    <Text style = {styles.timeReceived}>{item.messageTime}</Text>
-                  </View>
-                  <Text style = {styles.messagePreview}>{item.messageText}</Text>
-                </View>
-            </View>
-            </TouchableOpacity>
-            )}
+                    <TouchableOpacity onPress={() => navigation.navigate('DoctorChatScreen', {patientData: item.id})} style={styles.cardStyle}>
+                        <View style = {styles.userInfo}>
+                            <View style = {styles.userImgWrapper}>
+                                <Image style = {styles. userImgStyle} source={item.userImg} />
+                            </View>
+                            <View style = {styles.messageSection}>
+                                <View style ={styles.messageDetails}>
+                                    <Text style = {styles.userName}>{item.firstName} {item.lastName}</Text>
+                                    <Text style = {styles.timeReceived}>{item.messageTime}</Text>
+                                </View>
+                                <Text style = {styles.messagePreview}>{item.messageText}</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                    )}
             />
         </View>
     );  

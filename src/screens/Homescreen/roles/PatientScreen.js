@@ -221,8 +221,7 @@ const LatestResults = () =>{
   const { userData, updateUser } = useUserContext();
   const [dataList, setDataList] = React.useState({});
   const [isLoading, setLoading] = React.useState(false);
-  const trimmedUid = userData.uid.trim();
-
+  
   const resultsMap = [
     'YES'
   ];

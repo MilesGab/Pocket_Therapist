@@ -5,38 +5,104 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useUserContext } from '../../../contexts/UserContext';
+import firestore from '@react-native-firebase/firestore';
+
 
 export default function PatientMessages() {
+  const [messages, setMessages] = useState([]);
+  const [doctorData, setDoctor] = React.useState({});
+  const { userData } = useUserContext();
+  const trimmedUid = userData.uid.trim();
+  const doctorId = userData.doctor.trim();
 
+  const senderData = {
+    _id: trimmedUid,
+    name: userData.firstName,
+    avatar:
+      'https://55knots.com.au/wp-content/uploads/2021/01/Zanj-Avatar-scaled.jpg',
+  };
 
-  const [messages, setMessages] = useState([])
+  const fetchDoctor = async () => {
+    try {
+      const querySnapshot = await firestore()
+        .collection('users')
+        .where('uid', '==', doctorId)
+        .get();
 
-  const {userData, updateUser} = useUserContext();
+      if (!querySnapshot.empty) {
+        const doctorDoc = querySnapshot.docs[0];
+        const doctor = doctorDoc.data();
+        setDoctor(doctor);
+      } else {
+        console.log('No doctor found with the provided ID.');
+      }
+    } catch (error) {
+      console.error('Error fetching doctor: ', error);
+    }
+  };
 
   useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: `Hello ${userData.firstName}`,
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://55knots.com.au/wp-content/uploads/2021/01/Zanj-Avatar-scaled.jpg',
-        },
-      },
-    ])
-  }, [])
+    fetchDoctor();
+  }, []);
 
-  
+  const retrieveMessagesFromFirestore = async () => {
+    try {
+      const querySnapshot = await firestore()
+        .collection('messages')
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      const messages = [];
+
+      querySnapshot.forEach((documentSnapshot) => {
+        const messageData = documentSnapshot.data();
+        const message = {
+          _id: documentSnapshot.id,
+          user: messageData.user,
+          text: messageData.text,
+          createdAt: messageData.createdAt.toDate(),
+        };
+
+        messages.push(message);
+      });
+
+      setMessages(messages);
+    } catch (error) {
+      console.error('Error retrieving messages from Firestore:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    retrieveMessagesFromFirestore();
+  }, []);
+
   const onSend = useCallback((messages = []) => {
-    setMessages(previousMessages =>
-      GiftedChat.append(previousMessages, messages),
-    )
-  }, [])
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, messages)
+    );
 
-  {/*toolbar customization*/}
-  const customInputToolbar = props => {
+    sendMessagesToFirestore(messages);
+  }, []);
+
+  const sendMessagesToFirestore = async (messages) => {
+    try {
+      for (const message of messages) {
+        await firestore()
+          .collection('messages')
+          .add({
+            user: senderData,
+            text: message.text,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+          });
+      }
+    } catch (error) {
+      console.error('Error sending messages to Firestore:', error);
+    }
+  };
+
+  /*toolbar customization*/
+  const customInputToolbar = (props) => {
     return (
       <InputToolbar
         {...props}
@@ -45,46 +111,54 @@ export default function PatientMessages() {
     );
   };
 
-  {/*send button customization*/}
-  const renderSend = props => {
+  /*send button customization*/
+  const renderSend = (props) => {
     return (
-      <Send {...props} containerStyle = {{borderWidth:0}}>
-        <Icon
-          name="send"
-          style={styles.sendIcon}
-        />
+      <Send {...props} containerStyle={{ borderWidth: 0 }}>
+        <Icon name="send" style={styles.sendIcon} />
       </Send>
     );
-  }
+  };
 
   return (
-  <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.profileOptions}>
-          <TouchableOpacity style = {styles.profileAndOptions}>
-            <Avatar label={userData.firstName} size={55}/>
-              <View style = {styles.nameAndClass}>
-                <Text style={styles.username}>Miles Gabriel Macabeo</Text>
-                <Text style={styles.class}>Orthopedic Doctor (St. Lukes Hospital)</Text>
+    <TouchableWithoutFeedback
+      onPress={Keyboard.dismiss}
+      accessible={false}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.profileOptions}>
+            <TouchableOpacity
+              onPress={() => console.log(doctorData)}
+              style={styles.profileAndOptions}
+            >
+              <Avatar label={doctorData.firstName} size={55} />
+              <View style={styles.nameAndClass}>
+                <Text style={styles.username}>
+                  {doctorData.firstName} {doctorData.lastName}
+                </Text>
+                <Text style={styles.class}>
+                  Orthopedic Doctor (St. Lukes Hospital)
+                </Text>
               </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      <View style = {styles.toolbarContainer}>
+        <View style={styles.toolbarContainer}>
           <GiftedChat
             messages={messages}
-            onSend={messages => onSend(messages)}
-            user={{_id: 1,}}
-            renderSend={props => renderSend(props)}
-            renderInputToolbar={props => customInputToolbar(props)}
+            onSend={onSend}
+            user={{ _id: trimmedUid }}
+            renderSend={(props) => renderSend(props)}
+            renderInputToolbar={(props) => customInputToolbar(props)}
             alwaysShowSend={true}
           />
+        </View>
       </View>
-    </View>
-  </TouchableWithoutFeedback>
-  )
-};
+    </TouchableWithoutFeedback>
+  );
+}
+
 
 
 const styles = StyleSheet.create({

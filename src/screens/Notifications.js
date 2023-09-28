@@ -4,15 +4,24 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useUserContext } from '../../contexts/UserContext';
 import { FlatList } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
-import { Divider } from '@react-native-material/core';
+import { 
+  ActivityIndicator, 
+  Divider,   
+  Dialog,
+  DialogHeader,
+  DialogContent,
+  DialogActions,
+  Button,
+  Provider
+} from '@react-native-material/core';
 
-
-const Notification = ( props ) => {
+const Notification = ({ item }) => {
   const { userData, updateUser } = useUserContext();
-  const doctor_name = props.patientName;
-  const date = props.date;
+  const doctor_name = item.patientName;
+  const date = item.date;
 
-
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [decision, setDecision] = React.useState('');
   
   const timestamp = new Date(
     date.seconds * 1000 + date.nanoseconds / 1000000
@@ -27,6 +36,16 @@ const Notification = ( props ) => {
     minute: 'numeric',
     hour12: true,
   });
+
+  const handleApprove = () =>{
+    setDecision('Approve');
+    setIsOpen(true);
+  };
+
+  const handleReject = () =>{
+    setDecision('Reject');
+    setIsOpen(true);
+  };
 
   return(
     <View style={{display:'flex',
@@ -43,25 +62,62 @@ const Notification = ( props ) => {
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>
         <View style={{flexDirection:'column', flex:1}}>  
           <Text>Appointment Date</Text>
-          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>{formattedDate} {formattedTime}</Text>
+          <View style={{flexDirection:'row'}}>
+            <Text style={{fontWeight:'bold', color:'black', fontSize:16, flex:1}}>{formattedDate} {formattedTime}</Text>
+            <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>{item.name}</Text>
+          </View>
         </View>
-        <TouchableOpacity onPress={()=>{console.log(props.doctorName)}}>
-          <Icon name="ellipsis-vertical" style={{fontSize:20}}/>
-        </TouchableOpacity>
       </View>
       <Divider/>
-      <View style={{marginTop: 6, paddingVertical:12, flexDirection:'row'}}>
-        <View style={{marginLeft: 10, flexDirection:'column'}}>
-          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>{doctor_name}</Text>
+      <View style={{marginTop: 6, paddingVertical:12, flexDirection:'row', width:'100%'}}>
+        <View style={{marginLeft: 10, flexDirection:'column', width:'100%'}}>
+          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>Patient: {doctor_name}</Text>
+          <View style={{display:'flex', flexDirection:'row', justifyContent:'flex-end', alignItems:'center', paddingHorizontal: 20, gap: 12}}>
+            <TouchableOpacity onPress={handleReject} style={{borderWidth: 1, borderColor:'#DC6F6F', paddingVertical:4, paddingHorizontal: 6, borderRadius:4}}>
+              <Text style={{color:'red'}}>Reject</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleApprove} style={{backgroundColor:'#6FA8DC', paddingVertical:4, paddingHorizontal: 6, borderRadius:4}}>
+              <Text style={{color:'white'}}>Approve</Text>
+            </TouchableOpacity>
+            <RequestDialog visible={isOpen} decision={decision} setVisible={setIsOpen} date={formattedDate} time={formattedTime}/>
+          </View>
         </View>
       </View>
     </View>
   )
 }
 
+const RequestDialog = (props) => {
+  return(
+    <Dialog visible={props.visible} onDismiss={() => props.setVisible(false)}>
+    <DialogHeader title={props.decision + ' Appointment'} />
+    <DialogContent>
+      <Text style={{fontSize:20}}>
+        {props.decision} appointment for {props.date} at {props.time}?
+      </Text>
+    </DialogContent>
+    <DialogActions>
+      <Button
+        title="Cancel"
+        compact
+        variant="text"
+        onPress={() => props.setVisible(false)}
+      />
+      <Button
+        title="Approve"
+        compact
+        variant="text"
+        onPress={() => props.setVisible(false)}
+      />
+    </DialogActions>
+  </Dialog>
+  )
+}
+
 const Notifications = () => {
   const { userData, updateUser } = useUserContext();
   const [apptReqList, setApptReqList] = React.useState([]);
+  const [isLoading, setLoading] = React.useState(true);
   const trimmedUid = userData.uid.trim();
 
   const fetchApptRequest = async () => {
@@ -98,6 +154,8 @@ const Notifications = () => {
       setApptReqList(appointmentsData);
     } catch (error) {
       console.error('Error fetching appointments:', error);
+    } finally{
+      setLoading(false);
     }
   };
 
@@ -106,32 +164,44 @@ const Notifications = () => {
   }, []);
 
   return (
+    <Provider>
     <View style={styles.container}>
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom: 48}}>
         <Text style={{fontSize: 32, color: 'black', fontWeight:'bold', flex: 1}}>Notifications</Text>
-        <TouchableOpacity onPress={()=>{}}>
-          <Icon name="add-circle-outline" style={{fontSize:38, color:'black', marginRight: 12}}/>
-        </TouchableOpacity>
       </View>
       <View id="services">
-        <Text>Appointment Requests</Text>
+        {userData.role === 1 ? (
+          <>
+          <Text style={[styles.notifHeader, {color:'black'}]}>Appointment Requests</Text>
             <View>
-            <FlatList
-            horizontal={false}
-            data={apptReqList}
-            keyExtractor={(item) => item.uid}
-            renderItem={({ item }) => (
-              // Render your AppointmentCard component here for each item
-              <Notification {...item}/>
+              {isLoading ? (
+              <ActivityIndicator size="large" color="rgba(0,0,0,0.4)" style={{marginTop: 60}}/>
+              ) : 
+              (
+              <FlatList
+              horizontal={false}
+              data={apptReqList}
+              keyExtractor={(item) => item.uid}
+              renderItem={({ item }) => (
+                <Notification
+                  item={item}
+                />
+              )}
+              showsVerticalScrollIndicator={false}
+            />
             )}
-            showsVerticalScrollIndicator={false}
-          />
             </View>
+          </>
+        ) : (
+          <>
+          </>
+        )}
             <TouchableOpacity onPress={()=>{console.log(apptReqList)}}>
-              <Text>HI</Text>
+              <Text style={styles.notifHeader}>HI</Text>
             </TouchableOpacity>
       </View>
     </View>
+    </Provider>
   );
 };
 
@@ -141,6 +211,12 @@ const styles = StyleSheet.create({
     height: '100%',
     padding: 20,
   },
+
+  notifHeader: {
+    fontSize: 20,
+    fontWeight:'bold',
+    marginBottom: 12
+  }
 });
 
 export default Notifications;

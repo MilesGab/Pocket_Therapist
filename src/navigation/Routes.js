@@ -11,12 +11,10 @@ import Register from '../screens/Register.js';
 import Profile from '../screens/Profile.js';
 import PatientMessages from '../screens/ChatFunction/PatientMessages.js';
 import DoctorMessages from '../screens/ChatFunction/DoctorMessages.js';
-import AssessmentScreen from '../screens/Assessment/AssessmentScreen.js';
-import Questionnaire from '../screens/Assessment/Questionnaire.js';
-import Media from '../screens/Media.js';
-import JointAssessment from '../screens/Assessment/JointAssessment.js';
-import Results from '../screens/Assessment/Results.js';
+import Media from '../MediaScreen/Media.js';
 import Assessment from '../screens/Assessment/Assessment.js';
+import { useUserContext } from '../../contexts/UserContext.js';
+import DoctorChatScreen from '../screens/ChatFunction/DoctorChatScreen.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -187,9 +185,6 @@ const Routes = (props) => {
             <Stack.Screen name="MyTabs" component={MyTabs}/>
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="Assessment" component={Assessment} />
-            {/* <Stack.Screen name="Questionnaire" component={Questionnaire} />
-            <Stack.Screen name="JointAssessment" component={JointAssessment} />
-            <Stack.Screen name="Results" component={Results} /> */}
         </Stack.Navigator>
     )
 }

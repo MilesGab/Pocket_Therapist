@@ -5,38 +5,107 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useUserContext } from '../../../contexts/UserContext';
+import firestore from '@react-native-firebase/firestore';
 
-export default function DoctorChatScreen() {
 
+import { useRoute } from '@react-navigation/native';
 
-  const [messages, setMessages] = useState([])
-
+export default function DoctorChatScreen({ route }) {
+  const { patientData } = route.params;
+  const [messages, setMessages] = useState([]);
+  const [patient, setPatient] = React.useState({});
   const {userData, updateUser} = useUserContext();
+  const trimmedUid = userData.uid.trim();
+
+  const senderData = {
+    _id: trimmedUid,
+    name: userData.firstName,
+    avatar:
+      'https://55knots.com.au/wp-content/uploads/2021/01/Zanj-Avatar-scaled.jpg',
+  };
+
+  const fetchPatient = async () => {
+    try {
+      const querySnapshot = await firestore()
+        .collection('users')
+        .where('uid', '==', patientData)
+        .get();
+
+      if (!querySnapshot.empty) {
+        const patientDoc = querySnapshot.docs[0];
+        const patient = patientDoc.data();
+        setPatient(patient);
+      } else {
+        console.log('No doctor found with the provided ID.');
+      }
+    } catch (error) {
+      console.error('Error fetching doctor: ', error);
+    }
+  };
 
   useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: `Hello ${userData.firstName}`,
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: 'React Native',
-          avatar: 'https://55knots.com.au/wp-content/uploads/2021/01/Zanj-Avatar-scaled.jpg',
-        },
-      },
-    ])
-  }, [])
+    fetchPatient();
+  }, []);
 
-  
+  const retrieveMessagesFromFirestore = async () => {
+    try {
+      const querySnapshot = await firestore()
+        .collection('messages')
+        .where('user._id', 'in', [patientData, trimmedUid]) // Use 'in' query to match either
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      const messages = [];
+
+      querySnapshot.forEach((documentSnapshot) => {
+        const messageData = documentSnapshot.data();
+        const message = {
+          _id: documentSnapshot.id,
+          user: messageData.user,
+          text: messageData.text,
+          createdAt: messageData.createdAt.toDate(),
+        };
+
+        messages.push(message);
+      });
+
+      setMessages(messages);
+    } catch (error) {
+      console.error('Error retrieving messages from Firestore:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    retrieveMessagesFromFirestore();
+  }, []);
+
   const onSend = useCallback((messages = []) => {
-    setMessages(previousMessages =>
-      GiftedChat.append(previousMessages, messages),
-    )
-  }, [])
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, messages)
+    );
 
-  {/*toolbar customization*/}
-  const customInputToolbar = props => {
+    sendMessagesToFirestore(messages);
+  }, []);
+
+  const sendMessagesToFirestore = async (messages) => {
+    try {
+      for (const message of messages) {
+        await firestore()
+          .collection('messages')
+          .add({
+            user: senderData,
+            text: message.text,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+          });
+      }
+    } catch (error) {
+      console.error('Error sending messages to Firestore:', error);
+    }
+  };
+
+  /*toolbar customization*/
+  const customInputToolbar = (props) => {
     return (
       <InputToolbar
         {...props}
@@ -45,35 +114,54 @@ export default function DoctorChatScreen() {
     );
   };
 
-  {/*send button customization*/}
-  const renderSend = props => {
+  /*send button customization*/
+  const renderSend = (props) => {
     return (
-      <Send {...props} containerStyle = {{borderWidth:0}}>
-        <Icon
-          name="send"
-          style={styles.sendIcon}
-        />
+      <Send {...props} containerStyle={{ borderWidth: 0 }}>
+        <Icon name="send" style={styles.sendIcon} />
       </Send>
     );
-  }
+  };
 
   return (
-  <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <View style={styles.container}>
-      <View style = {styles.toolbarContainer}>
+    <TouchableWithoutFeedback
+      onPress={Keyboard.dismiss}
+      accessible={false}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.profileOptions}>
+            <TouchableOpacity
+              onPress={() => console.log('hello')}
+              style={styles.profileAndOptions}
+            >
+              <Avatar label={patient.firstName} size={55} />
+              <View style={styles.nameAndClass}>
+                <Text style={styles.username}>
+                  {patient.firstName} {patient.lastName}
+                </Text>
+                <Text style={styles.class}>
+                  {patient.contact}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={styles.toolbarContainer}>
           <GiftedChat
             messages={messages}
-            onSend={messages => onSend(messages)}
-            user={{_id: 1,}}
-            renderSend={props => renderSend(props)}
-            renderInputToolbar={props => customInputToolbar(props)}
+            onSend={onSend}
+            user={{ _id: trimmedUid }}
+            renderSend={(props) => renderSend(props)}
+            renderInputToolbar={(props) => customInputToolbar(props)}
             alwaysShowSend={true}
           />
+        </View>
       </View>
-    </View>
-  </TouchableWithoutFeedback>
-  )
-};
+    </TouchableWithoutFeedback>
+  );
+}
+
 
 
 const styles = StyleSheet.create({
