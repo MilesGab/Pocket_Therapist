@@ -15,6 +15,7 @@ import Media from '../MediaScreen/Media.js';
 import Assessment from '../screens/Assessment/Assessment.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import DoctorChatScreen from '../screens/ChatFunction/DoctorChatScreen.js';
+import Media from '../screens/Media.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
