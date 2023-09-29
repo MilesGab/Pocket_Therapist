@@ -21,9 +21,9 @@ export function UserProvider({ children }) {
     loadUserData();
   }, []);
 
-  React.useEffect(() => {
-    console.log(userData);
-  }, [userData]);
+  // React.useEffect(() => {
+  //   console.log(userData);
+  // }, [userData]);
 
   const updateUser = async (newUserData) => {
     setUserData(newUserData);

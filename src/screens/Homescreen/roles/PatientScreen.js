@@ -18,8 +18,7 @@ const PatientScreen = ({ navigation }) => {
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);
 
-  const trimmedUid = "Pkw5kI5F8tQ6MA4TP5eccSAwB503";
-  //userData.uid.trim();
+  const trimmedUid = userData.doctor;
 
   React.useEffect(() => {
     setLoading(true);

@@ -15,10 +15,11 @@ import {
   Provider
 } from '@react-native-material/core';
 
-const Notification = ({ item }) => {
+const Notification = ({ item, fetchApptRequest }) => {
   const { userData, updateUser } = useUserContext();
   const doctor_name = item.patientName;
   const date = item.date;
+  const appointmentId = item.uid;
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [decision, setDecision] = React.useState('');
@@ -46,6 +47,36 @@ const Notification = ({ item }) => {
     setDecision('Reject');
     setIsOpen(true);
   };
+
+  const approveAppointment = async () => {
+
+    try{
+      const appointmentRef = firestore().collection('appointments').doc(appointmentId);
+    
+      appointmentRef.update({
+        status: 1
+      });
+    } catch (error) {
+      console.error('Error updating appointment: ', error);
+    } finally {
+      fetchApptRequest();
+    }
+
+  }
+
+  const rejectAppointment = async () => {
+
+    try{
+      const appointmentRef = firestore().collection('appointments').doc(appointmentId);
+    
+      appointmentRef.delete();
+    } catch (error) {
+      console.error('Error updating appointment: ', error);
+    } finally {
+      fetchApptRequest();
+    }
+
+  }
 
   return(
     <View style={{display:'flex',
@@ -79,7 +110,7 @@ const Notification = ({ item }) => {
             <TouchableOpacity onPress={handleApprove} style={{backgroundColor:'#6FA8DC', paddingVertical:4, paddingHorizontal: 6, borderRadius:4}}>
               <Text style={{color:'white'}}>Approve</Text>
             </TouchableOpacity>
-            <RequestDialog visible={isOpen} decision={decision} setVisible={setIsOpen} date={formattedDate} time={formattedTime}/>
+            <RequestDialog visible={isOpen} approveAppointment={approveAppointment} rejectAppointment={rejectAppointment} decision={decision} setVisible={setIsOpen} date={formattedDate} time={formattedTime}/>
           </View>
         </View>
       </View>
@@ -88,12 +119,15 @@ const Notification = ({ item }) => {
 }
 
 const RequestDialog = (props) => {
+
+  const decision = props.decision;
+
   return(
     <Dialog visible={props.visible} onDismiss={() => props.setVisible(false)}>
-    <DialogHeader title={props.decision + ' Appointment'} />
+    <DialogHeader title={decision + ' Appointment'} />
     <DialogContent>
       <Text style={{fontSize:20}}>
-        {props.decision} appointment for {props.date} at {props.time}?
+        {decision} appointment for {props.date} at {props.time}?
       </Text>
     </DialogContent>
     <DialogActions>
@@ -107,7 +141,13 @@ const RequestDialog = (props) => {
         title="Approve"
         compact
         variant="text"
-        onPress={() => props.setVisible(false)}
+        onPress={() => {
+          if (decision === 'Approve') {
+            props.approveAppointment();
+          } else {
+            props.rejectAppointment();
+          
+        }}}
       />
     </DialogActions>
   </Dialog>
@@ -185,7 +225,13 @@ const Notifications = () => {
               renderItem={({ item }) => (
                 <Notification
                   item={item}
+                  fetchApptRequest={fetchApptRequest}
                 />
+              )}
+              ListEmptyComponent={() => (
+                <View>
+                  <Text>No appointments available</Text>
+                </View>
               )}
               showsVerticalScrollIndicator={false}
             />
@@ -207,7 +253,7 @@ const Notifications = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f1f1f1',
+    backgroundColor: 'white',
     height: '100%',
     padding: 20,
   },

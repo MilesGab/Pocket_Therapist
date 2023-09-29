@@ -12,28 +12,6 @@ import DoctorScreen from './roles/DoctorScreen';
 const HomeScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
 
-  React.useEffect(()=>{
-    console.log(userData?.role);
-  },[]);
-
-
-  const onPressFunction = () => {
-    console.log('hi');
-  }
-
-  const handleLogout = () => {
-    auth()
-      .signOut()
-      .then(() => {
-        console.log('Logout successful!');
-        navigation.navigate('Login');
-      })
-      .catch(error => {
-        console.error('Error logging out:', error);
-      });
-  };
-
-
   return (
     <>
       {userData?.role === 0 ? (<PatientScreen navigation={navigation} />) : (<DoctorScreen navigation={navigation} />)}

@@ -177,6 +177,11 @@ const styles = StyleSheet.create({
 });
 
 const Routes = (props) => {
+  const {userData,updateUser} = useUserContext();
+
+  React.useEffect(()=>{
+    console.log(userData);
+  }, [])
 
     return(
         <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>

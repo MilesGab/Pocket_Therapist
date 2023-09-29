@@ -244,11 +244,13 @@ const DoctorScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+
   container: {
     backgroundColor: 'white',
     justifyContent: 'space-between',
     padding: 20,
-    paddingTop: 32
+    paddingVertical: 32,
+    height: '100%'
   },
   header: {
     display: 'flex',
