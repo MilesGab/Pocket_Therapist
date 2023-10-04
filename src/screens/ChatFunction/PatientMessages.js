@@ -4,7 +4,10 @@ import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard} from 'react
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
+
 import { useUserContext } from '../../../contexts/UserContext';
+import { useNavigation } from '@react-navigation/native';
+
 import firestore from '@react-native-firebase/firestore';
 
 
@@ -14,6 +17,7 @@ export default function PatientMessages() {
   const { userData } = useUserContext();
   const trimmedUid = userData.uid.trim();
   const doctorId = userData.doctor.trim();
+  const navigation = useNavigation();
 
   const senderData = {
     _id: trimmedUid,
@@ -47,26 +51,52 @@ export default function PatientMessages() {
 
   const retrieveMessagesFromFirestore = async () => {
     try {
-      const querySnapshot = await firestore()
-        .collection('messages')
-        .orderBy('createdAt', 'desc')
-        .get();
-
-      const messages = [];
-
-      querySnapshot.forEach((documentSnapshot) => {
-        const messageData = documentSnapshot.data();
-        const message = {
-          _id: documentSnapshot.id,
-          user: messageData.user,
-          text: messageData.text,
-          createdAt: messageData.createdAt.toDate(),
-        };
-
-        messages.push(message);
-      });
-
-      setMessages(messages);
+      // const querySnapshot = await firestore()
+      //   .collection('messages')
+      //   .where('sendTo', 'in', [doctorId, trimmedUid])
+      //   .where('user._id', 'in', [doctorId, trimmedUid])
+      //   .orderBy('createdAt', 'desc')
+      //   .get();
+  
+      // const messages = [];
+  
+      // querySnapshot.forEach((documentSnapshot) => {
+      //   const messageData = documentSnapshot.data();
+      //   const message = {
+      //     _id: documentSnapshot.id,
+      //     user: messageData.user,
+      //     text: messageData.text,
+      //     createdAt: messageData.createdAt.toDate(),
+      //   };
+  
+      //   messages.push(message);
+      // });
+  
+      // setMessages(messages);
+  
+      const chatRef = firestore().collection('messages');
+      chatRef.where('sendTo', 'in', [doctorId, trimmedUid])
+             .where('user._id', 'in', [doctorId, trimmedUid])
+             .orderBy('createdAt', 'desc')
+             .onSnapshot((snapshot) => {
+               snapshot.docChanges().forEach((change) => {
+                 if (change.type === 'added') {
+                   const messageData = change.doc.data();
+                   const newMessage = {
+                     _id: change.doc.id,
+                     user: messageData.user,
+                     text: messageData.text,
+                     createdAt: messageData?.createdAt.toDate(),
+                   };
+                   setMessages((prevMessages) => {
+                    if (prevMessages.some((message) => message._id === newMessage._id)) {
+                      return prevMessages;
+                    }
+                    return [...prevMessages, newMessage];
+                  });
+                 }
+               });
+             });
     } catch (error) {
       console.error('Error retrieving messages from Firestore:', error);
       throw error;
@@ -83,6 +113,7 @@ export default function PatientMessages() {
     );
 
     sendMessagesToFirestore(messages);
+    retrieveMessagesFromFirestore();
   }, []);
 
   const sendMessagesToFirestore = async (messages) => {
@@ -94,6 +125,7 @@ export default function PatientMessages() {
             user: senderData,
             text: message.text,
             createdAt: firestore.FieldValue.serverTimestamp(),
+            sendTo: doctorId
           });
       }
     } catch (error) {
@@ -120,6 +152,10 @@ export default function PatientMessages() {
     );
   };
 
+  const handleCall = () => {
+    navigation.navigate('VoiceChat');
+  }
+
   return (
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
@@ -142,6 +178,12 @@ export default function PatientMessages() {
                 </Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity>
+              <Icon name="video-camera" size={24}/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleCall}>
+              <Icon name="phone" size={24}/>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.toolbarContainer}>
@@ -163,7 +205,6 @@ export default function PatientMessages() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
     flex: 1,
     justifyContent: 'center',
   },
@@ -222,13 +263,11 @@ const styles = StyleSheet.create({
 
   toolbarContainer:{
     flex:1,
-    paddingTop: 15,
     paddingBottom:15,
   },
 
   inputToolbar: {
-    marginLeft: 10,
-    marginRight: 10,
+    marginHorizontal: 10,
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 20,

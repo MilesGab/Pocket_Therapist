@@ -3,18 +3,19 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/Homescreen/Homescreen.js';
 import Schedule from '../screens/Schedule.js';
-import Notifications from '../screens/Notifications.js';
+import Notifications from '../screens/Notifications/Notifications.js';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Login from '../screens/Login.js';
 import Register from '../screens/Register.js';
-import Profile from '../screens/Profile.js';
+import Profile from '../screens/Profile/Profile.js';
 import PatientMessages from '../screens/ChatFunction/PatientMessages.js';
 import DoctorMessages from '../screens/ChatFunction/DoctorMessages.js';
 import Media from '../MediaScreen/Media.js';
 import Assessment from '../screens/Assessment/Assessment.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import DoctorChatScreen from '../screens/ChatFunction/DoctorChatScreen.js';
+import VoiceChat from '../screens/ChatFunction/call/VoiceChat.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -56,6 +57,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 };
 
 function MyTabs() {
+  const { userData, updateUser } = useUserContext();
+
   return (
     <Tab.Navigator
       initialRouteName="Home" tabBar={(props) => <CustomTabBar {...props} />}
@@ -97,7 +100,8 @@ function MyTabs() {
           tabBarLabel: 'Notifications',
         }}
       />
-      <Tab.Screen
+      { userData?.role === 1 ? (
+        <Tab.Screen
         name="Media"
         component={Media}
         options={{
@@ -106,6 +110,7 @@ function MyTabs() {
           tabBarLabel: 'Media',
         }}
       />
+      ) : (null)}
     </Tab.Navigator>
   );
 }
@@ -115,10 +120,8 @@ const MessageStack = () => {
   useEffect(() => {
     if (userData) {
       if (userData.role === 0) {
-        // Perform actions for patient users
         console.log('Chat accessed as patient');
       } else if (userData.role === 1) {
-        // Perform actions for doctor users
         console.log('Chat accessed as doctor');
       }
     }
@@ -152,6 +155,11 @@ return (
     )
   } 
     />
+    <Stack.Screen 
+    name="VoiceChat"
+    component={VoiceChat}
+    options={{headerShown: false}}
+    />
   </Stack.Navigator>
 );
 };
@@ -162,9 +170,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingTop: 10
+    paddingTop: 10,
+    borderRadius: 32,
+    marginHorizontal: 12,
+    marginBottom: 12,
+    elevation: 4,
   },
   tabItemContainer: {
     alignItems: 'center',
@@ -177,14 +187,14 @@ const styles = StyleSheet.create({
 });
 
 const Routes = (props) => {
-  const {userData,updateUser} = useUserContext();
-
-  React.useEffect(()=>{
-    console.log(userData);
-  }, [])
+  const { userData, updateUser } = useUserContext();
 
     return(
-        <Stack.Navigator initialRouteName={props.user ? 'MyTabs' : 'Login'} screenOptions={{ headerShown: false }}>
+        <Stack.Navigator 
+          initialRouteName={props.user ? 'MyTabs' : 'Login'} 
+          screenOptions={{ 
+            headerShown: false, 
+            }}>
             <Stack.Screen name="Login" component={Login}/>
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="MyTabs" component={MyTabs}/>

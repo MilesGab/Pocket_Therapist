@@ -11,7 +11,8 @@ export function UserProvider({ children }) {
       try {
         const storedUserData = await AsyncStorage.getItem('userData');
         if (storedUserData) {
-          setUserData(JSON.parse(storedUserData));
+          const parsedUserData = JSON.parse(storedUserData);
+          setUserData(parsedUserData);        
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -20,10 +21,6 @@ export function UserProvider({ children }) {
     
     loadUserData();
   }, []);
-
-  // React.useEffect(() => {
-  //   console.log(userData);
-  // }, [userData]);
 
   const updateUser = async (newUserData) => {
     setUserData(newUserData);

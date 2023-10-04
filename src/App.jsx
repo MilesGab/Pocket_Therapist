@@ -12,7 +12,6 @@ export default function App() {
   
   function onAuthStateChanged(user) {
     setUser(user);
-    console.log("Value: ", user.uid);
     if (initializing) setInitializing(false);
   }
 

@@ -14,7 +14,11 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <>
-      {userData?.role === 0 ? (<PatientScreen navigation={navigation} />) : (<DoctorScreen navigation={navigation} />)}
+      {userData?.role === 0 ? (
+        <PatientScreen navigation={navigation} />
+        ) : (
+        <DoctorScreen navigation={navigation} />
+        )}
     </>
   );
 };

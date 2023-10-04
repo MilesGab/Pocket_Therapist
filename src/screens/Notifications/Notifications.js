@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useUserContext } from '../../contexts/UserContext';
+import { useUserContext } from '../../../contexts/UserContext';
 import { FlatList } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import { 
@@ -14,6 +14,8 @@ import {
   Button,
   Provider
 } from '@react-native-material/core';
+import AppointmentList from './components/AppointmentList';
+import AssessmentList from './components/AssessmentList';
 
 const Notification = ({ item, fetchApptRequest }) => {
   const { userData, updateUser } = useUserContext();
@@ -240,11 +242,21 @@ const Notifications = () => {
           </>
         ) : (
           <>
+            <Text style={[styles.notifHeader, {color:'black'}]}>Approved Appointments</Text>
+              <View>
+                <AppointmentList />
+                <AppointmentList />
+                <AppointmentList />
+              </View>
+            <Text style={[styles.notifHeader, {color:'black'}]}>Asessments</Text>
+              <View>
+                <AssessmentList />
+              </View>
           </>
         )}
-            <TouchableOpacity onPress={()=>{console.log(apptReqList)}}>
+            {/* <TouchableOpacity onPress={()=>{console.log(apptReqList)}}>
               <Text style={styles.notifHeader}>HI</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
       </View>
     </View>
     </Provider>
@@ -253,7 +265,6 @@ const Notifications = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
     height: '100%',
     padding: 20,
   },

@@ -7,7 +7,7 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
 import Icon from "react-native-vector-icons/Ionicons";
-import { useUserContext } from '../../contexts/UserContext';
+import { useUserContext } from '../../../contexts/UserContext';
 import { useNavigation } from '@react-navigation/native';
 
 const InformationSection = (props) => {
@@ -104,8 +104,8 @@ const EditSection = (props) => {
   //Edit Values
   const [firstName, setFirstName] = React.useState(userFirstName);
   const [lastName, setLastName] = React.useState(userLastName);
-  const [dropDownValue, setDropDownValue] = React.useState();
-  const [date, setDate] = React.useState(new Date());
+  const [dropDownValue, setDropDownValue] = React.useState(userData?.sex);
+  const [date, setDate] = React.useState(userData?.dateOfBirth);
   const [emailAddress, setEmailAddress] = React.useState(userEmail);
   const [contactNumber, setContactNumber] = React.useState(userContact);
 
@@ -161,7 +161,11 @@ const EditSection = (props) => {
     showMode('date');
   };
 
-  const formattedDate = date.toLocaleDateString('en-US', {
+  const timestamp = new Date(
+    date.seconds * 1000 + date.nanoseconds / 1000000
+ );
+
+  const formattedDate = timestamp.toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric' 
   });
 

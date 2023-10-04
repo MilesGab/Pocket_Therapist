@@ -92,7 +92,6 @@ const RequestDialog = (props) => {
     </DialogActions>
   </Dialog>
   )
-
 }
 
 const AddAppointment = (props) => {

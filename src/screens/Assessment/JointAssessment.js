@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import SensorFusionProvider, { useSensorFusion, toDegrees } from 'react-native-sensor-fusion';
-import Instructions from '../../../assets/images/instructions.png';
+import Instructions from '../../../assets/images/icon.gif';
 import { Button } from '@react-native-material/core';
 import { useNavigation } from "@react-navigation/native";
 

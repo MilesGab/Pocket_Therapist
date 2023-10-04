@@ -26,6 +26,7 @@ const PatientScreen = ({ navigation }) => {
       try {
         const appointmentsSnapshot = await firestore()
           .collection('appointments')
+          .limit(1)
           .get();
 
         const appointmentsData = await Promise.all(
@@ -144,6 +145,8 @@ const PatientScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
+        <LatestResults/>
+
         <View style={styles.services}>
           <Text style={styles.servicesText}>Services</Text>
               <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center'}}>
@@ -193,11 +196,9 @@ const PatientScreen = ({ navigation }) => {
               />
               </View>
         </View>
-        
-        <LatestResults/>
-
+      
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Upcoming Appointments</Text>
+          <Text style={styles.footerText}>Upcoming Appointment</Text>
           {isLoading ? (
             <ActivityIndicator size="large"/>
           ) : (
@@ -306,7 +307,6 @@ const LatestResults = () =>{
 const styles = StyleSheet.create({
   container: {
     height:'100%',
-    backgroundColor: 'white',
     justifyContent: 'space-between',
     padding: 20,
     paddingTop: 32
@@ -338,6 +338,10 @@ const styles = StyleSheet.create({
     height: '35%',
     marginBottom: 16
   },
+  footer: {
+
+  },
+
   footerText: {
     fontFamily: 'Nunito Sans',
     fontSize: 20,
