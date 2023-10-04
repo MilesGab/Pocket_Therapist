@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image} from 'react-native';
 import { Avatar, IconButton, Box } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
@@ -7,7 +7,6 @@ import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
-
 
 const DoctorScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
@@ -168,7 +167,17 @@ const DoctorScreen = ({ navigation }) => {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
-            <Avatar image={{ uri: "https://mui.com/static/images/avatar/1.jpg" }} label={userData?.firstName} />
+          <Image
+          source={{ uri: userData.profilePictureURL }}
+          color='#CEDDF7'
+          style={{
+          width: 80,
+          height: 80,
+          borderRadius: 75,
+          borderWidth: 5,
+          borderColor: 'white',
+          }}
+        />
           </TouchableOpacity>
           <View style={{marginLeft:10, flex: 1}}>
             <Text style={styles.headerText}>Hello!</Text>

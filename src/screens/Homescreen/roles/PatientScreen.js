@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Avatar, IconButton, Box } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
@@ -140,7 +140,17 @@ const PatientScreen = ({ navigation }) => {
               fontWeight: 'bold'}}>{userData?.firstName || '---'}</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-            <Avatar label={userData?.firstName} />
+          <Image
+              source={{ uri: userData.profilePictureURL }}
+              color='#CEDDF7'
+              style={{
+              width: 80,
+              height: 80,
+              borderRadius: 75,
+              borderWidth: 5,
+              borderColor: 'white',
+              }}
+          />
           </TouchableOpacity>
         </View>
 

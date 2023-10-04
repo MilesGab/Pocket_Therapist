@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, StatusBar, ScrollView, TouchableOpacity} from 'react-native';
-import {Avatar} from "@react-native-material/core";
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, StatusBar, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { getStorage, ref, put, getDownloadURL} from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
-
+import * as ImagePicker from 'react-native-image-picker';
 import Icon from "react-native-vector-icons/Ionicons";
 import { useUserContext } from '../../contexts/UserContext';
 import { useNavigation } from '@react-navigation/native';
@@ -41,6 +42,19 @@ const InformationSection = (props) => {
 
   return (
     <>
+      <View style= {styles.avtrpos}>
+        <Image
+          source={{ uri: userData.profilePictureURL }}
+          color='#CEDDF7'
+          style={{
+          width: 150,
+          height: 150,
+          borderRadius: 75,
+          borderWidth: 5,
+          borderColor: 'white',
+          }}
+        />
+      </View>
       <View style={styles.heading}>
       <Text style={[styles.headingTxt, {flex:1}]}>Personal Information</Text>
       <TouchableOpacity onPress={()=>props.handleEditMode()}>
@@ -100,6 +114,7 @@ const EditSection = (props) => {
   const userLastName = '' + userData?.lastName;
   const userEmail = '' + userData?.email;
   const userContact = '' + userData?.contact;
+  const userPic = '' + userData?.profilePictureURL;
 
   //Edit Values
   const [firstName, setFirstName] = React.useState(userFirstName);
@@ -108,6 +123,7 @@ const EditSection = (props) => {
   const [date, setDate] = React.useState(new Date());
   const [emailAddress, setEmailAddress] = React.useState(userEmail);
   const [contactNumber, setContactNumber] = React.useState(userContact);
+  const [image, setProfilePicture] = React.useState(userPic);
 
 
   const handleCancel = () => {
@@ -136,6 +152,7 @@ const EditSection = (props) => {
       dateOfBirth: date,
       email: emailAddress,
       contact: contactNumber,
+      profilePictureURL: image
     };
   
     const uid = trimmedUid;
@@ -165,12 +182,58 @@ const EditSection = (props) => {
     month: 'short', day: 'numeric', year: 'numeric' 
   });
 
+  const handlePickProfilePicture = async () => {
+    let result = await ImagePicker.launchImageLibrary({
+      mediaType: 'photo'
+    });
+
+    if (!result.didCancel){
+      setProfilePicture(result.assets[0].uri);
+    }
+  };
+
+  const handleUploadProfilePicture = async () => {
+    if (image) {
+      const filename = image.substring(image.lastIndexOf('/') + 1);
+      const storageRef = storage().ref(`profilePictures/${filename}`);
+      const response = await fetch(image);
+      const blob = await response.blob();
+      await storageRef.put(blob);
+  
+      const trimmedUid = userData.uid.trim();
+      const uid = trimmedUid;
+      const userRef = firestore().collection('users').doc(uid);
+      await userRef.update({
+        profilePictureURL: await storageRef.getDownloadURL(),
+      });
+  
+      alert('Changes Saved!');
+    } else {
+      alert('There is an error while saving, please try again');
+    }
+  };
+  
   return (
     <>
+    <View style= {styles.avtrpos}>
+      <Image
+        source={{ uri: image }}
+        color='#CEDDF7'
+        style={{
+          width: 150,
+          height: 150,
+          borderRadius: 75,
+          borderWidth: 5,
+          borderColor: 'white',
+        }}
+      />
+      <TouchableOpacity onPress={handlePickProfilePicture}>
+        <Text>Change Profile Picture</Text>
+      </TouchableOpacity>
+  </View>
       <View style={styles.heading}>
         <Text style={[styles.headingTxt, {flex:1}]}>Edit Personal Information</Text>
       </View>
-      
       <View style={{display:'flex', flexDirection:'row', width: '100%', gap: 10}}>
         <View style={{flexDirection:'column', width: '45%'}}>
           <View style={styles.row}>
@@ -244,7 +307,7 @@ const EditSection = (props) => {
           style={[styles.textInput]}/>
       </View>
       <View style={{display:'flex', flexDirection:'row', gap:12,justifyContent:'center', alignContent:'center', alignItems:'center', marginTop: 20}}>
-        <TouchableOpacity onPress={()=>handleSave()} style={{width:'50%', backgroundColor:'#f57c00', borderRadius: 10, padding:12}}>
+        <TouchableOpacity onPress ={() => {handleSave(); handleUploadProfilePicture();}} style={{width:'50%', backgroundColor:'#f57c00', borderRadius: 10, padding:12}}>
           <Text style={{textAlign:'center', color:'white', fontSize:20, fontWeight: '500'}}>Save Changes</Text>
         </TouchableOpacity>
       </View>
@@ -256,8 +319,8 @@ const Profile = () => {
   const { userData, updateUser } = useUserContext();
   const fullName = userData.firstName + " " + userData.lastName;
   const navigation = useNavigation();
-
   const [isEditMode, setEditMode] = React.useState(false);
+  const [image, setProfilePicture] = React.useState(null);
 
   const handleEditMode = () => {
     setEditMode(!isEditMode);
@@ -274,28 +337,27 @@ const Profile = () => {
         console.error('Error logging out:', error);
       });
   };
-
-  return (
+  
+return (
+  <ScrollView contentContainerStyle={styles.scrollViewContainer}>
     <View style={styles.container}>
       <View style={styles.whiteSheet}>
-      <View style= {styles.avtrpos}>
-        <Avatar label={fullName} size={130} color='#CEDDF7' style = {{borderWidth:5, borderColor: 'white'}}/>
-      </View>
-      {/* Information Section*/}
-      <View>
-        {isEditMode ? (<EditSection handleEditMode={handleEditMode}/>) : (<InformationSection handleEditMode={handleEditMode}/>)}
-      </View>
-      {/* Footer Section */}
-      <View style={{justifyContent:'center', alignContent:'center', alignItems:'center', marginTop: 20}}>
-        {isEditMode ? (null) : (
-          <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'orange', borderRadius: 14, padding:12}}>
-          <Text style={{textAlign:'center', color:'white', fontSize:26, fontWeight:'500'}}>Log Out</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+        {/* Information Section*/}
+        <View>
+          {isEditMode ? (<EditSection handleEditMode={handleEditMode}/>) : (<InformationSection handleEditMode={handleEditMode}/>)}
+        </View>
+        {/* Footer Section */}
+        <View style={{justifyContent:'center', alignContent:'center', alignItems:'center', marginTop: 20}}>
+          {isEditMode ? (null) : (
+            <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'orange', borderRadius: 14, padding:12}}>
+              <Text style={{textAlign:'center', color:'white', fontSize:26, fontWeight:'500'}}>Log Out</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
-  );
+  </ScrollView>
+);
 };
 
 const styles = StyleSheet.create({
@@ -304,12 +366,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingTop: StatusBar.currentHeight,
+    height: 950
   },
 
   whiteSheet: {
     width: '100%',
-    height: 700,
     position: "absolute", 
+    height: 800,
     bottom: 0,
     backgroundColor: '#fff',
     borderTopLeftRadius: 50,
@@ -318,7 +381,7 @@ const styles = StyleSheet.create({
   },
 
   avtrpos: {
-    marginTop: -70,
+    marginTop: 10,
     alignItems: 'center'
   },
 
