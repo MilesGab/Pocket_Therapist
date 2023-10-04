@@ -44,7 +44,7 @@ const InformationSection = (props) => {
     <>
       <View style= {styles.avtrpos}>
         <Image
-          source={{ uri: userData.profilePictureURL }}
+          source={{ uri: userData?.profilePictureURL }}
           color='#CEDDF7'
           style={{
           width: 150,
@@ -320,7 +320,7 @@ const Profile = () => {
   const fullName = userData.firstName + " " + userData.lastName;
   const navigation = useNavigation();
   const [isEditMode, setEditMode] = React.useState(false);
-  const [image, setProfilePicture] = React.useState(null);
+
 
   const handleEditMode = () => {
     setEditMode(!isEditMode);

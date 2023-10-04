@@ -141,7 +141,7 @@ const PatientScreen = ({ navigation }) => {
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <Image
-              source={{ uri: userData.profilePictureURL }}
+              source={{ uri: userData?.profilePictureURL }}
               color='#CEDDF7'
               style={{
               width: 80,

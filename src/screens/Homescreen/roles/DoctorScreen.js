@@ -166,9 +166,9 @@ const DoctorScreen = ({ navigation }) => {
   return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
+        <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
           <Image
-          source={{ uri: userData.profilePictureURL }}
+          source={{ uri: userData?.profilePictureURL }}
           color='#CEDDF7'
           style={{
           width: 80,
