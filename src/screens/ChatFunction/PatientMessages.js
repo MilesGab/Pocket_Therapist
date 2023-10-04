@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -23,7 +23,7 @@ export default function PatientMessages() {
     _id: trimmedUid,
     name: userData.firstName,
     avatar:
-      'https://55knots.com.au/wp-content/uploads/2021/01/Zanj-Avatar-scaled.jpg',
+      userData?.profilePictureURL,
   };
 
   const fetchDoctor = async () => {
@@ -168,7 +168,22 @@ export default function PatientMessages() {
               onPress={() => console.log(doctorData)}
               style={styles.profileAndOptions}
             >
-              <Avatar label={doctorData.firstName} size={55} />
+              <Avatar 
+                label={doctorData.firstName} 
+                image={
+                  <Image
+                    source={{ uri: doctorData?.profilePictureURL }}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      borderRadius: 28,
+                    }}
+                  />
+                } 
+                size={55} />
               <View style={styles.nameAndClass}>
                 <Text style={styles.username}>
                   {doctorData.firstName} {doctorData.lastName}

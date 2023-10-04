@@ -44,7 +44,7 @@ const InformationSection = (props) => {
     <>
       <View style= {styles.avtrpos}>
         <Image
-          source={{ uri: userData.profilePictureURL }}
+          source={{ uri: userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png' }}
           color='#CEDDF7'
           style={{
           width: 150,
@@ -114,7 +114,7 @@ const EditSection = (props) => {
   const userLastName = '' + userData?.lastName;
   const userEmail = '' + userData?.email;
   const userContact = '' + userData?.contact;
-  const userPic = '' + userData?.profilePictureURL;
+  const userPic = '' + userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png';
 
   //Edit Values
   const [firstName, setFirstName] = React.useState(userFirstName);
@@ -221,7 +221,7 @@ const EditSection = (props) => {
     <>
     <View style= {styles.avtrpos}>
       <Image
-        source={{ uri: image }}
+        source={{ uri: image  }}
         color='#CEDDF7'
         style={{
           width: 150,
