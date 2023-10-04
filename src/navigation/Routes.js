@@ -11,11 +11,11 @@ import Register from '../screens/Register.js';
 import Profile from '../screens/Profile/Profile.js';
 import PatientMessages from '../screens/ChatFunction/PatientMessages.js';
 import DoctorMessages from '../screens/ChatFunction/DoctorMessages.js';
-import Media from '../MediaScreen/Media.js';
 import Assessment from '../screens/Assessment/Assessment.js';
 import { useUserContext } from '../../contexts/UserContext.js';
 import DoctorChatScreen from '../screens/ChatFunction/DoctorChatScreen.js';
 import VoiceChat from '../screens/ChatFunction/call/VoiceChat.js';
+import Media from '../screens/Media.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
