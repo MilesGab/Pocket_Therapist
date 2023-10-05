@@ -78,7 +78,7 @@ function MyTabs() {
         component={Schedule}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Icon name="calendar" color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Icon name="calendar-outline" color={color} size={size} />,
           tabBarLabel: 'Schedule',
         }}
       />
@@ -88,7 +88,7 @@ function MyTabs() {
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Icon name="chatbox-ellipses-outline" color={color} size={size} />,
-          tabBarLabel: 'Messages',
+          tabBarLabel: userData?.role === 0 ? 'Doctor' : 'Patient'
         }}
       />
       <Tab.Screen
@@ -96,7 +96,7 @@ function MyTabs() {
         component={Notifications}
         options={{
           headerShown: false,
-          tabBarIcon: ({ color, size }) => <Icon name="notifications" color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Icon name="notifications-outline" color={color} size={size} />,
           tabBarLabel: 'Notifications',
         }}
       />
@@ -146,7 +146,7 @@ return (
     name= "DoctorChatScreen" 
     component={DoctorChatScreen} 
     options={({route}) => ({
-      headerTitle: `${userData.firstName}`,
+      headerTitle: `Messages`,
         headerStyle: {
           backgroundColor:'#DCEDF9',
           height: 80

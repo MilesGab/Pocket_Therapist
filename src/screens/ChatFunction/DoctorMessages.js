@@ -1,11 +1,13 @@
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, FlatList, Text, Image} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, FlatList, Text, Image, TouchableWithoutFeedback } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
 import Sana from '../../assets/images/user1.png';
 import Kim from '../../assets/images/user2.png';
+
+import Icon from 'react-native-vector-icons/Ionicons';
 import { Avatar} from "@react-native-material/core";
 import { useUserContext } from '../../../contexts/UserContext';
 
@@ -14,6 +16,9 @@ const DoctorMessages = ({navigation}) => {
     const { userData, updateUser } = useUserContext();
     const trimmedUid = userData?.uid.trim();
     const [patientList, setPatientList] = React.useState([]);
+
+    const [selectedItemIndex, setSelectedItemIndex] = React.useState(-1);
+    const [dropMenu, setDropMenu] = React.useState(false);
 
     const fetchPatients = async () => {
         try {
@@ -30,7 +35,7 @@ const DoctorMessages = ({navigation}) => {
                 id: doc.id,
                 firstName: doc.data().firstName,
                 lastName: doc.data().lastName,
-                userImg: null,
+                userImg: doc.data().profilePictureURL,
               };
         
               const latestMessageSnapshot = await firestore()
@@ -52,9 +57,9 @@ const DoctorMessages = ({navigation}) => {
                 patient.messageText = '';
               }
         
-              const userImageRef = storage().ref().child(`users/7b574a23f46c10a63c1b5061249c92ab.jpg`);
-              const userImageUrl = await userImageRef.getDownloadURL();
-              patient.userImg = Sana;
+              // const userImageRef = storage().ref().child(`users/7b574a23f46c10a63c1b5061249c92ab.jpg`);
+              // const userImageUrl = await userImageRef.getDownloadURL();
+              // patient.userImg = Sana;
 
               patientData.push(patient);
             }
@@ -89,53 +94,96 @@ const DoctorMessages = ({navigation}) => {
         fetchPatients();
     }, []);
     
+    const handleMessage = (userid) => {
+     console.log(userid);
+     navigation.navigate('DoctorChatScreen', {patientData: userid});
+    }
+
+    const handleDropDown = (index) => {
+      setSelectedItemIndex(index);
+      setDropMenu(true);
+    };
+  
+    const closeDropDown = () => {
+      setSelectedItemIndex(-1);
+      setDropMenu(false);
+    };
+
     return(
+      <TouchableWithoutFeedback onPress={closeDropDown}>
         <View style = {styles.container}>
             <View style={styles.header}>
-                <Text style ={styles.headerTxt}>Messages</Text>
-            </View>
+                <Text style ={styles.headerTxt}>Patients</Text>
+            </View> 
             <FlatList
                 data={patientList}
                 keyExtractor={item => item.id}
-                renderItem={({item}) => (
-                    <TouchableOpacity onPress={() => navigation.navigate('DoctorChatScreen', {patientData: item.id})} style={styles.cardStyle}>
-                        <View style = {styles.userInfo}>
-                            <View style = {styles.userImgWrapper}>
-                                <Image style = {styles. userImgStyle} source={item.userImg} />
+                renderItem={({item, index}) => (
+                    <TouchableOpacity onPress={() => handleDropDown(index)} style={styles.cardStyle} activeOpacity={1}>
+                        <View style={styles.userInfo}>
+                            <View style={styles.userImgWrapper}>
+                                <Image style={styles. userImgStyle} source={{uri: item.userImg}} />
                             </View>
-                            <View style = {styles.messageSection}>
-                                <View style ={styles.messageDetails}>
-                                    <Text style = {styles.userName}>{item.firstName} {item.lastName}</Text>
-                                    <Text style = {styles.timeReceived}>{item.messageTime}</Text>
-                                </View>
-                                <Text style = {styles.messagePreview}>{item.messageText}</Text>
-                            </View>
+                              <View style={styles.messageSection}>
+                                  <View style={styles.messageDetails}>
+                                      <Text style={styles.userName}>{item.firstName} {item.lastName}</Text>
+                                  </View>
+                                  <View>
+                                    <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
+                                      <Icon name="chatbox-ellipses-outline" size={18}/>
+                                      <Text style={styles.messagePreview}>{item.messageText} · </Text>
+                                      <Text style={styles.timeReceived}>{item.messageTime}</Text>
+                                    </View>
+                                    <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
+                                      <Icon name="pulse-outline" size={18}/>
+                                      <Text style={[styles.messagePreview, {fontSize: 14}]}>New assessment available!</Text>
+                                    </View>
+                                  </View>
+                              </View>
                         </View>
-                    </TouchableOpacity>
+                        {selectedItemIndex === index && dropMenu && (
+                            <View style={styles.dropMenu}>
+                              <TouchableOpacity onPress={()=>handleMessage(item.id)}>
+                                <View style={styles.menuContent}>
+                                  <Icon name="chatbox-ellipses-outline" size={20} />
+                                  <Text>View Messages</Text>
+                                </View>
+                              </TouchableOpacity>
+                              <View style={styles.menuContent}>
+                                <Icon name="pulse-outline" size={20} />
+                                <Text>View Assessments</Text>
+                              </View>
+                            </View>
+                          )}
+                        </TouchableOpacity>
                     )}
             />
         </View>
+        </TouchableWithoutFeedback>
     );  
 };
 
 const styles = StyleSheet.create({
 
 container: {
-    backgroundColor: 'white',
     flex: 1,
     padding: 10,
 },
 
 cardStyle: {
     width: '100%',
-    marginBottom: 20,
     borderRadius: 10,
+    marginBottom: 10
 },
 
 userInfo: {
+    backgroundColor:'#FFFFFF',
+    borderRadius: 10,
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    padding: 5
+    padding: 5,
+    paddingHorizontal: 12,
+    elevation: 2
 },
 
 userImgWrapper: {
@@ -156,8 +204,6 @@ messageSection: {
     paddingLeft: 0,
     marginLeft: 10,
     width: 300,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc'
 },
 
 messageDetails: {
@@ -179,13 +225,14 @@ timeReceived: {
 },
 
 messagePreview: {
-  fontSize: 14,
+  marginLeft: 4,
+  fontSize: 16,
   color: '#333333'
 },
 
+
 header: {
     flexDirection: 'row',
-    backgroundColor:'white',
     paddingTop: 20,
     paddingBottom: 10,
     height:100,
@@ -198,6 +245,22 @@ headerTxt:{
     fontWeight: 'bold',
     paddingLeft: 10,
     color: 'black'
+},
+
+dropMenu: {
+  backgroundColor:'#DADADA',
+  borderBottomRightRadius: 10,
+  borderBottomLeftRadius: 10,
+  padding: 12,
+  display:'flex',
+  flexDirection:'column',
+  gap: 12
+},
+
+menuContent: {
+  display:'flex', 
+  flexDirection:'row',
+  gap: 4
 }
 })
 

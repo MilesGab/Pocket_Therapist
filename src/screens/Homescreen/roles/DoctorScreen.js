@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Image} from 'react-native';
-import { Avatar, IconButton, Box } from "@react-native-material/core";
+import { Avatar, IconButton, Box, ActivityIndicator } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
@@ -16,6 +16,8 @@ const DoctorScreen = ({ navigation }) => {
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [appointmentsCount, setAppointmentsCount] = React.useState(0); 
   const [patientCount, setPatientCount] = React.useState(0);
+
+  const [loading, setLoading] = React.useState(true);
 
   const countPatients = async () => {
     try{
@@ -90,6 +92,8 @@ const DoctorScreen = ({ navigation }) => {
         setAppointmentList(appointmentsData);
       } catch (error) {
         console.error('Error fetching appointments:', error);
+      } finally{
+        setLoading(false);
       }
     };
 
@@ -208,7 +212,11 @@ const DoctorScreen = ({ navigation }) => {
                             <Text style={{marginTop:8, color: 'black', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
                             <Icon style={{fontWeight:'bold', fontSize:18, color:'black'}} name="chevron-down-outline"/>
                         </View>
-                    <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                        {loading ? (
+                      <ActivityIndicator size="large"/>
+                      ): (
+                        <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                        )}
                 </Box>
               </Box>
               {/* 2nd button */}
@@ -225,7 +233,11 @@ const DoctorScreen = ({ navigation }) => {
                             <Text style={{marginTop:8, color: 'black', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
                             <Icon style={{fontWeight:'bold', fontSize:18, color:'black'}} name="chevron-down-outline"/>
                         </View>
-                    <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
+                    {loading ? (
+                      <ActivityIndicator size="large"/>
+                      ): (
+                      <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
+                      )}
                 </Box>
               </Box>
               {/* 3rd button */}
@@ -239,14 +251,19 @@ const DoctorScreen = ({ navigation }) => {
                     <Text style={{color:'#257cba'}}>See All</Text>
                 </TouchableOpacity>
             </View>
-          <FlatList
-            horizontal={false} // Set to false to display items vertically
-            data={appointmentList}
-            renderItem={renderItem}
-            keyExtractor={item => item.uid}
-            extraData={selectedId}
-            showsVerticalScrollIndicator={false} // Optionally, hide vertical scroll indicator
-            />
+            {loading ? 
+            (
+              <ActivityIndicator size="large"/>
+            ) : (
+              <FlatList
+              horizontal={false} // Set to false to display items vertically
+              data={appointmentList}
+              renderItem={renderItem}
+              keyExtractor={item => item.uid}
+              extraData={selectedId}
+              showsVerticalScrollIndicator={false} // Optionally, hide vertical scroll indicator
+              />
+            )}
         </View>
       </View>
   );
@@ -255,7 +272,6 @@ const DoctorScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
 
   container: {
-    backgroundColor: 'white',
     justifyContent: 'space-between',
     padding: 20,
     paddingVertical: 32,

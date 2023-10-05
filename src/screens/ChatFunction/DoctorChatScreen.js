@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -49,27 +49,52 @@ export default function DoctorChatScreen({ route }) {
 
   const retrieveMessagesFromFirestore = async () => {
     try {
-      const querySnapshot = await firestore()
-        .collection('messages')
-        .where('user._id', 'in', [patientData, trimmedUid]) // Use 'in' query to match either
-        .orderBy('createdAt', 'desc')
-        .get();
+      // const querySnapshot = await firestore()
+      //   .collection('messages')
+      //   .where('user._id', '==', patientData) // Match patientData
+      //   .orderBy('createdAt', 'desc')
+      //   .get();
 
-      const messages = [];
+      // const messages = [];
 
-      querySnapshot.forEach((documentSnapshot) => {
-        const messageData = documentSnapshot.data();
-        const message = {
-          _id: documentSnapshot.id,
-          user: messageData.user,
-          text: messageData.text,
-          createdAt: messageData.createdAt.toDate(),
-        };
+      // querySnapshot.forEach((documentSnapshot) => {
+      //   const messageData = documentSnapshot.data();
+      //   const message = {
+      //     _id: documentSnapshot.id,
+      //     user: messageData.user,
+      //     text: messageData.text,
+      //     createdAt: messageData.createdAt.toDate(),
+      //   };
 
-        messages.push(message);
-      });
+      //   messages.push(message);
+      // });
 
-      setMessages(messages);
+      // setMessages(messages);
+
+      const chatRef = firestore().collection('messages');
+      chatRef.where('sendTo', 'in', [patientData, trimmedUid])
+             .where('user._id', 'in', [patientData, trimmedUid])
+             .orderBy('createdAt', 'desc')
+             .onSnapshot((snapshot) => {
+               snapshot.docChanges().forEach((change) => {
+                 if (change.type === 'added') {
+                   const messageData = change.doc.data();
+                   const newMessage = {
+                     _id: change.doc.id,
+                     user: messageData.user,
+                     text: messageData.text,
+                     createdAt: messageData?.createdAt.toDate(),
+                   };
+                   setMessages((prevMessages) => {
+                    if (prevMessages.some((message) => message._id === newMessage._id)) {
+                      return prevMessages;
+                    }
+                    return [...prevMessages, newMessage];
+                  });
+                 }
+               });
+             });
+
     } catch (error) {
       console.error('Error retrieving messages from Firestore:', error);
       throw error;
@@ -135,7 +160,20 @@ export default function DoctorChatScreen({ route }) {
               onPress={() => console.log('hello')}
               style={styles.profileAndOptions}
             >
-              <Avatar label={patient.firstName} size={55} />
+              <Avatar label={patient.firstName} size={55} 
+              image={
+                <Image
+                source={{ uri: patient?.profilePictureURL || 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'}}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: 28,
+                }}
+              />
+              }/>
               <View style={styles.nameAndClass}>
                 <Text style={styles.username}>
                   {patient.firstName} {patient.lastName}
@@ -166,7 +204,6 @@ export default function DoctorChatScreen({ route }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
     flex: 1,
     justifyContent: 'center',
   },
