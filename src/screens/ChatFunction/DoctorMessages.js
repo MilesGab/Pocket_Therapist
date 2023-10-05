@@ -8,7 +8,7 @@ import Sana from '../../assets/images/user1.png';
 import Kim from '../../assets/images/user2.png';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Avatar} from "@react-native-material/core";
+import { ActivityIndicator, Avatar} from "@react-native-material/core";
 import { useUserContext } from '../../../contexts/UserContext';
 
 const DoctorMessages = ({navigation}) => {
@@ -19,6 +19,7 @@ const DoctorMessages = ({navigation}) => {
 
     const [selectedItemIndex, setSelectedItemIndex] = React.useState(-1);
     const [dropMenu, setDropMenu] = React.useState(false);
+    const [isLoading, setLoading] = React.useState(true);
 
     const fetchPatients = async () => {
         try {
@@ -67,6 +68,8 @@ const DoctorMessages = ({navigation}) => {
             setPatientList(patientData);
       } catch(error){
         console.error('Error fetching patients: ', error);
+      } finally {
+        setLoading(false);
       }
     }
   
@@ -99,6 +102,11 @@ const DoctorMessages = ({navigation}) => {
      navigation.navigate('DoctorChatScreen', {patientData: userid});
     }
 
+    const handleAssessments = (userid) => {
+     console.log(userid);
+     navigation.navigate('PatientAssessment', {patientData: userid});
+    }
+
     const handleDropDown = (index) => {
       setSelectedItemIndex(index);
       setDropMenu(true);
@@ -115,7 +123,10 @@ const DoctorMessages = ({navigation}) => {
             <View style={styles.header}>
                 <Text style ={styles.headerTxt}>Patients</Text>
             </View> 
-            <FlatList
+            {isLoading ? (
+              <ActivityIndicator size="large"/>
+            ) : (
+              <FlatList
                 data={patientList}
                 keyExtractor={item => item.id}
                 renderItem={({item, index}) => (
@@ -129,14 +140,16 @@ const DoctorMessages = ({navigation}) => {
                                       <Text style={styles.userName}>{item.firstName} {item.lastName}</Text>
                                   </View>
                                   <View>
-                                    <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
-                                      <Icon name="chatbox-ellipses-outline" size={18}/>
-                                      <Text style={styles.messagePreview}>{item.messageText} · </Text>
-                                      <Text style={styles.timeReceived}>{item.messageTime}</Text>
-                                    </View>
-                                    <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
-                                      <Icon name="pulse-outline" size={18}/>
-                                      <Text style={[styles.messagePreview, {fontSize: 14}]}>New assessment available!</Text>
+                                    <View style={{display:'flex', flexDirection:'column'}}>
+                                      <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
+                                        <Icon name="chatbox-ellipses-outline" size={18}/>
+                                        <Text style={styles.messagePreview}>{item.messageText} · </Text>
+                                        <Text style={styles.timeReceived}>{item.messageTime}</Text>
+                                      </View>
+                                      <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
+                                        <Icon name="pulse-outline" size={18}/>
+                                        <Text style={[styles.messagePreview, {fontSize: 14}]}>New assessment available!</Text>
+                                      </View>
                                     </View>
                                   </View>
                               </View>
@@ -149,15 +162,18 @@ const DoctorMessages = ({navigation}) => {
                                   <Text>View Messages</Text>
                                 </View>
                               </TouchableOpacity>
-                              <View style={styles.menuContent}>
-                                <Icon name="pulse-outline" size={20} />
-                                <Text>View Assessments</Text>
-                              </View>
+                              <TouchableOpacity onPress={()=>handleAssessments(item.id)} >
+                                <View style={styles.menuContent}>
+                                  <Icon name="pulse-outline" size={20} />
+                                  <Text>View Assessments</Text>
+                                </View>
+                              </TouchableOpacity>
                             </View>
                           )}
                         </TouchableOpacity>
                     )}
-            />
+                />
+            )}
         </View>
         </TouchableWithoutFeedback>
     );  

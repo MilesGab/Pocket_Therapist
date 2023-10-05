@@ -16,6 +16,8 @@ import { useUserContext } from '../../contexts/UserContext.js';
 import DoctorChatScreen from '../screens/ChatFunction/DoctorChatScreen.js';
 import VoiceChat from '../screens/ChatFunction/call/VoiceChat.js';
 import Media from '../screens/Media.js';
+import PatientAssessment from '../screens/ChatFunction/assessments/PatientAssessments.js';
+import Exercises from '../screens/ChatFunction/assessments/Exercises.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -158,6 +160,18 @@ return (
     <Stack.Screen 
     name="VoiceChat"
     component={VoiceChat}
+    options={{headerShown: false}}
+    />
+
+    <Stack.Screen 
+    name="PatientAssessment"
+    component={PatientAssessment}
+    options={{headerShown: false}}
+    />
+    
+    <Stack.Screen 
+    name="Exercises"
+    component={Exercises}
     options={{headerShown: false}}
     />
   </Stack.Navigator>
