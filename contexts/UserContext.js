@@ -11,7 +11,8 @@ export function UserProvider({ children }) {
       try {
         const storedUserData = await AsyncStorage.getItem('userData');
         if (storedUserData) {
-          setUserData(JSON.parse(storedUserData));
+          const parsedUserData = JSON.parse(storedUserData);
+          setUserData(parsedUserData);        
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -27,8 +28,6 @@ export function UserProvider({ children }) {
       await AsyncStorage.setItem('userData', JSON.stringify(newUserData));
     } catch (error) {
       console.error('Error saving user data:', error);
-    } finally {
-      console.log(userData);
     }
   };
 

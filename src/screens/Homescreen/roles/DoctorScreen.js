@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { Avatar, IconButton, Box } from "@react-native-material/core";
+import { View, Text, StyleSheet, Pressable, Image} from 'react-native';
+import { Avatar, IconButton, Box, ActivityIndicator } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
@@ -8,15 +8,36 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
 
-
 const DoctorScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
-  const trimmedUid = "Pkw5kI5F8tQ6MA4TP5eccSAwB503";
-  //Pkw5kI5F8tQ6MA4TP5eccSAwB503
-
+  const trimmedUid = userData?.uid.trim();
+  
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [appointmentsCount, setAppointmentsCount] = React.useState(0); 
+  const [patientCount, setPatientCount] = React.useState(0);
+
+  const [loading, setLoading] = React.useState(true);
+
+  const countPatients = async () => {
+    try{
+      const querySnapshot = await firestore()
+      .collection('users')
+      .where('role', '==', 0)
+      .where('doctor', '==', trimmedUid)
+      .get();
+
+      const count = querySnapshot.size;
+      setPatientCount(count);
+
+    } catch(error){
+      console.error('Error fetching patients: ', error);
+    }
+  }
+
+  React.useEffect(()=>{
+    countPatients();
+  }, []);
 
   const countAppointments = async () => {
     try {
@@ -71,38 +92,14 @@ const DoctorScreen = ({ navigation }) => {
         setAppointmentList(appointmentsData);
       } catch (error) {
         console.error('Error fetching appointments:', error);
+      } finally{
+        setLoading(false);
       }
     };
 
     fetchAppointments();
   }, []);
 
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'Consultation',
-      date: '25',
-      day: 'Fri',
-      doctor: 'Dr. Mim Akhter',
-      time: '03:00 PM'
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Catch up',
-      date: '28',
-      day: 'Mon',
-      doctor: 'Dr. Mim Akhter',
-      time: '03:00 PM'
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Consultation',
-      date: '31',
-      day: 'Thu',
-      doctor: 'Dr. Mim Akhter',
-      time: '03:00 PM'
-    },
-  ];
 
   const Item = ({item, onPress, backgroundColor, textColor}) => {
     
@@ -173,8 +170,18 @@ const DoctorScreen = ({ navigation }) => {
   return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleLogout}>
-            <Avatar image={{ uri: "https://mui.com/static/images/avatar/1.jpg" }} label={userData?.firstName} />
+          <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
+          <Image
+          source={{ uri: userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png' }}
+          color='#CEDDF7'
+          style={{
+          width: 80,
+          height: 80,
+          borderRadius: 75,
+          borderWidth: 5,
+          borderColor: 'white',
+          }}
+        />
           </TouchableOpacity>
           <View style={{marginLeft:10, flex: 1}}>
             <Text style={styles.headerText}>Hello!</Text>
@@ -205,7 +212,11 @@ const DoctorScreen = ({ navigation }) => {
                             <Text style={{marginTop:8, color: 'black', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
                             <Icon style={{fontWeight:'bold', fontSize:18, color:'black'}} name="chevron-down-outline"/>
                         </View>
-                    <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>6</Text>
+                        {loading ? (
+                      <ActivityIndicator size="large"/>
+                      ): (
+                        <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                        )}
                 </Box>
               </Box>
               {/* 2nd button */}
@@ -222,7 +233,11 @@ const DoctorScreen = ({ navigation }) => {
                             <Text style={{marginTop:8, color: 'black', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
                             <Icon style={{fontWeight:'bold', fontSize:18, color:'black'}} name="chevron-down-outline"/>
                         </View>
-                    <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
+                    {loading ? (
+                      <ActivityIndicator size="large"/>
+                      ): (
+                      <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
+                      )}
                 </Box>
               </Box>
               {/* 3rd button */}
@@ -236,25 +251,31 @@ const DoctorScreen = ({ navigation }) => {
                     <Text style={{color:'#257cba'}}>See All</Text>
                 </TouchableOpacity>
             </View>
-          <FlatList
-            horizontal={false} // Set to false to display items vertically
-            data={appointmentList}
-            renderItem={renderItem}
-            keyExtractor={item => item.uid}
-            extraData={selectedId}
-            showsVerticalScrollIndicator={false} // Optionally, hide vertical scroll indicator
-            />
+            {loading ? 
+            (
+              <ActivityIndicator size="large"/>
+            ) : (
+              <FlatList
+              horizontal={false} // Set to false to display items vertically
+              data={appointmentList}
+              renderItem={renderItem}
+              keyExtractor={item => item.uid}
+              extraData={selectedId}
+              showsVerticalScrollIndicator={false} // Optionally, hide vertical scroll indicator
+              />
+            )}
         </View>
       </View>
   );
 };
 
 const styles = StyleSheet.create({
+
   container: {
-    backgroundColor: 'white',
     justifyContent: 'space-between',
     padding: 20,
-    paddingTop: 32
+    paddingVertical: 32,
+    height: '100%'
   },
   header: {
     display: 'flex',

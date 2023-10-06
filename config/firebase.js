@@ -1,6 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from 'firebase/storage'
+
 import Constants from "expo-constants";
 // Firebase config
 const firebaseConfig = {
@@ -12,8 +14,11 @@ const firebaseConfig = {
   appId: Constants.expoConfig.extra.appId,
   databaseURL: Constants.expoConfig.extra.databaseURL,
 //   @deprecated is deprecated Constants.manifest
-};
+}
+
 // initialize firebase
 initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const database = getFirestore();
+export const storage = getStorage();
+
