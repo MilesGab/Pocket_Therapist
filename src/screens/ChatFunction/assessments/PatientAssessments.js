@@ -1,3 +1,4 @@
+import { firebase } from '@react-native-firebase/auth';
 import { Divider } from '@react-native-material/core';
 
 import { useNavigation } from '@react-navigation/native';
@@ -6,19 +7,48 @@ import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useUserContext } from '../../../../contexts/UserContext';
+import firestore from '@react-native-firebase/firestore';
 
 
 const AssessmentCard = () => {
+    const { userData, updateUser } = useUserContext();
+    const trimmedUid = userData?.uid.trim();
+    const [assessmentData, setAssessmentData] = React.useState([]);
 
+    const fetchPatientResults = async () =>{
+        try {
+            const querySnapshot = await firestore()
+              .collection('assessments')
+              .where('patient', '==', trimmedUid)
+              .get();
+
+             const assessments = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                assessments.push(data);
+            });
+
+        // Store the assessment data in state for use in the component
+        setAssessmentData(assessments);
+        } catch (error) {
+            console.error('Error fetching results: ', error);
+        }
+    }
+    React.useEffect(()=>{
+        fetchPatientResults();
+    }, []);
     return(
+        <View>
+        {assessmentData.map((assessment, index) => (
         <View style={styles.displayCard}>
-            <Text style={{marginBottom: 6}}>{'October 5, 2023'}</Text>
+            <Text style={{marginBottom: 6}}>{assessment.date && assessment.date.toDate().toString()}</Text>
             <Divider color='black'/>
             <View>
                 <View>
                     <Text>Notes</Text>
-                    <Text>•Discoloration is present</Text>
-                    <Text>•Pain has been going on for the past few weeks</Text>
+                    <Text>•Physical Data</Text>
+                
                 </View>
                 <View style={{display:'flex', justifyContent:'flex-end', alignContent:'flex-end', alignItems:'flex-end'}}>
                     <TouchableOpacity style={{flexDirection:'row', alignItems:'center'}}>
@@ -27,7 +57,8 @@ const AssessmentCard = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-
+        </View>
+        ))}
         </View>
     )
 
