@@ -12,43 +12,18 @@ import firestore from '@react-native-firebase/firestore';
 
 
 const AssessmentCard = () => {
-    const { userData, updateUser } = useUserContext();
-    const trimmedUid = userData?.uid.trim();
-    const [assessmentData, setAssessmentData] = React.useState([]);
-
-    const fetchPatientResults = async () =>{
-        try {
-            const querySnapshot = await firestore()
-              .collection('assessments')
-              .where('patient', '==', trimmedUid)
-              .get();
-
-             const assessments = [];
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                assessments.push(data);
-            });
-
-        // Store the assessment data in state for use in the component
-        setAssessmentData(assessments);
-        } catch (error) {
-            console.error('Error fetching results: ', error);
-        }
-    }
-    React.useEffect(()=>{
-        fetchPatientResults();
-    }, []);
+   
     return(
-        <View>
-        {assessmentData.map((assessment, index) => (
         <View style={styles.displayCard}>
-            <Text style={{marginBottom: 6}}>{assessment.date && assessment.date.toDate().toString()}</Text>
+            <Text style={{marginBottom: 6}}>October 8, 2023</Text>
             <Divider color='black'/>
             <View>
                 <View>
                     <Text>Notes</Text>
                     <Text>•Physical Data</Text>
-                
+                    {assessmentList.map((data, index) => (
+                        <Text key={index}>{data}</Text>
+                    ))}
                 </View>
                 <View style={{display:'flex', justifyContent:'flex-end', alignContent:'flex-end', alignItems:'flex-end'}}>
                     <TouchableOpacity style={{flexDirection:'row', alignItems:'center'}}>
@@ -58,11 +33,10 @@ const AssessmentCard = () => {
                 </View>
             </View>
         </View>
-        ))}
-        </View>
-    )
+      
+    );
 
-}
+};
 
 const PatientAssessment = ({ route }) => {
 
@@ -72,6 +46,36 @@ const PatientAssessment = ({ route }) => {
     const handleList = () => {
         navigation.navigate('Exercises');
     }
+
+    const { userData, updateUser } = useUserContext();
+    const trimmedUid = userData?.uid.trim();
+    const [assessmentData, setAssessmentData] = React.useState([]);
+    const [assessmentList, setAssessmentList] = React.useState([]);
+
+    const fetchPatientResults = async () =>{
+        try {
+            const querySnapshot = await firestore()
+              .collection('assessments')
+              .where('doctor', '==', trimmedUid)
+              .get();
+
+             const assessments = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                assessmentData = data.physicalData || []
+                assessments.push(data);
+            });
+
+        // Store the assessment data in state for use in the component
+        setAssessmentList(assessments);
+        console.log(assessmentList);
+        } catch (error) {
+            console.error('Error fetching results: ', error);
+        }
+    }
+    React.useEffect(()=>{
+        fetchPatientResults();
+    }, []);
 
     return(
         <View style={styles.container}>
@@ -84,10 +88,11 @@ const PatientAssessment = ({ route }) => {
                     </View>
                 </TouchableOpacity>
             </View>
-            <AssessmentCard/>
+            {assessmentList.map((item, index) => (
+                 <AssessmentCard key={index} {...item} />
+            ))}
         </View>
     )
-
 }
 
 const styles = StyleSheet.create({
