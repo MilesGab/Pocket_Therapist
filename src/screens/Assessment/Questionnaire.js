@@ -134,6 +134,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
 
       <View style={styles.top}>
         <ProgressBar progress={progress / 100} color="#f9bc27" />
+
         {isPainAssessment ? (
           <View>
             <Text style={styles.question}>
@@ -215,11 +216,10 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
           <Text style={styles.question}>{questions[currentQuestion]}</Text>
         )}
       </View>
-      {/* Display physical assessment questions or image picker buttons */}
+
       {currentQuestion !== questions.length - 1 ? (
-        // Display physical assessment questions
         <View>
-           {isPainAssessment ? null : ( // Conditionally render the "YES" and "NO" buttons
+          {isPainAssessment ? null : (
             <React.Fragment>
               <TouchableOpacity onPress={() => handleNextQuestion('YES')} style={styles.ansButton}>
                 <Text style={styles.ansButtonText}>YES</Text>
@@ -257,7 +257,6 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         <Image source={{ uri: selectedImage.uri }} style={styles.selectedImage} />
       )}
 
-      {/* Navigation buttons (BACK, NEXT, Proceed to Pain Assessment) */}
       <View style={styles.bottom}>
         <TouchableOpacity
           onPress={isPainAssessment ? 
@@ -305,7 +304,6 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         )}
       </View>
 
-      {/* Toggle button for switching between Physical Inspection and Pain Assessment */}
       <TouchableOpacity
         onPress={() => setIsPainAssessment(!isPainAssessment)}
         style={styles.toggleButton}

@@ -1,3 +1,4 @@
+import { firebase } from '@react-native-firebase/auth';
 import { Divider } from '@react-native-material/core';
 
 import { useNavigation } from '@react-navigation/native';
@@ -6,19 +7,23 @@ import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useUserContext } from '../../../../contexts/UserContext';
+import firestore from '@react-native-firebase/firestore';
 
 
 const AssessmentCard = () => {
-
+   
     return(
         <View style={styles.displayCard}>
-            <Text style={{marginBottom: 6}}>{'October 5, 2023'}</Text>
+            <Text style={{marginBottom: 6}}>October 8, 2023</Text>
             <Divider color='black'/>
             <View>
                 <View>
                     <Text>Notes</Text>
-                    <Text>•Discoloration is present</Text>
-                    <Text>•Pain has been going on for the past few weeks</Text>
+                    <Text>•Physical Data</Text>
+                    {assessmentList.map((data, index) => (
+                        <Text key={index}>{data}</Text>
+                    ))}
                 </View>
                 <View style={{display:'flex', justifyContent:'flex-end', alignContent:'flex-end', alignItems:'flex-end'}}>
                     <TouchableOpacity style={{flexDirection:'row', alignItems:'center'}}>
@@ -27,11 +32,11 @@ const AssessmentCard = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-
         </View>
-    )
+      
+    );
 
-}
+};
 
 const PatientAssessment = ({ route }) => {
 
@@ -41,6 +46,36 @@ const PatientAssessment = ({ route }) => {
     const handleList = () => {
         navigation.navigate('Exercises');
     }
+
+    const { userData, updateUser } = useUserContext();
+    const trimmedUid = userData?.uid.trim();
+    const [assessmentData, setAssessmentData] = React.useState([]);
+    const [assessmentList, setAssessmentList] = React.useState([]);
+
+    const fetchPatientResults = async () =>{
+        try {
+            const querySnapshot = await firestore()
+              .collection('assessments')
+              .where('doctor', '==', trimmedUid)
+              .get();
+
+             const assessments = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                assessmentData = data.physicalData || []
+                assessments.push(data);
+            });
+
+        // Store the assessment data in state for use in the component
+        setAssessmentList(assessments);
+        console.log(assessmentList);
+        } catch (error) {
+            console.error('Error fetching results: ', error);
+        }
+    }
+    React.useEffect(()=>{
+        fetchPatientResults();
+    }, []);
 
     return(
         <View style={styles.container}>
@@ -53,10 +88,11 @@ const PatientAssessment = ({ route }) => {
                     </View>
                 </TouchableOpacity>
             </View>
-            <AssessmentCard/>
+            {assessmentList.map((item, index) => (
+                 <AssessmentCard key={index} {...item} />
+            ))}
         </View>
     )
-
 }
 
 const styles = StyleSheet.create({

@@ -17,7 +17,7 @@ const InformationSection = (props) => {
   const [date, setDate] = React.useState(userData?.dateOfBirth);
   
   const timestamp = new Date(
-     date.seconds * 1000 + date.nanoseconds / 1000000
+     date?.seconds * 1000 + date?.nanoseconds / 1000000
   );
 
   const formattedDate = timestamp.toLocaleDateString('en-US', {
@@ -179,7 +179,7 @@ const EditSection = (props) => {
   };
 
   const timestamp = new Date(
-    date.seconds * 1000 + date.nanoseconds / 1000000
+    date?.seconds * 1000 + date?.nanoseconds / 1000000
  );
 
   const formattedDate = timestamp.toLocaleDateString('en-US', {
