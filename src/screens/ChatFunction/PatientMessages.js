@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
+import { Bubble, GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
@@ -75,7 +75,7 @@ export default function PatientMessages() {
       // setMessages(messages);
   
       const chatRef = firestore().collection('messages');
-      chatRef.where('sendTo', 'in', [doctorId, trimmedUid])
+      chatRef.where('sendTo', 'in', [trimmedUid])
              .where('user._id', 'in', [doctorId, trimmedUid])
              .orderBy('createdAt', 'desc')
              .onSnapshot((snapshot) => {
@@ -86,7 +86,7 @@ export default function PatientMessages() {
                      _id: change.doc.id,
                      user: messageData.user,
                      text: messageData.text,
-                     createdAt: messageData?.createdAt.toDate(),
+                     createdAt: messageData?.createdAt?.toDate() || new Date(),
                    };
                    setMessages((prevMessages) => {
                     if (prevMessages.some((message) => message._id === newMessage._id)) {
@@ -152,6 +152,22 @@ export default function PatientMessages() {
     );
   };
 
+  const renderBubble = (props) => {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          right: {
+            backgroundColor: '#3A97F9',
+          },
+          left: {
+            backgroundColor: 'white',
+          },
+        }}
+      />
+    );
+  };
+
   const handleCall = () => {
     navigation.navigate('VoiceChat');
   }
@@ -208,6 +224,7 @@ export default function PatientMessages() {
             user={{ _id: trimmedUid }}
             renderSend={(props) => renderSend(props)}
             renderInputToolbar={(props) => customInputToolbar(props)}
+            renderBubble={(props) => renderBubble(props)} // Pass the custom renderBubble function here
             alwaysShowSend={true}
           />
         </View>

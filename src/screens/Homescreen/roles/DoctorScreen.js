@@ -108,8 +108,11 @@ const DoctorScreen = ({ navigation }) => {
       );
     
     const formattedDate = timestamp.toLocaleDateString('en-US', {
-        weekday: 'long',
         day: '2-digit',
+      });
+
+    const formattedDay = timestamp.toLocaleDateString('en-US', {
+        weekday: 'short',
       });
 
     const formattedTime = timestamp.toLocaleTimeString('en-US', {

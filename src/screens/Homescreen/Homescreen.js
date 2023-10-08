@@ -12,6 +12,10 @@ import DoctorScreen from './roles/DoctorScreen';
 const HomeScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
 
+  React.useEffect(()=>{
+    console.log('Hi my role is: ', userData?.role)
+  }, []);
+
   return (
     <>
       {userData?.role === 0 ? (

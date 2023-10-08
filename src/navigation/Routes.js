@@ -47,8 +47,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             }}
             style={styles.tabItemContainer}
           >
-            {options.tabBarIcon({ color: isFocused ? '#007bff' : '#ccc', size: 30 })}
-            <Text style={[styles.tabLabel, { color: isFocused ? '#007bff' : '#ccc' }]}>
+            {options.tabBarIcon({ color: isFocused ? '#4d8ebf' : '#ccc', size: 30 })}
+            <Text style={[styles.tabLabel, { color: isFocused ? '#4d8ebf' : '#ccc' }]}>
               {label}
             </Text>
           </TouchableOpacity>
