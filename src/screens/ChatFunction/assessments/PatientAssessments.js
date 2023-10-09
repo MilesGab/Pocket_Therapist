@@ -4,26 +4,35 @@ import { Divider } from '@react-native-material/core';
 import { useNavigation } from '@react-navigation/native';
 
 import React from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useUserContext } from '../../../../contexts/UserContext';
 import firestore from '@react-native-firebase/firestore';
 
 
-const AssessmentCard = () => {
+const AssessmentCard = ( item ) => {
    
+    const timestamp = new Date(
+        item.date.seconds * 1000 + item.date.nanoseconds / 1000000
+      );
+    
+      const formattedDate = timestamp.toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric' 
+      });
+
     return(
         <View style={styles.displayCard}>
-            <Text style={{marginBottom: 6}}>October 8, 2023</Text>
+            <Text style={{marginBottom: 6}}>{formattedDate}</Text>
             <Divider color='black'/>
             <View>
                 <View>
                     <Text>Notes</Text>
                     <Text>•Physical Data</Text>
-                    {assessmentList.map((data, index) => (
+                    {/* {assessmentList.map((data, index) => (
                         <Text key={index}>{data}</Text>
-                    ))}
+                    ))} */}
+                    <Text>{item.phyiscalData[1]}</Text>
                 </View>
                 <View style={{display:'flex', justifyContent:'flex-end', alignContent:'flex-end', alignItems:'flex-end'}}>
                     <TouchableOpacity style={{flexDirection:'row', alignItems:'center'}}>
@@ -48,31 +57,31 @@ const PatientAssessment = ({ route }) => {
     }
 
     const { userData, updateUser } = useUserContext();
-    const trimmedUid = userData?.uid.trim();
-    const [assessmentData, setAssessmentData] = React.useState([]);
+    const trimmedUid = patientData?.trim();
     const [assessmentList, setAssessmentList] = React.useState([]);
 
-    const fetchPatientResults = async () =>{
+    const fetchPatientResults = async () => {
         try {
             const querySnapshot = await firestore()
-              .collection('assessments')
-              .where('doctor', '==', trimmedUid)
-              .get();
+            .collection("assessments")
+            .where("patient", "==", trimmedUid)
+            .get();
 
-             const assessments = [];
+            const assessments = [];
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                assessmentData = data.physicalData || []
                 assessments.push(data);
             });
 
-        // Store the assessment data in state for use in the component
-        setAssessmentList(assessments);
-        console.log(assessmentList);
+            setAssessmentList(assessments);
+
         } catch (error) {
             console.error('Error fetching results: ', error);
+        } finally {
+            console.log(assessmentList);
         }
     }
+
     React.useEffect(()=>{
         fetchPatientResults();
     }, []);
@@ -88,9 +97,15 @@ const PatientAssessment = ({ route }) => {
                     </View>
                 </TouchableOpacity>
             </View>
-            {assessmentList.map((item, index) => (
-                 <AssessmentCard key={index} {...item} />
-            ))}
+            <FlatList
+                horizontal={false}
+                data={assessmentList}
+                keyExtractor={(item) => item.uid}
+                renderItem={({ item }) => (
+                    <AssessmentCard {...item} />
+                )}
+                showsVerticalScrollIndicator={false} 
+            />
         </View>
     )
 }
@@ -106,7 +121,8 @@ const styles = StyleSheet.create({
     displayCard:{
         backgroundColor: 'white',
         padding: 12,
-        borderRadius: 6
+        borderRadius: 6,
+        marginBottom: 12
     },
 
     videoContainer:{
