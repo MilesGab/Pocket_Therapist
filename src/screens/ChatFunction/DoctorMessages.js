@@ -103,7 +103,6 @@ const DoctorMessages = ({navigation}) => {
     }
 
     const handleAssessments = (userid) => {
-     console.log(userid);
      navigation.navigate('PatientAssessment', {patientData: userid});
     }
 

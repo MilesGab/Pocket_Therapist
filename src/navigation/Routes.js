@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/Homescreen/Homescreen.js';
 import Schedule from '../screens/Schedule.js';
 import Notifications from '../screens/Notifications/Notifications.js';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
@@ -18,6 +17,10 @@ import VoiceChat from '../screens/ChatFunction/call/VoiceChat.js';
 import Media from '../screens/Media.js';
 import PatientAssessment from '../screens/ChatFunction/assessments/PatientAssessments.js';
 import Exercises from '../screens/ChatFunction/assessments/Exercises.js';
+import AssessmentPage from '../screens/ChatFunction/assessments/AssessmentPage.js';
+import PatientScreen from '../screens/Homescreen/roles/PatientScreen.js';
+import DoctorScreen from '../screens/Homescreen/roles/DoctorScreen.js';
+import PatientSearch from '../screens/Homescreen/roles/components/SearchPatient.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -47,8 +50,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             }}
             style={styles.tabItemContainer}
           >
-            {options.tabBarIcon({ color: isFocused ? '#007bff' : '#ccc', size: 30 })}
-            <Text style={[styles.tabLabel, { color: isFocused ? '#007bff' : '#ccc' }]}>
+            {options.tabBarIcon({ color: isFocused ? '#4d8ebf' : '#ccc', size: 30 })}
+            <Text style={[styles.tabLabel, { color: isFocused ? '#4d8ebf' : '#ccc' }]}>
               {label}
             </Text>
           </TouchableOpacity>
@@ -67,7 +70,7 @@ function MyTabs() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStack}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Icon name="home-outline" color={color} size={size} />,
@@ -117,6 +120,45 @@ function MyTabs() {
   );
 }
 
+const HomeStack = () => {
+  const { userData, updateUser } = useUserContext();
+
+  useEffect(() => {
+    if (userData) {
+      if (userData.role === 0) {
+        console.log('Homescreen accessed as patient');
+      } else if (userData.role === 1) {
+        console.log('Homescreen accessed as doctor');
+      }
+    }
+  }, [userData]);
+
+return (
+  <Stack.Navigator>
+    {userData?.role === 0 ? (
+      <Stack.Screen
+        name="PatientHomescreen"
+        component={PatientScreen}
+        options={{headerShown: false, initialParams: { role: 0 } }}
+      />
+    ) : (
+      <Stack.Screen
+        name="DoctorHomescreen"
+        component={DoctorScreen} // Use the imported component
+        options={{headerShown: false, initialParams: { role: 1 } }} // role 1 is for doctors
+      />
+    )}
+
+  <Stack.Screen 
+    name="PatientSearch"
+    component={PatientSearch}
+    options={{headerShown: false}}
+    />
+
+  </Stack.Navigator>
+);
+};
+
 const MessageStack = () => {
   const { userData, updateUser } = useUserContext();
   useEffect(() => {
@@ -153,9 +195,8 @@ return (
           backgroundColor:'#DCEDF9',
           height: 80
         },
-    }
-    )
-  } 
+      })
+    } 
     />
     <Stack.Screen 
     name="VoiceChat"
@@ -174,6 +215,12 @@ return (
     component={Exercises}
     options={{headerShown: false}}
     />
+
+    <Stack.Screen 
+    name="AssessmentPage"
+    component={AssessmentPage}
+    options={{headerShown: false}}
+    />
   </Stack.Navigator>
 );
 };
@@ -185,10 +232,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingTop: 10,
-    borderRadius: 32,
-    marginHorizontal: 12,
-    marginBottom: 12,
-    elevation: 4,
   },
   tabItemContainer: {
     alignItems: 'center',
