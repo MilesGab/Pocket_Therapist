@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, SafeAreaView, TouchableOpacity, StatusBar, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { StyleSheet, Text, View, TextInput, SafeAreaView, TouchableOpacity, StatusBar, TouchableWithoutFeedback, Keyboard, Image } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from "../../contexts/UserContext";
-const backImage = require("../../assets/images/pt_icon.png");
 
 
 export default function Login({ navigation }) {
@@ -52,15 +51,18 @@ export default function Login({ navigation }) {
   };
   
   return (
+    
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
-        <View style={styles.image_container}/>
         <View style={styles.whiteSheet} />
         <SafeAreaView style={styles.form}>
           <Toast
             position='bottom'
             bottomOffset={50}
           />
+        <View style= {styles.logopos}>
+          <Image source={require('../assets/images/app_icon.png')} style={styles.image} />
+        </View>
           <Text style={styles.title}>Log In</Text>
         <TextInput
           style={styles.input}
@@ -102,6 +104,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#65A89F",
   },
+
   title: {
     fontSize: 36,
     fontWeight: 'bold',
@@ -110,11 +113,19 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
 
-  avtrpos: {
-    marginTop: 10,
-    alignItems: 'center'
+  logopos: {
+    alignSelf: 'center',
+    width: 150,
+    height: 150,
   },
-  
+
+  image:{
+    alignSelf: 'center',
+    marginTop: 20,
+    height:110,
+    width:120,
+  },
+
   input: {
     backgroundColor: "#F6F7FB",
     height: 58,
@@ -123,21 +134,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
   },
-  image_container: {
-    // backgroundColor: 'blue',
-    // height: 400,
-    // alignItems: 'center',
-    // justifyContent: 'center',
-  },
-  // backImage: {6fa8dc
-  //   display: 'flex',
-  //   alignItems: 'center',   // Center horizontally
-  //   justifyContent: 'center',   // Center vertically
-  //   width: 160,
-  //   height: 150,
-  //   top: 16,
-  //   resizeMode: 'cover',
-  // },
+
   whiteSheet: {
     shadowColor: '#171717',
     shadowOffset: {width: -2, height: 4},
@@ -151,11 +148,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 60,
     borderTopRightRadius: 60,
   },
+
   form: {
     flex: 1,
     justifyContent: 'center',
     marginHorizontal: 40,
   },
+
   button: {
     backgroundColor: '#65A89F',
     height: 58,

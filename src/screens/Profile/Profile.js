@@ -114,8 +114,8 @@ const EditSection = (props) => {
   const userLastName = '' + userData?.lastName;
   const userEmail = '' + userData?.email;
   const userContact = '' + userData?.contact;
-  const userPic = '' + userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png';
-
+  const userPic = '' + userData?.profilePictureURL
+  
   //Edit Values
   const [firstName, setFirstName] = React.useState(userFirstName);
   const [lastName, setLastName] = React.useState(userLastName);
@@ -353,7 +353,7 @@ return (
         {/* Footer Section */}
         <View style={{justifyContent:'center', alignContent:'center', alignItems:'center', marginTop: 20}}>
           {isEditMode ? (null) : (
-            <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'orange', borderRadius: 14, padding:12}}>
+            <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'#65A89F', borderRadius: 14, padding:12}}>
               <Text style={{textAlign:'center', color:'white', fontSize:26, fontWeight:'500'}}>Log Out</Text>
             </TouchableOpacity>
           )}
@@ -366,11 +366,16 @@ return (
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#CEDDF7',
+    backgroundColor: '#65A89F',
     flex: 1,
     justifyContent: 'center',
     paddingTop: StatusBar.currentHeight,
     height: 950
+  },
+
+  avtrpos:{
+    marginTop: 10,
+    alignItems: 'center'
   },
 
   whiteSheet: {
@@ -412,7 +417,7 @@ const styles = StyleSheet.create({
   infoTxt:{
     paddingTop: 20, 
     fontSize: 14, 
-    color: '#5b88b0', 
+    color: '#65A89F', 
     textAlign: 'left',
 
   },

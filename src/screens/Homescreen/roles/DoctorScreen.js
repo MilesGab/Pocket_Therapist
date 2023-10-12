@@ -8,8 +8,17 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
 import messaging from '@react-native-firebase/messaging';
+import DoctorMessages from '../../ChatFunction/DoctorMessages';
 
 const DoctorScreen = ({ navigation }) => {
+  
+  const { userData, updateUser } = useUserContext();
+  const trimmedUid = userData?.uid.trim();
+  const [selectedId, setSelectedId] = React.useState();
+  const [appointmentList, setAppointmentList] = React.useState([]);
+  const [appointmentsCount, setAppointmentsCount] = React.useState(0); 
+  const [patientCount, setPatientCount] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
 
   const requestUserPermission = async () =>{
     const authStatus = await messaging().requestPermission();
@@ -36,36 +45,73 @@ const DoctorScreen = ({ navigation }) => {
   {/* started app after tapping notif */}
     messaging().getInitialNotification().then( async (remoteMessage) => {if (remoteMessage) {
       console.log('Notification caused app to open from quit state:', remoteMessage.notification);
-        }
+      if(userData?.role === 0){
+        navigation.navigate('DoctorMessaging');
+        }else{
+  
+        }    
+    }
       setLoading(false);
     });
+
   {/* opened after tapping notif */}
-    messaging().onNotificationOpenedApp( async (remoteMessage) => {
-      console.log('Notification caused app to open from background state:',remoteMessage.notification);
-      navigation.navigate(remoteMessage.data.type);
+    messaging().onNotificationOpenedApp(async (remoteMessage) => {
+      console.log('Notification caused app to open from background state:', remoteMessage.notification);
+    
+      if (userData?.role === 0) {
+        // Assuming fetchLatestMessagesData() is a function that retrieves the latest messages data
+        const latestMessagesData = await fetchLatestMessagesData();
+        
+        navigation.navigate('DoctorMessaging', { latestMessagesData });
+      } else {
+        // Handle navigation for other roles if needed
+      }
     });
+  
 
   {/* notif whilst app in background */}
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
-    });
+messaging().onNotificationOpenedApp(async (remoteMessage) => {
+  console.log('Notification caused app to open from background state:', remoteMessage.notification);
+
+  if (userData?.role === 0) {
+    // Assuming fetchLatestMessagesData() is a function that retrieves the latest messages data
+    const latestMessagesData = await fetchLatestMessagesData();
+    
+    navigation.navigate('DoctorMessaging', { latestMessagesData });
+  } else {
+    // Handle navigation for other roles if needed
+  }
+});
+
   
   {/* notif whilst inside the app */}
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+            if(userData?.role === 0){
+      navigation.navigate('DoctorMessaging');
+      }else{
+
+      }
     });
     return unsubscribe;  
   }, [])
-  
-  const { userData, updateUser } = useUserContext();
-  const trimmedUid = userData?.uid.trim();
-  
-  const [selectedId, setSelectedId] = React.useState();
-  const [appointmentList, setAppointmentList] = React.useState([]);
-  const [appointmentsCount, setAppointmentsCount] = React.useState(0); 
-  const [patientCount, setPatientCount] = React.useState(0);
 
-  const [loading, setLoading] = React.useState(true);
+    const fetchLatestMessagesData = async () => {
+      try {
+        const messagesRef = firestore().collection('messages');
+        const querySnapshot = await messagesRef.orderBy('timestamp', 'desc').limit(10).get();
+
+        const latestMessages = [];
+        querySnapshot.forEach((doc) => {
+          latestMessages.push(doc.data());
+        });
+
+        return latestMessages;
+      } catch (error) {
+        console.error('Error fetching latest messages:', error);
+        return [];
+      }
+    };
 
   const countPatients = async () => {
     try{

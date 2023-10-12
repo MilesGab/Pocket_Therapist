@@ -104,7 +104,7 @@ export default function Register({ navigation }) {
           <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}>Sign Up</Text>
         </TouchableOpacity>
         <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
-          <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Alreadt have an accout? </Text>
+          <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Already have an accout? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text style={{color: '#65A89F', fontWeight: '600', fontSize: 14}}> Sign In</Text>
           </TouchableOpacity>
@@ -136,21 +136,6 @@ const styles = StyleSheet.create({
     padding: 12,
     borderBottomWidth: 0.5
   },
-  image_container: {
-    // backgroundColor: 'blue',
-    // height: 400,
-    // alignItems: 'center',
-    // justifyContent: 'center',
-  },
-  // backImage: {
-  //   display: 'flex',
-  //   alignItems: 'center',   // Center horizontally
-  //   justifyContent: 'center',   // Center vertically
-  //   width: 160,
-  //   height: 150,
-  //   top: 16,
-  //   resizeMode: 'cover',
-  // },
   whiteSheet: {
     shadowColor: '#171717',
     shadowOffset: {width: -2, height: 4},

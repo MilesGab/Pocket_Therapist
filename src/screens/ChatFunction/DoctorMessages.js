@@ -3,10 +3,6 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList, Text, Image, TouchableWithoutFeedback } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-
-import Sana from '../../assets/images/user1.png';
-import Kim from '../../assets/images/user2.png';
-
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ActivityIndicator, Avatar} from "@react-native-material/core";
 import { useUserContext } from '../../../contexts/UserContext';
