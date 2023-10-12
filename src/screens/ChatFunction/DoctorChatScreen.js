@@ -6,8 +6,7 @@ import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useUserContext } from '../../../contexts/UserContext';
 import firestore from '@react-native-firebase/firestore';
-
-
+import { requestUserPermission, NotificationListener } from '../../notifications';
 import { useRoute } from '@react-navigation/native';
 
 export default function DoctorChatScreen({ route }) {

@@ -13,7 +13,6 @@ import { ActivityIndicator } from "@react-native-material/core";
 
 const PatientScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
-
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);

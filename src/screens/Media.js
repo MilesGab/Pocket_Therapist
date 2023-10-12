@@ -79,15 +79,15 @@ const Media = () => {
         {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
         {video && <Video source={{ uri: video }} style={{ width: 200, height: 200 }} />}
     
-        {!image && <Button title="Select Image" onPress={pickImage} />}
-        {(!image && !video) && <Button title="Select Video" onPress={pickVideo} />}
+        {!video && <Button title="Select Image" onPress={pickImage} />}
+        {!image && <Button title="Select Video" onPress={pickVideo} />}
     
         <Button title="Upload Image" onPress={uploadImage} disabled={!image || uploading} />
         <Button title="Upload Video" onPress={uploadVideo} disabled={!video || uploading} />
-
+    
         {image && <Button title="Unselect Image" onPress={unselectImage} />}
         {video && <Button title="Unselect Video" onPress={unselectVideo} />}
-        </View>
+      </View>
     );
   }
 
