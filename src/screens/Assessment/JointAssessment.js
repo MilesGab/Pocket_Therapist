@@ -42,7 +42,7 @@ const WristAngleSensor = (props) =>{
 
       <View style={styles.circle}>
         <View>
-          <Text style={{textAlign: 'center'}}>
+          <Text style={{textAlign: 'center', color:'black'}}>
             Wrist: {toDegrees(pitch)}°
           </Text>
         </View>

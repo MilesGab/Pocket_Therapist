@@ -62,24 +62,24 @@ const Results = ({ painData, phyiscalData }) => {
                 <Text style={{fontSize:32, color:'black', fontWeight:'bold'}}>Results</Text>
             </View>
             <View style={styles.physicalResults}>
-                <Text>Physical Assessment</Text>
+                <Text style={{color:'black'}} >Physical Assessment</Text>
                 {questions.map((question, index) => (
-                    <Text key={question}>
+                    <Text style={{color:'black'}} key={question}>
                         {question} {phyiscalData[index] || '---'}
                     </Text>
                 ))}
             </View>
             <View style={styles.painResults}>
-                <Text>Pain Assessment</Text>
+                <Text style={{color:'black'}} >Pain Assessment</Text>
                 {painAssessmentQuestions.map((question, index) => (
-                    <Text key={question}>
+                    <Text style={{color:'black'}} key={question}>
                         {question}: {painData[index] || '---'}
                     </Text>
                 ))}
             </View>
             <View style={styles.wristResults}>
-                <Text>Range of Motion Assessment</Text>
-                <Text>Max wrist flexion: {maxAngle || '---'} </Text>
+                <Text style={{color:'black'}} >Range of Motion Assessment</Text>
+                <Text style={{color:'black'}} >Max wrist flexion: {maxAngle || '---'} </Text>
             </View>
             <View style={styles.decisionButtons}>
                 <Button onPress={handleReturn} title="Retake Assessment"/>
