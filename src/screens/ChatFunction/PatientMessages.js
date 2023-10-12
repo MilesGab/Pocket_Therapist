@@ -14,6 +14,7 @@ import firestore from '@react-native-firebase/firestore';
 export default function PatientMessages() {
   const [messages, setMessages] = useState([]);
   const [doctorData, setDoctor] = React.useState({});
+  const [appointmentState, setAppointmentState] = React.useState(false);
   const { userData } = useUserContext();
   const trimmedUid = userData.uid.trim();
   const doctorId = userData.doctor.trim();
@@ -75,7 +76,7 @@ export default function PatientMessages() {
       // setMessages(messages);
   
       const chatRef = firestore().collection('messages');
-      chatRef.where('sendTo', 'in', [trimmedUid])
+      chatRef.where('sendTo', 'in', [trimmedUid, doctorId])
              .where('user._id', 'in', [doctorId, trimmedUid])
              .orderBy('createdAt', 'desc')
              .onSnapshot((snapshot) => {
@@ -224,7 +225,7 @@ export default function PatientMessages() {
             user={{ _id: trimmedUid }}
             renderSend={(props) => renderSend(props)}
             renderInputToolbar={(props) => customInputToolbar(props)}
-            renderBubble={(props) => renderBubble(props)} // Pass the custom renderBubble function here
+            renderBubble={(props) => renderBubble(props)}
             alwaysShowSend={true}
           />
         </View>
@@ -303,6 +304,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 20,
+    height: 'auto'
 
   },
 

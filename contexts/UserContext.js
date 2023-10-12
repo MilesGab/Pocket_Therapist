@@ -31,8 +31,17 @@ export function UserProvider({ children }) {
     }
   };
 
+  const logout = async () => {
+    try {
+      await AsyncStorage.removeItem('userData'); // Remove user data from AsyncStorage
+      setUserData(null); // Clear the user data in the state
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ userData, updateUser }}>
+    <UserContext.Provider value={{ userData, updateUser, logout }}>
       {children}
     </UserContext.Provider>
   );

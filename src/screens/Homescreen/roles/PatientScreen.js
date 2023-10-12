@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
-import { Avatar, IconButton, Box } from "@react-native-material/core";
+import { Avatar, IconButton, Box, Divider } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
@@ -17,7 +17,7 @@ const PatientScreen = ({ navigation }) => {
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);
 
-  const trimmedUid = userData.doctor;
+  const trimmedUid = userData?.uid.trim();
 
   React.useEffect(() => {
     setLoading(true);
@@ -25,6 +25,7 @@ const PatientScreen = ({ navigation }) => {
       try {
         const appointmentsSnapshot = await firestore()
           .collection('appointments')
+          .where('patient_assigned', '==', trimmedUid)
           .limit(1)
           .get();
 
@@ -45,9 +46,9 @@ const PatientScreen = ({ navigation }) => {
             
             return {
               ...appointmentData,
-              doctorName: doctorData.lastName,
-              doctorPhoto: doctorData.profilePictureURL,
-              patientName: patientData.firstName,
+              doctorName: doctorData?.lastName,
+              doctorPhoto: doctorData?.profilePictureURL,
+              patientName: patientData?.firstName,
             };
           })
         );
@@ -63,7 +64,7 @@ const PatientScreen = ({ navigation }) => {
     fetchAppointments();
   }, []);
 
-const Item = ({item, onPress, backgroundColor, textColor}) => {
+const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
   const timestamp = new Date(
       item.date.seconds * 1000 + item.date.nanoseconds / 1000000
@@ -233,7 +234,9 @@ const LatestResults = () =>{
   const { userData, updateUser } = useUserContext();
   const [dataList, setDataList] = React.useState({});
   const [isLoading, setLoading] = React.useState(false);
-  
+  const trimmedUid = userData?.uid.trim();
+
+
   const resultsMap = [
     'YES'
   ];
@@ -247,6 +250,7 @@ const LatestResults = () =>{
     try {
       const assessmentsSnapshot = await firestore()
         .collection('assessments')
+        .where('patient', '==', trimmedUid)
         .orderBy('date', 'desc')
         .limit(1)
         .get();
@@ -263,24 +267,26 @@ const LatestResults = () =>{
   };
 
   const timestamp = new Date(
-    dataList.date?.seconds * 1000 + dataList.date?.nanoseconds / 1000000
+    dataList?.date?.seconds * 1000 + dataList?.date?.nanoseconds / 1000000
   );
 
   const formattedDate = timestamp.toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric' 
   });
 
+  const outputDate = formattedDate !== 'Invalid Date' ? formattedDate : '';
+
   return(
     <View style={styles.stats}>
-      <Box w={'100%'} h={'100%'} style={{ backgroundColor: "rgba(174, 223, 247, 0.7)", borderRadius: 8 }}>
+      <Box w={'100%'} h={'100%'} style={{ backgroundColor: "rgba(174, 223, 247, 0.7)", borderRadius: 20 }}>
           <Box style={{padding: 16, paddingHorizontal: 20, display: 'flex', flexDirection: 'row'}}>
             <Box style={{flex: 1}}>
-              <Box style={{display:'flex', flexDirection:'row'}}>
-                <Text style={{fontFamily: 'Nunito Sans', fontWeight:'bold', fontSize: 20, color: 'black', flex:1}}>Recent Assessment</Text>
+              <Box style={{display:'flex', flexDirection:'row', marginBottom: 20}}>
+                <Text style={{fontFamily: 'Nunito Sans', fontWeight:'bold', fontSize: 20, color: 'black', flex:1}}>Last Assessment</Text>
                 {isLoading ? (
                   <Text>Getting date...</Text>
                 ) : (
-                  <Text>{formattedDate}</Text>
+                  <Text>{outputDate}</Text>
                 )}
               </Box>
               {isLoading ? (
@@ -290,23 +296,32 @@ const LatestResults = () =>{
                 </View>
               ) : (
                 <>
-                  <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black', marginBottom: 12}}>These are your latest test results: </Text>
-                  <Box style={{display:'flex', flexDirection:'row'}}>
-                    <Box style={{flexDirection:'column', flex:1}}>
-                      <Text>Physical Assessment</Text>
-                      {dataList.phyiscalData?.map((item, index) => (
-                        <Text key={index}>{item || ''}</Text>
-                      ))}
-                    </Box>
-                    <Box style={{flexDirection:'column'}}>
-                      <Text>Pain Assessment</Text>
-                      {dataList.painData?.map((item, index) => (
-                        <Text key={index}>{item || ''}</Text>
-                      ))}
-                    </Box>
-                  </Box>
-                  <Text>Range of Motion</Text>
-                  <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black'}}>Max wrist flexion: {dataList.maxAngle}°</Text>
+                  <View style={{marginBottom: 60}}>
+                    <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black', marginBottom: 12}}>Maximum wrist range of motion:</Text>
+                    <Text style={{fontSize: 32, fontWeight:'bold'}}>{dataList.maxAngle}°</Text>
+                  </View>
+                  {dataList && dataList.painData ? (
+                  <View style={{display:'flex', flexDirection:'row', borderTopWidth: 1, justifyContent:'space-around'}}>
+                    <View style={{borderRightWidth: 1, paddingHorizontal: 4,minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>VAS Score</Text>
+                      <Text>{dataList?.painData[0]}</Text>
+                    </View>
+                    <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>Pain</Text>
+                      <Text>{dataList?.painData[1]}</Text>
+                    </View>
+                    <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>Warm?</Text>
+                      <Text>{dataList?.phyiscalData[3]}</Text>
+                    </View>
+                    <View style={{paddingHorizontal: 4, minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>VAS Score</Text>
+                      <Text>6</Text>
+                    </View>
+                  </View>
+                  ) : (
+                    null
+                  )}
                 </>
               )}
             </Box>
@@ -341,7 +356,8 @@ const styles = StyleSheet.create({
   },
 
   services: {
-    marginBottom: 16
+    marginBottom: 16,
+    paddingHorizontal: 16
   },
 
   servicesText: {
