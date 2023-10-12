@@ -18,6 +18,7 @@ import VoiceChat from '../screens/ChatFunction/call/VoiceChat.js';
 import Media from '../screens/Media.js';
 import PatientAssessment from '../screens/ChatFunction/assessments/PatientAssessments.js';
 import Exercises from '../screens/ChatFunction/assessments/Exercises.js';
+import AssessmentPage from '../screens/ChatFunction/assessments/AssessmentPage.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -174,6 +175,12 @@ return (
     component={Exercises}
     options={{headerShown: false}}
     />
+
+    <Stack.Screen 
+    name="AssessmentPage"
+    component={AssessmentPage}
+    options={{headerShown: false}}
+    />
   </Stack.Navigator>
 );
 };
@@ -185,10 +192,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingTop: 10,
-    borderRadius: 32,
-    marginHorizontal: 12,
-    marginBottom: 12,
-    elevation: 4,
   },
   tabItemContainer: {
     alignItems: 'center',
