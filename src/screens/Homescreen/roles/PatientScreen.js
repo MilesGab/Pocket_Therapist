@@ -13,7 +13,6 @@ import { ActivityIndicator } from "@react-native-material/core";
 
 const PatientScreen = ({ navigation }) => {
   const { userData, updateUser } = useUserContext();
-
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);
@@ -64,28 +63,28 @@ const PatientScreen = ({ navigation }) => {
     fetchAppointments();
   }, []);
 
-  const Item = ({item, onPress, backgroundColor, textColor}) => {
-    
-    const timestamp = new Date(
-        item.date.seconds * 1000 + item.date.nanoseconds / 1000000
-      );
-    
-    const formattedDate = timestamp.toLocaleDateString('en-US', {
-        month: 'long',
-        weekday: 'long',
-        day: '2-digit',
-      });
+const Item = ({item, onPress, backgroundColor, textColor}) => {
+  
+  const timestamp = new Date(
+      item.date.seconds * 1000 + item.date.nanoseconds / 1000000
+    );
+  
+  const formattedDate = timestamp.toLocaleDateString('en-US', {
+      month: 'long',
+      weekday: 'long',
+      day: '2-digit',
+    });
 
-    const formattedTime = timestamp.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true,
-      });
+  const formattedTime = timestamp.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    });
 
-    return(
-        <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
+  return(
+      <View style={[styles.item, {backgroundColor}]}>
         <View style={{display: 'flex', flexDirection: 'row', justifyContent:'flex-start', paddingHorizontal: 12, paddingVertical: 18,gap: 12}}>
-            <Box style={{borderRadius: 20, paddingVertical: 8, paddingLeft:12}}>
+            <Box style={{borderRadius: 20, paddingVertical: 8, paddingLeft:6}}>
               <Avatar label={item.firstName} size={55} 
                 image={
                   <Image
@@ -107,7 +106,7 @@ const PatientScreen = ({ navigation }) => {
               <Text style={[styles.title, {color: textColor}]}>{item.name}</Text>
             </Box>
         </View>
-        <View style={{display: 'flex', flexDirection: 'row', marginHorizontal: 12, marginBottom: 20, backgroundColor:'#A8D5BA', borderRadius:4, paddingVertical: 4,paddingHorizontal: 12}}>
+        <View style={{display: 'flex', flexDirection: 'row', marginHorizontal: 12, marginBottom: 20, backgroundColor:'#A8D5BA', borderRadius:4, paddingVertical: 4,paddingHorizontal: 12, gap: 32}}>
           <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', gap: 6,flex: 1}}>
             <Icon name="calendar-outline" size={20}/>
             <Text>{formattedDate}</Text>
@@ -117,9 +116,9 @@ const PatientScreen = ({ navigation }) => {
             <Text>{formattedTime}</Text>
           </View>
         </View>
-        </TouchableOpacity>
-        )
-    };
+      </View>
+      )
+  };
 
   const renderItem = ({item}) => {
     const backgroundColor = item.id === selectedId ? '#65A89F' : '#257cba';
@@ -215,12 +214,12 @@ const PatientScreen = ({ navigation }) => {
           ) : (
             <View style={{justifyContent:'center', alignContent:'center', alignItems:'center'}}>
               <FlatList
-              horizontal={true}
-              data={appointmentList}
-              renderItem={renderItem}
-              keyExtractor={item => item.uid}
-              extraData={selectedId}
-              showsHorizontalScrollIndicator={false}
+                horizontal={true}
+                data={appointmentList}
+                renderItem={renderItem}
+                keyExtractor={item => item.uid}
+                extraData={selectedId}
+                showsHorizontalScrollIndicator={false}
               />
             </View>
           )}
@@ -318,18 +317,21 @@ const LatestResults = () =>{
 }
 
 const styles = StyleSheet.create({
+  
   container: {
     height:'100%',
     justifyContent: 'space-between',
     padding: 20,
     paddingTop: 32
   },
+
   header: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 32
   },
+
   headerText: {
     fontFamily: 'Nunito Sans',
     fontSize: 16,
@@ -337,9 +339,11 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: 'bold'
   },
+
   services: {
     marginBottom: 16
   },
+
   servicesText: {
     fontFamily: 'Nunito Sans',
     fontSize: 20,
@@ -347,12 +351,14 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: 'bold'
   },
+
   stats: {
     height: '35%',
     marginBottom: 16
   },
-  footer: {
 
+  footer: {
+    width: '100%'
   },
 
   footerText: {
@@ -362,13 +368,15 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: 'bold'
   },
+
   item: {
-    paddingHorizontal: 0,
+    paddingHorizontal: 12,
     height: 'auto',
-    width: '100%',
+    width: 'auto',
     borderRadius: 12,
     marginVertical: 8,
   },
+
   title: {
     fontSize: 18
   }

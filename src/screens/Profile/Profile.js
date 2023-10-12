@@ -384,11 +384,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
 
-  avtrpos: {
-    marginTop: 10,
-    alignItems: 'center'
-  },
-
   heading:{
     display:'flex',
     flexDirection:'row',

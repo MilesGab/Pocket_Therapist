@@ -60,7 +60,7 @@ export default function Register({ navigation }) {
               onChangeText={(text) => setFirstName(text)}
             />
             <TextInput
-              style={[styles.input, {width: 180, justifyContent: 'flex-end', alignContent: 'flex-end', alignSelf: 'flex-end'}]}
+              style={[styles.input, {width: 160, justifyContent: 'flex-end', alignContent: 'flex-end', alignSelf: 'flex-end'}]}
               placeholder="Last name"
               autoCapitalize="none"
               keyboardType="default"
@@ -106,7 +106,7 @@ export default function Register({ navigation }) {
         <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
           <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Alreadt have an accout? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <Text style={{color: '#f57c00', fontWeight: '600', fontSize: 14}}> Sign In</Text>
+            <Text style={{color: '#65A89F', fontWeight: '600', fontSize: 14}}> Sign In</Text>
           </TouchableOpacity>
         </View>
         </SafeAreaView>
@@ -118,12 +118,12 @@ export default function Register({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#6fa8dc",
+    backgroundColor: "#65A89F",
   },
   title: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: "orange",
+    color: "#65A89F",
     alignSelf: "center",
     paddingBottom: 24,
   },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3,
     width: '100%',
-    height: 740,
+    height: 650,
     position: "absolute", 
     bottom: 0,
     backgroundColor: '#fff',
@@ -168,10 +168,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     marginHorizontal: 40,
-    marginTop: 50,
+    marginTop: 80,
   },
   button: {
-    backgroundColor: '#f57c00',
+    backgroundColor: '#65A89F',
     height: 58,
     borderRadius: 10,
     justifyContent: 'center',

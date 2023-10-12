@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image} from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react'
+import { View, Text, StyleSheet, Pressable, Image, Alert} from 'react-native';
 import { Avatar, IconButton, Box, ActivityIndicator } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
@@ -7,8 +7,56 @@ import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
+import messaging from '@react-native-firebase/messaging';
 
 const DoctorScreen = ({ navigation }) => {
+
+  const requestUserPermission = async () =>{
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL
+
+    if (enabled){
+        console.log('Authorization:', authStatus);
+        GetFCMToken();
+    }
+  }
+
+  useEffect(()=>{
+    if(requestUserPermission()){
+      messaging().getToken().then(token =>{
+        console.log(token);
+      });
+    }
+    else{
+      console.log("Failed token", authStatus);
+    }
+
+  {/* started app after tapping notif */}
+    messaging().getInitialNotification().then( async (remoteMessage) => {if (remoteMessage) {
+      console.log('Notification caused app to open from quit state:', remoteMessage.notification);
+        }
+      setLoading(false);
+    });
+  {/* opened after tapping notif */}
+    messaging().onNotificationOpenedApp( async (remoteMessage) => {
+      console.log('Notification caused app to open from background state:',remoteMessage.notification);
+      navigation.navigate(remoteMessage.data.type);
+    });
+
+  {/* notif whilst app in background */}
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Message handled in the background!', remoteMessage);
+    });
+  
+  {/* notif whilst inside the app */}
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+    });
+    return unsubscribe;  
+  }, [])
+  
   const { userData, updateUser } = useUserContext();
   const trimmedUid = userData?.uid.trim();
   
@@ -18,6 +66,10 @@ const DoctorScreen = ({ navigation }) => {
   const [patientCount, setPatientCount] = React.useState(0);
 
   const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(()=>{
+    countPatients();
+  }, []);
 
   const countPatients = async () => {
     try{
@@ -34,10 +86,6 @@ const DoctorScreen = ({ navigation }) => {
       console.error('Error fetching patients: ', error);
     }
   }
-
-  React.useEffect(()=>{
-    countPatients();
-  }, []);
 
   const countAppointments = async () => {
     try {
@@ -169,6 +217,10 @@ const DoctorScreen = ({ navigation }) => {
       });
   };
 
+  const handleSearch = () =>{
+    navigation.navigate('PatientSearch');
+  }
+
 
   return (
       <View style={styles.container}>
@@ -194,7 +246,7 @@ const DoctorScreen = ({ navigation }) => {
               color: 'black',
               }}>Dr. {userData?.firstName || '---'} {userData?.lastName || '---'}</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleSearch}>
             <Icon name="person-add-outline" color={'black'} size={26} />
           </TouchableOpacity>
         </View>
@@ -259,12 +311,12 @@ const DoctorScreen = ({ navigation }) => {
               <ActivityIndicator size="large"/>
             ) : (
               <FlatList
-              horizontal={false} // Set to false to display items vertically
-              data={appointmentList}
-              renderItem={renderItem}
-              keyExtractor={item => item.uid}
-              extraData={selectedId}
-              showsVerticalScrollIndicator={false} // Optionally, hide vertical scroll indicator
+                horizontal={false} // Set to false to display items vertically
+                data={appointmentList}
+                renderItem={renderItem}
+                keyExtractor={item => item.uid}
+                extraData={selectedId}
+                showsVerticalScrollIndicator={false} // Optionally, hide vertical scroll indicator
               />
             )}
         </View>
