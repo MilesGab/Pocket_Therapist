@@ -10,60 +10,6 @@ import { useUserContext } from '../../../../contexts/UserContext';
 import { QuerySnapshot } from 'firebase/firestore';
 import { ActivityIndicator } from "@react-native-material/core";
 
-
-const PatientScreen = ({ navigation }) => {
-  const { userData, updateUser } = useUserContext();
-  const [selectedId, setSelectedId] = React.useState();
-  const [appointmentList, setAppointmentList] = React.useState([]);
-  const [isLoading, setLoading] = React.useState(false);
-
-  const trimmedUid = userData?.uid.trim();
-
-  React.useEffect(() => {
-    setLoading(true);
-    const fetchAppointments = async () => {
-      try {
-        const appointmentsSnapshot = await firestore()
-          .collection('appointments')
-          .where('patient_assigned', '==', trimmedUid)
-          .limit(1)
-          .get();
-
-        const appointmentsData = await Promise.all(
-          appointmentsSnapshot.docs.map(async doc => {
-            const appointmentData = doc.data();
-            const doctorSnapshot = await firestore()
-              .collection('users')
-              .doc(appointmentData.doctor_assigned)
-              .get();
-            const patientSnapshot = await firestore()
-              .collection('users')
-              .doc(trimmedUid)
-              .get();
-            
-            const doctorData = doctorSnapshot.data();
-            const patientData = patientSnapshot.data();
-            
-            return {
-              ...appointmentData,
-              doctorName: doctorData?.lastName,
-              doctorPhoto: doctorData?.profilePictureURL,
-              patientName: patientData?.firstName,
-            };
-          })
-        );
-
-        setAppointmentList(appointmentsData);
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
-      } finally{
-        setLoading(false);
-      }
-    };
-
-    fetchAppointments();
-  }, []);
-
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
   const timestamp = new Date(
@@ -121,6 +67,63 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
       )
   };
 
+const PatientScreen = ({ navigation }) => {
+  const { userData, updateUser } = useUserContext();
+  const [selectedId, setSelectedId] = React.useState();
+  const [appointmentList, setAppointmentList] = React.useState([]);
+  const [isLoading, setLoading] = React.useState(false);
+
+  const trimmedUid = userData?.uid.trim();
+
+  React.useEffect(() => {
+    setLoading(true);
+    const fetchAppointments = async () => {
+
+      const dateToday = new Date();
+
+      try {
+        const appointmentsSnapshot = await firestore()
+          .collection('appointments')
+          .where('patient_assigned', '==', trimmedUid)
+          .where('date', '>=', dateToday)
+          .limit(1)
+          .get();
+
+        const appointmentsData = await Promise.all(
+          appointmentsSnapshot.docs.map(async doc => {
+            const appointmentData = doc.data();
+            const doctorSnapshot = await firestore()
+              .collection('users')
+              .doc(appointmentData.doctor_assigned)
+              .get();
+            const patientSnapshot = await firestore()
+              .collection('users')
+              .doc(trimmedUid)
+              .get();
+            
+            const doctorData = doctorSnapshot.data();
+            const patientData = patientSnapshot.data();
+            
+            return {
+              ...appointmentData,
+              doctorName: doctorData?.lastName,
+              doctorPhoto: doctorData?.profilePictureURL,
+              patientName: patientData?.firstName,
+            };
+          })
+        );
+
+        setAppointmentList(appointmentsData);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      } finally{
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
   const renderItem = ({item}) => {
     const backgroundColor = item.id === selectedId ? '#65A89F' : '#257cba';
     const color = item.id === selectedId ? 'white' : 'black';
@@ -134,23 +137,6 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
       />
     );
   };
-
-  const onPressFunction = () => {
-    console.log(userData);
-  }
-
-  const handleLogout = () => {
-    auth()
-      .signOut()
-      .then(() => {
-        console.log('Logout successful!');
-        navigation.navigate('Login');
-      })
-      .catch(error => {
-        console.error('Error logging out:', error);
-      });
-  };
-
 
   return (
       <View style={styles.container}>
@@ -185,7 +171,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
               <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center', paddingHorizontal: 16}}>
               {/* 1st button */}
               <IconButton
-                onPress={() => navigation.navigate('Profile')}
+                onPress={() => navigation.navigate('Assessment')}
                 style={{
                   backgroundColor: '#D1B655',
                   width: '50%',
@@ -196,7 +182,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
               />
               {/* 2nd button */}
               <IconButton
-                onPress={() => navigation.navigate('Assessment')}
+                onPress={() => navigation.navigate('MyExercises')}
                 style={{
                   backgroundColor: '#D1B655',
                   width: '50%',

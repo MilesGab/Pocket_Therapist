@@ -112,7 +112,7 @@ const PatientSearch = () => {
             </View>
             <View>
             {resultsList
-            .filter(result => result?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()))
+            .filter(result => result?.firstName?.toLowerCase().startsWith(searchQuery.toLowerCase()))
             .map((result, index) => (
                 <SearchResult key={index} result={result} doctorId={trimmedUid} updateDoctorField={updateDoctorField}/>
             ))}

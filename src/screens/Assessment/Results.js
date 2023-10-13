@@ -91,8 +91,8 @@ const Results = ({ painData, phyiscalData }) => {
             </Box>
 
             <View style={styles.decisionButtons}>
-                <Button onPress={handleReturn} title="Retake Assessment"/>
-                <Button onPress={handleSave} title="Confirm Results"/>
+                <Button color={'white'} onPress={handleReturn} title="Retake Assessment"/>
+                <Button color={'white'} onPress={handleSave} title="Confirm Results"/>
             </View>
         </View>
     )

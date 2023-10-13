@@ -331,10 +331,12 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
+
+    logout();
+
     auth()
       .signOut()
       .then(() => {
-        logout();
         console.log('Logout successful!');
         navigation.navigate('Login');
       })

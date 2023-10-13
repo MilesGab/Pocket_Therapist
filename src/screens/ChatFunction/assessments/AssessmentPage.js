@@ -1,10 +1,11 @@
 import React from 'react';
-import { Avatar } from '@react-native-material/core';
-import { View, Text, StyleSheet } from 'react-native';
+import { Avatar, Button, Dialog, DialogContent, DialogHeader, Provider, TextInput } from '@react-native-material/core';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import Slider from "@react-native-community/slider";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRoute } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
 
 
 const PhysicalQuestions = [
@@ -65,18 +66,69 @@ const VASScoreDisplay = () => {
 
 }
 
+const NoteDialog = ( props ) => {
+
+    return(
+        <Dialog visible={props?.visible} onDismiss={() => props?.setVisible(false)}>
+            <DialogHeader title="Review Assessment"/>
+            <DialogContent>
+                <View style={{gap: 12}}>
+                    <View style={{display:'flex', flexDirection:'column'}}>
+                        <Text>Diagnosis</Text>
+                        <TextInput />   
+                    </View>
+                    <View>
+                        <Text>Notes</Text> 
+                        <TextInput />   
+                    </View>
+                    <View>
+                        <Button onPress={() => props?.setVisible(false)} color={'lightgray'} title={'Save'} />
+                    </View>
+                </View>
+            </DialogContent>
+        </Dialog>
+    ) 
+
+}
+
 const AssessmentPage = ({ route }) => {
 
     const { patientData } = route.params;
+    const [patientInfo, setPatientInfo] = React.useState([]);
+    const [visible, setVisible] = React.useState(false);
 
+    const trimmedUid = patientData?.patient.trim();
+
+    React.useEffect(()=>{
+        fetchPatientData();
+        console.log(trimmedUid);
+    },[]);
+
+    const fetchPatientData = async () => {
+        try{
+
+            const querySnapshot = await firestore()
+            .collection("users")
+            .where("uid", "==", trimmedUid)
+            .get();
+
+            const queryData = querySnapshot.docs[0].data();
+
+            setPatientInfo(queryData);
+        }
+        catch (error) {
+            console.error('Error fetching patient results: ', error);
+        }
+    };
 
     return (
+        <Provider>
         <ScrollView>
             <View style={styles.container}>
                 <View style={styles.patientInfoContainer}>
-                    <Avatar label={'Hanni Pham'} />
+                    <Avatar image={{uri: patientInfo?.profilePictureURL}} />
                     <View style={{marginLeft:12, color:'white'}}>
-                        <Text style={{color:'white'}}>Hanni Pham</Text>
+                        <Text style={{color:'white'}}>{patientInfo?.firstName} {patientInfo?.lastName}</Text>
                         <Text style={{color:'white'}}>Patient</Text>
                         <Text style={{color:'white'}}>Assessment Taken: October 10, 2023</Text>
                     </View>
@@ -90,22 +142,27 @@ const AssessmentPage = ({ route }) => {
                     </View>
                     <Text style={{color:'white', fontSize: 20, fontWeight:'bold', marginBottom: 12}}>Pain Assessment</Text>
                         <View style={{paddingHorizontal: 12}}>
-                        <VASScoreDisplay/>
-                        {PainQuestions.map((question, index) => (
-                        <PhysicalDataResults
-                            key={index}
-                            question={question}
-                            answer={
-                              patientData.painData[index + 1]
-                              ? patientData.painData[index + 1]
-                              : patientData.maxAngle
-                            }
-                          />
-                        ))}
-                    </View>
+                            <VASScoreDisplay/>
+                            {PainQuestions.map((question, index) => (
+                            <PhysicalDataResults
+                                key={index}
+                                question={question}
+                                answer={
+                                patientData.painData[index + 1]
+                                ? patientData.painData[index + 1]
+                                : patientData.maxAngle
+                                }
+                            />
+                            ))}
+                        </View>
+                        <TouchableOpacity onPress={()=>{setVisible(true)}} style={{backgroundColor: 'white', justifyContent:'center', alignContent:'center', alignItems:'center', padding: 12, borderRadius: 12}}>
+                            <Text style={{color:'black'}}>Notes and diagnosis</Text>
+                        </TouchableOpacity> 
+                        <NoteDialog visible={visible} setVisible={setVisible} />
                 </View>
             </View>
         </ScrollView>
+        </Provider>
     )
 
 }
