@@ -6,7 +6,7 @@ import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useUserContext } from '../../../contexts/UserContext';
 import firestore from '@react-native-firebase/firestore';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function DoctorChatScreen({ route }) {
   const { patientData } = route.params;
@@ -14,6 +14,8 @@ export default function DoctorChatScreen({ route }) {
   const [patient, setPatient] = React.useState({});
   const {userData, updateUser} = useUserContext();
   const trimmedUid = userData.uid.trim();
+  const navigation = useNavigation();
+
 
   const senderData = {
     _id: trimmedUid,
@@ -141,6 +143,10 @@ export default function DoctorChatScreen({ route }) {
     );
   };
 
+  const handleCall = () => {
+    navigation.navigate('VoiceChat');
+  }
+
   return (
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
@@ -175,6 +181,9 @@ export default function DoctorChatScreen({ route }) {
                   {patient.contact}
                 </Text>
               </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleCall}>
+              <Icon name="phone" size={24}/>
             </TouchableOpacity>
           </View>
         </View>

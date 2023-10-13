@@ -1,16 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ToastAndroid } from 'react-native';
 import { Searchbar, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { Avatar } from '@react-native-material/core';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../../contexts/UserContext';
 
-
-const SearchResult = ({ result, doctorId}) => {
+const SearchResult = ({ result, doctorId, updateDoctorField}) => {
 
     const handleAdd = () => {
-        console.log(doctorId);
+        updateDoctorField(result?.uid);
+        ToastAndroid.show('Patient has been added!', ToastAndroid.SHORT);
     }
 
     return(
@@ -21,7 +21,7 @@ const SearchResult = ({ result, doctorId}) => {
                         style={{marginRight: 12}} 
                         image={{ uri: result?.profilePictureURL || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
                         }}/>
-                    <Text style={{fontSize: 18}}>{result?.name || result?.firstName}</Text>
+                    <Text style={{fontSize: 18, color:'black'}}>{result?.name || result?.firstName} {result?.lastName}</Text>
                 </View>
             </TouchableOpacity>
             { result?.doctor === doctorId ? (
@@ -56,30 +56,42 @@ const PatientSearch = () => {
         navigation.navigate('DoctorHomescreen');
     }
 
-        const searchPatient = async () => {
-            try {
-                const querySnapshot = await firestore()
-                    .collection('users')
-                    // .where('doctor', '==', '')
-                    .where('firstName', '>=', searchQuery) // Check if the name starts with searchQuery
-                    .where('firstName', '<=', searchQuery + '\uf8ff') // Check if the name ends with searchQuery
-                    .where('role', '==', 0)
-                    .get();
-        
-                const resultsArray = [];
-        
-                querySnapshot.forEach((documentSnapshot) => {
-                    const data = documentSnapshot.data();
-                    resultsArray.push(data);
-                });
-        
-                setResultsList(resultsArray);
-            } catch (error) {
-                console.error('Error fetching patient list: ', error);
-            } finally {
-            }
-        }
+    const searchPatient = async () => {
+        try {
+            const querySnapshot = await firestore()
+                .collection('users')
+                .where('role', '==', 0)
+                .get();
     
+            const resultsArray = [];
+    
+            querySnapshot.forEach((documentSnapshot) => {
+                const data = documentSnapshot.data();
+                resultsArray.push(data);
+            });
+    
+            setResultsList(resultsArray);
+        } catch (error) {
+            console.error('Error fetching patient list: ', error);
+        } finally {
+        }
+    }
+
+    const updateDoctorField = async (userUid) => {
+        try {
+            const userRef = firestore().collection('users').doc(userUid);
+    
+            await userRef.update({
+                doctor: trimmedUid
+            });
+    
+            console.log(`Doctor field updated for user with UID: ${userUid}`);
+        } catch (error) {
+            console.error('Error updating doctor field: ', error);
+        } finally{
+            searchPatient();
+        }
+    };
 
     React.useEffect(()=>{
         searchPatient();
@@ -95,12 +107,14 @@ const PatientSearch = () => {
                     style={{ width: '85%' }}
                 />
                 <TouchableOpacity onPress={handleCancel}>
-                    <Text style={{fontSize: 18}}>Cancel</Text>
+                    <Text style={{fontSize: 18, color:"black"}}>Cancel</Text>
                 </TouchableOpacity>
             </View>
             <View>
-            {resultsList.map((result, index) => (
-                <SearchResult key={index} result={result} doctorId={trimmedUid} />
+            {resultsList
+            .filter(result => result?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()))
+            .map((result, index) => (
+                <SearchResult key={index} result={result} doctorId={trimmedUid} updateDoctorField={updateDoctorField}/>
             ))}
             </View>
         </View>

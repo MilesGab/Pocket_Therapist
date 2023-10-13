@@ -17,8 +17,8 @@ import Sound from 'react-native-sound';
 import Ringtone from '../../../../assets/audio/ptring.mp3';
 
 const appId = '8c9007f71b7c429d971501377a0772fe';
-const channelName = 'callscreen';
-const token = '007eJxTYPCX+nw9z3uG7EUx02/zJtWwXF4o6Op4cZlKiB7fUZ0Hi5sUGCySLQ0MzNPMDZPMk02MLFMszQ1NDQyNzc0TDczNjdJSXZdLpjYEMjIcSF3AwsgAgSA+F0NyYk5OcXJRamoeAwMAiOkf3Q==';
+const channelName = 'newcall';
+const token = '007eJxTYDhyUUl4mnSKW0acy7rT7NopG5qKGdtvmMxbWPiUJzTtf7ECg0WypYGBeZq5YZJ5somRZYqluaGpgaGxuXmigbm5UVrqL2+N1IZARgYddnsWRgYIBPHZGfJSy5MTc3IYGADtBh1v';
 const uid = 1;
 
 const VoiceChat = () =>{
@@ -87,13 +87,6 @@ const VoiceChat = () =>{
             return;
         }
         try {
-            sound.play((success) => {
-                if (success) {
-                  console.log('Sound played successfully');
-                } else {
-                  console.log('Error playing sound');
-                }
-              });
             agoraEngineRef.current?.setChannelProfile(
                 ChannelProfileType.ChannelProfileCommunication,
             );
@@ -110,7 +103,6 @@ const VoiceChat = () =>{
             agoraEngineRef.current?.leaveChannel();
             setRemoteUid(0);
             setIsJoined(false);
-            sound.release();
             showMessage('You left the channel');
         } catch (e) {
             console.log(e);
@@ -137,9 +129,13 @@ const VoiceChat = () =>{
                 <TouchableOpacity onPress={leave} style={styles.endCall}>
                     <Icon style={{}} name="call" color={'white'} size={40}/>
                 </TouchableOpacity>
+                {isJoined ? (
+                    null
+                ) : (
                 <TouchableOpacity onPress={join} style={[styles.endCall, {backgroundColor:'#3dcc44'}]}>
                     <Icon style={{}} name="call" color={'white'} size={40}/>
                 </TouchableOpacity>
+                )}
             </View>
         </View>
     );

@@ -145,7 +145,7 @@ const AddAppointment = (props) => {
       try {
         const appointmentRef = await firestore().collection('appointments').add({
           date,
-          doctor_assigned: 'Pkw5kI5F8tQ6MA4TP5eccSAwB503',
+          doctor_assigned: userData?.doctor,
           name: value,
           patient_assigned: trimmedUid,
           status: 0
@@ -220,6 +220,7 @@ const AddAppointment = (props) => {
 
 const Schedule = () => {
   const { userData, updateUser } = useUserContext();
+  const trimmedUid = userData?.uid.trim();
   const [isLoading, setLoading] = React.useState(true);
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -236,6 +237,7 @@ const Schedule = () => {
       const appointmentsSnapshot = await firestore()
         .collection('appointments')
         .where('status', '==', 1)
+        .where('patient_assigned', '==', trimmedUid)
         .get();
 
       const appointmentsData = await Promise.all(
@@ -323,8 +325,8 @@ const Schedule = () => {
         filteredAppointments.length === 0 ? (
           value === 'upcoming' ? 
           <View style={{display:'flex', justifyContent:'center', alignContent:'center', alignItems:'center'}}>
-            <Icon style={{fontSize:100}} name="calendar-clear-outline"/>
-            <Text style={{fontSize:20}}>No upcoming appointments</Text> 
+            <Icon style={{fontSize:100, color:'#696969'}} name="calendar-clear-outline"/>
+            <Text style={{fontSize:20, color:'#696969'}}>No upcoming appointments</Text> 
           </View>
           : 
           <View style={{display:'flex', justifyContent:'center', alignContent:'center', alignItems:'center'}}>
