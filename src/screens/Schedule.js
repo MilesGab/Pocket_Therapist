@@ -325,8 +325,8 @@ const Schedule = () => {
         filteredAppointments.length === 0 ? (
           value === 'upcoming' ? 
           <View style={{display:'flex', justifyContent:'center', alignContent:'center', alignItems:'center'}}>
-            <Icon style={{fontSize:100}} name="calendar-clear-outline"/>
-            <Text style={{fontSize:20}}>No upcoming appointments</Text> 
+            <Icon style={{fontSize:100, color:'#696969'}} name="calendar-clear-outline"/>
+            <Text style={{fontSize:20, color:'#696969'}}>No upcoming appointments</Text> 
           </View>
           : 
           <View style={{display:'flex', justifyContent:'center', alignContent:'center', alignItems:'center'}}>

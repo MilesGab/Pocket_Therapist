@@ -107,7 +107,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
               <Text style={[styles.title, {color: textColor}]}>{item.name}</Text>
             </Box>
         </View>
-        <View style={{display: 'flex', flexDirection: 'row', marginHorizontal: 12, marginBottom: 20, backgroundColor:'#A8D5BA', borderRadius:4, paddingVertical: 4,paddingHorizontal: 12, gap: 32}}>
+        <View style={{display: 'flex', flexDirection: 'row', marginHorizontal: 16, marginBottom: 20, backgroundColor:'#A8D5BA', borderRadius:4, paddingVertical: 4,paddingHorizontal: 12, gap: 32}}>
           <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', gap: 6,flex: 1}}>
             <Icon name="calendar-outline" size={20}/>
             <Text>{formattedDate}</Text>
@@ -182,7 +182,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
 
         <View style={styles.services}>
           <Text style={styles.servicesText}>Services</Text>
-              <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center'}}>
+              <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center', paddingHorizontal: 16}}>
               {/* 1st button */}
               <IconButton
                 onPress={() => navigation.navigate('Profile')}
@@ -298,25 +298,25 @@ const LatestResults = () =>{
                 <>
                   <View style={{marginBottom: 60}}>
                     <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black', marginBottom: 12}}>Maximum wrist range of motion:</Text>
-                    <Text style={{fontSize: 32, fontWeight:'bold'}}>{dataList.maxAngle}°</Text>
+                    <Text style={{fontSize: 32, fontWeight:'bold', color:'#696969'}}>{dataList.maxAngle}°</Text>
                   </View>
                   {dataList && dataList.painData ? (
                   <View style={{display:'flex', flexDirection:'row', borderTopWidth: 1, justifyContent:'space-around'}}>
                     <View style={{borderRightWidth: 1, paddingHorizontal: 4,minWidth: 60}}>
-                      <Text style={{fontWeight:'bold'}}>VAS Score</Text>
-                      <Text>{dataList?.painData[0]}</Text>
+                      <Text style={{fontWeight:'bold', color:'black' }}>VAS Score</Text>
+                      <Text style={{color:'#696969' }}>{dataList?.painData[0]}</Text>
                     </View>
                     <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
-                      <Text style={{fontWeight:'bold'}}>Pain</Text>
-                      <Text>{dataList?.painData[1]}</Text>
+                      <Text style={{fontWeight:'bold',color:'black'}}>Pain</Text>
+                      <Text style={{color:'#696969' }}>{dataList?.painData[1]}</Text>
                     </View>
                     <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
-                      <Text style={{fontWeight:'bold'}}>Warm?</Text>
-                      <Text>{dataList?.phyiscalData[3]}</Text>
+                      <Text style={{fontWeight:'bold', color:'black'}}>Warm?</Text>
+                      <Text style={{color:'#696969' }}>{dataList?.phyiscalData[3]}</Text>
                     </View>
                     <View style={{paddingHorizontal: 4, minWidth: 60}}>
-                      <Text style={{fontWeight:'bold'}}>VAS Score</Text>
-                      <Text>6</Text>
+                      <Text style={{fontWeight:'bold', color:'black'}}>VAS Score</Text>
+                      <Text style={{color:'#696969' }}>6</Text>
                     </View>
                   </View>
                   ) : (
@@ -357,7 +357,6 @@ const styles = StyleSheet.create({
 
   services: {
     marginBottom: 16,
-    paddingHorizontal: 16
   },
 
   servicesText: {
@@ -365,7 +364,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#343434',
     fontStyle: 'normal',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    
   },
 
   stats: {

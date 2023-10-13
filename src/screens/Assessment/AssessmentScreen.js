@@ -9,10 +9,6 @@ const AssessmentScreen = () => {
   
   return(
     <View style={styles.container}>
-      <TouchableOpacity onPress={()=>{}}>
-          <Icon name="arrow-back" style={{fontSize:38, color:'black', marginRight: 12}}/>
-        </TouchableOpacity>
-
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Pocket Therapist</Text>
       </View>

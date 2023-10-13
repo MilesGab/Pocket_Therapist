@@ -155,7 +155,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                 />
                 <View style={styles.sliderScale}>
                   {Array.from({ length: 11 }, (_, i) => (
-                    <Text key={i}>{i}</Text>
+                    <Text style={{color:'black', fontSize: 18}} key={i}>{i}</Text>
                   ))}
                 </View>
                 <Text style={styles.sliderValue}>{sliderValue.toString()}</Text>
@@ -445,7 +445,7 @@ cameraPicker: {
 
   slider: {
     width: 358, // Adjust the width of the slider
-    marginLeft: 3
+    marginLeft: 3,
   },
 
   sliderValue: {

@@ -50,11 +50,11 @@ const WristAngleSensor = (props) =>{
 
       <View>
         {countdown > 0 ? (
-          <Text style={{ textAlign: 'center' }}>{countdown} seconds remaining</Text>
+          <Text style={{ textAlign: 'center', color: 'black' }}>{countdown} seconds remaining</Text>
         ) : (
           <>
-            <Text style={{ textAlign: 'center' }}>Wrist assessment complete</Text>
-            <Button onPress={handleNext} title="Next"/>
+            <Text style={{ textAlign: 'center', color: 'black', marginBottom: 12}}>Wrist assessment complete</Text>
+            <Button style={{marginBottom: 12}} onPress={handleNext} title="Next"/>
           </>
         )}
       </View>
@@ -130,6 +130,7 @@ const styles = {
     borderWidth: 4, // You can adjust the border width.
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 12
   },
 
 }
