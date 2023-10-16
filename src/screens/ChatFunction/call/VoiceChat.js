@@ -19,7 +19,7 @@ import Ringtone from '../../../../assets/audio/ptring.mp3';
 const appId = '8c9007f71b7c429d971501377a0772fe';
 const channelName = 'newcall';
 const token = '007eJxTYDhyUUl4mnSKW0acy7rT7NopG5qKGdtvmMxbWPiUJzTtf7ECg0WypYGBeZq5YZJ5somRZYqluaGpgaGxuXmigbm5UVrqL2+N1IZARgYddnsWRgYIBPHZGfJSy5MTc3IYGADtBh1v';
-const uid = 0;
+const uid = 1;
 
 const VoiceChat = () =>{
     const agoraEngineRef = useRef(IRtcEngine); // Agora engine instance

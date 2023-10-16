@@ -28,7 +28,8 @@ export default function Register({ navigation }) {
         lastName,
         contact,
         email,
-        role: 0
+        role: 0,
+        doctor:''
       });
 
       console.log('User account created & signed up!');

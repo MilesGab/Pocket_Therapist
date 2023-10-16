@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { Button } from '@react-native-material/core';
+import { Box, Button } from '@react-native-material/core';
 import { useNavigation } from "@react-navigation/native";
 import { useUserContext } from '../../../contexts/UserContext';
 import firestore from '@react-native-firebase/firestore';
@@ -59,31 +59,40 @@ const Results = ({ painData, phyiscalData }) => {
     return(
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={{fontSize:32, color:'black', fontWeight:'bold'}}>Results</Text>
+                <Text style={{fontSize:32, color:'black', fontWeight:'bold', marginBottom: 12}}>Results</Text>
             </View>
+
+            <Box style={{ backgroundColor: '#65A89F', borderRadius: 20, marginBottom: 12 }}>
             <View style={styles.physicalResults}>
-                <Text>Physical Assessment</Text>
+                <Text style={{fontWeight:'bold',color:'white'}} >Physical Assessment</Text>
                 {questions.map((question, index) => (
-                    <Text key={question}>
+                    <Text style={{color:'white', fontSize: 16}} key={question}>
                         {question} {phyiscalData[index] || '---'}
                     </Text>
                 ))}
             </View>
+            </Box>
+            <Box style={{ backgroundColor: '#65A89F', borderRadius: 20, marginBottom: 12 }}>
             <View style={styles.painResults}>
-                <Text>Pain Assessment</Text>
+                <Text style={{fontWeight:'bold',color:'white'}}>Pain Assessment</Text>
                 {painAssessmentQuestions.map((question, index) => (
-                    <Text key={question}>
+                    <Text style={{color:'white', fontSize: 16}} key={question}>
                         {question}: {painData[index] || '---'}
                     </Text>
                 ))}
             </View>
+            </Box>
+
+            <Box style={{ backgroundColor: '#65A89F', borderRadius: 20, marginBottom: 20 }}>
             <View style={styles.wristResults}>
-                <Text>Range of Motion Assessment</Text>
-                <Text>Max wrist flexion: {maxAngle || '---'} </Text>
+                <Text style={{fontWeight:'bold',color:'white'}} >Range of Motion Assessment</Text>
+                <Text style={{color:'white', fontSize: 16}} >Max wrist flexion: {maxAngle || '---'} </Text>
             </View>
+            </Box>
+
             <View style={styles.decisionButtons}>
-                <Button onPress={handleReturn} title="Retake Assessment"/>
-                <Button onPress={handleSave} title="Confirm Results"/>
+                <Button color={'white'} onPress={handleReturn} title="Retake Assessment"/>
+                <Button color={'white'} onPress={handleSave} title="Confirm Results"/>
             </View>
         </View>
     )
@@ -108,15 +117,21 @@ const styles = {
     },
 
     physicalResults: {
-        marginBottom: 10
+        marginVertical: 10,
+        marginHorizontal:14,
+        display: 'flex'
     },
 
     painResults: {
-        marginBottom: 10
+        marginVertical: 10,
+        marginHorizontal:14,
+        display: 'flex'
     },
 
     wristResults:{
-        marginBottom: 10
+        marginVertical: 10,
+        marginHorizontal:14,
+        display: 'flex'
     }
 
 }

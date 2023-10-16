@@ -21,6 +21,7 @@ import AssessmentPage from '../screens/ChatFunction/assessments/AssessmentPage.j
 import PatientScreen from '../screens/Homescreen/roles/PatientScreen.js';
 import DoctorScreen from '../screens/Homescreen/roles/DoctorScreen.js';
 import PatientSearch from '../screens/Homescreen/roles/components/SearchPatient.js';
+import MyExercises from '../screens/Homescreen/roles/components/MyExercise.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -152,6 +153,12 @@ return (
   <Stack.Screen 
     name="PatientSearch"
     component={PatientSearch}
+    options={{headerShown: false}}
+    />
+
+  <Stack.Screen 
+    name="MyExercises"
+    component={MyExercises}
     options={{headerShown: false}}
     />
 

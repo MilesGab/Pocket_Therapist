@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import { View, Text, StyleSheet, Pressable, Image, Alert} from 'react-native';
 import { Avatar, IconButton, Box, ActivityIndicator } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -9,6 +9,64 @@ import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
 import messaging from '@react-native-firebase/messaging';
 import DoctorMessages from '../../ChatFunction/DoctorMessages';
+
+const Item = ({ item, onPress, backgroundColor, textColor }) => {
+  
+  const timestamp = new Date(
+      item.date.seconds * 1000 + item.date.nanoseconds / 1000000
+    );
+  
+  const formattedDate = timestamp.toLocaleDateString('en-US', {
+      month: 'long',
+      weekday: 'long',
+      day: '2-digit',
+    });
+
+  const formattedTime = timestamp.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    });
+
+  return(
+      <View style={[styles.item, {backgroundColor}]}>
+        <View style={{display: 'flex', flexDirection: 'row', justifyContent:'flex-start', paddingHorizontal: 12, paddingVertical: 10,gap: 12}}>
+            <Box style={{borderRadius: 20, paddingVertical: 8, paddingLeft:6}}>
+              <Avatar label={item.firstName} size={55} 
+                image={
+                  <Image
+                  source={{ uri: item?.profilePictureURL || 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'}}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    borderRadius: 28,
+                  }}
+                  />
+                  }
+                />
+            </Box>
+            <Box style={{paddingVertical: 8}}>
+              <Text style={[styles.title, {color:textColor, fontWeight: 'bold'}]}>{item.patientName}</Text>
+              <Text style={[styles.title, {color: textColor}]}>{item.name}</Text>
+            </Box>
+        </View>
+        <View style={{display: 'flex', flexDirection: 'row', marginHorizontal: 16, marginBottom: 20, backgroundColor:'#A8D5BA', borderRadius:4, paddingVertical: 4,paddingHorizontal: 12, gap: 32}}>
+          <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', gap: 6,flex: 1}}>
+            <Icon name="calendar-outline" size={20}/>
+            <Text>{formattedDate}</Text>
+          </View>
+          <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', gap: 6}}>
+            <Icon name="time-outline" size={20}/>
+            <Text>{formattedTime}</Text>
+          </View>
+        </View>
+      </View>
+      )
+  };
+
 
 const DoctorScreen = ({ navigation }) => {
   
@@ -32,7 +90,7 @@ const DoctorScreen = ({ navigation }) => {
     }
   }
 
-  useEffect(()=>{
+  React.useEffect(()=>{
     if(requestUserPermission()){
       messaging().getToken().then(token =>{
         console.log(token);
@@ -113,9 +171,6 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
       }
     };
 
-  React.useEffect(()=>{
-    countPatients();
-  }, []);
 
   const countPatients = async () => {
     try{
@@ -132,6 +187,10 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
       console.error('Error fetching patients: ', error);
     }
   }
+
+  React.useEffect(()=>{
+    countPatients();
+  }, []);
 
   const countAppointments = async () => {
     try {
@@ -152,91 +211,60 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
     countAppointments();
   }, []);
 
-  React.useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const appointmentsSnapshot = await firestore()
-          .collection('appointments')
-          .where('doctor_assigned', '==', trimmedUid)
-          .get();
-  
-          const appointmentsData = await Promise.all(
-            appointmentsSnapshot.docs.map(async doc => {
-              const appointmentData = doc.data();
-              const doctorId = appointmentData.doctor_assigned; // Get the doctor ID from appointment data
-              const patientId = appointmentData.patient_assigned; // Get the patient ID from appointment data
-    
-              // Fetch doctor and patient data separately
-              const [doctorSnapshot, patientSnapshot] = await Promise.all([
-                firestore().collection('users').doc(doctorId).get(),
-                firestore().collection('users').doc(patientId).get(),
-              ]);
-    
-              const doctorData = doctorSnapshot.data();
-              const patientData = patientSnapshot.data();
-    
-              return {
-                ...appointmentData,
-                doctorName: doctorData.firstName,
-                patientName: patientData.firstName,
-              };
-            })
-          );
-  
-        setAppointmentList(appointmentsData);
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
-      } finally{
-        setLoading(false);
-      }
-    };
+  const fetchAppointments = async () => {
+    const dateToday = new Date();
 
+    try {
+      const appointmentsSnapshot = await firestore()
+        .collection('appointments')
+        .where('doctor_assigned', '==', trimmedUid)
+        .where('date', '>=', dateToday)
+        .get();
+
+        const appointmentsData = await Promise.all(
+          appointmentsSnapshot.docs.map(async doc => {
+            const appointmentData = doc.data();
+            const doctorId = appointmentData.doctor_assigned; // Get the doctor ID from appointment data
+            const patientId = appointmentData.patient_assigned; // Get the patient ID from appointment data
+  
+            // Fetch doctor and patient data separately
+            const [doctorSnapshot, patientSnapshot] = await Promise.all([
+              firestore().collection('users').doc(doctorId).get(),
+              firestore().collection('users').doc(patientId).get(),
+            ]);
+  
+            const doctorData = doctorSnapshot.data();
+            const patientData = patientSnapshot.data();
+  
+            return {
+              ...appointmentData,
+              doctorName: doctorData.firstName,
+              patientName: patientData.firstName,
+              profilePictureURL: patientData.profilePictureURL
+            };
+          })
+        );
+
+      setAppointmentList(appointmentsData);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    } finally{
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
     fetchAppointments();
   }, []);
 
-
-  const Item = ({item, onPress, backgroundColor, textColor}) => {
-    
-    const timestamp = new Date(
-        item.date.seconds * 1000 + item.date.nanoseconds / 1000000
-      );
-    
-    const formattedDate = timestamp.toLocaleDateString('en-US', {
-        day: '2-digit',
-      });
-
-    const formattedDay = timestamp.toLocaleDateString('en-US', {
-        weekday: 'short',
-      });
-
-    const formattedTime = timestamp.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true,
-      });
-
-    return(
-        <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
-        <View style={{display: 'flex', flexDirection: 'row', justifyContent:'flex-start', paddingHorizontal: 12, paddingVertical: 18,gap: 12}}>
-            <Box style={{borderRadius: 20, paddingVertical: 8, paddingLeft:20}}>
-            <Text style={[styles.title, { color: textColor, fontSize: 32, fontWeight: 'bold', width: 100}]}>
-                {formattedDate}
-            </Text>          
-            </Box>
-            <Box style={{paddingVertical: 8}}>
-            <Text style={[styles.title, {color:textColor}]}>{formattedTime}</Text>
-            <Text style={[styles.title, {color:textColor, fontWeight: 'bold'}]}>{item.patientName}</Text>
-            <Text style={[styles.title, {color: textColor}]}>{item.name}</Text>
-            </Box>
-        </View>
-        </TouchableOpacity>
-        )
-    };
+  const handleSearch = () =>{
+    navigation.navigate('PatientSearch');
+  }
 
   const renderItem = ({item}) => {
-    const backgroundColor = item.id === selectedId ? '#1C6BA4' : '#257cba';
+    const backgroundColor = item.id === selectedId ? '#65A89F' : '#257cba';
     const color = item.id === selectedId ? 'white' : 'black';
-
+  
     return (
       <Item
         item={item}
@@ -247,31 +275,11 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
     );
   };
 
-  const onPressFunction = () => {
-    console.log(userData);
-  }
-
-  const handleLogout = () => {
-    auth()
-      .signOut()
-      .then(() => {
-        console.log('Logout successful!');
-        navigation.navigate('Login');
-      })
-      .catch(error => {
-        console.error('Error logging out:', error);
-      });
-  };
-
-  const handleSearch = () =>{
-    navigation.navigate('PatientSearch');
-  }
-
-
   return (
+    <ScrollView>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
+        <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
           <Image
           source={{ uri: userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png' }}
           color='#CEDDF7'
@@ -305,18 +313,18 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
                 <Box 
                     style={{
                     display:'flex',
-                    backgroundColor: '#DCEDF9',
+                    backgroundColor: '#D1B655',
                     width: '100%',
                     height: 120,
                     borderRadius: 8}}>
                         <View style={{display:'flex', flexDirection:'row', paddingHorizontal:12, paddingTop:6, alignItems:'center'}}>
-                            <Text style={{marginTop:8, color: 'black', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
-                            <Icon style={{fontWeight:'bold', fontSize:18, color:'black'}} name="chevron-down-outline"/>
+                            <Text style={{marginTop:8, color: '#F2F2F2', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
+                            <Icon style={{fontWeight:'bold', fontSize:18, color:'#F2F2F2'}} name="chevron-down-outline"/>
                         </View>
                         {loading ? (
                       <ActivityIndicator size="large"/>
                       ): (
-                        <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                        <Text style={{marginTop:8, color: '#F2F2F2', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
                         )}
                 </Box>
               </Box>
@@ -326,18 +334,18 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
                 <Box 
                     style={{
                     display:'flex',
-                    backgroundColor: '#DCEDF9',
+                    backgroundColor: '#D1B655',
                     width: '100%',
                     height: 120,
                     borderRadius: 8}}>
                         <View style={{display:'flex', flexDirection:'row', paddingHorizontal:12, paddingTop:6, alignItems:'center'}}>
-                            <Text style={{marginTop:8, color: 'black', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
-                            <Icon style={{fontWeight:'bold', fontSize:18, color:'black'}} name="chevron-down-outline"/>
+                            <Text style={{marginTop:8, color: '#F2F2F2', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
+                            <Icon style={{fontWeight:'bold', fontSize:18, color:'#F2F2F2'}} name="chevron-down-outline"/>
                         </View>
                     {loading ? (
                       <ActivityIndicator size="large"/>
                       ): (
-                      <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
+                      <Text style={{marginTop:8, color: '#F2F2F2', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
                       )}
                 </Box>
               </Box>
@@ -357,16 +365,23 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
               <ActivityIndicator size="large"/>
             ) : (
               <FlatList
-                horizontal={false} // Set to false to display items vertically
+                horizontal={false}
                 data={appointmentList}
                 renderItem={renderItem}
                 keyExtractor={item => item.uid}
                 extraData={selectedId}
-                showsVerticalScrollIndicator={false} // Optionally, hide vertical scroll indicator
+                showsVerticalScrollIndicator={false} 
+                scrollEnabled={false}
+                ListEmptyComponent={() => (
+                  <View style={{marginTop: 12}}>
+                    <Text style={{ textAlign: 'center' }}>No upcoming appointments</Text>
+                  </View>
+                )}
               />
             )}
         </View>
       </View>
+    </ScrollView>
   );
 };
 
@@ -415,7 +430,7 @@ const styles = StyleSheet.create({
   item: {
     height: 132,
     width: '100%',
-    borderRadius: 28,
+    borderRadius: 12,
     marginVertical: 8,
   },
   title: {

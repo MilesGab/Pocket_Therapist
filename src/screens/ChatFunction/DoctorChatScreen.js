@@ -89,6 +89,7 @@ export default function DoctorChatScreen({ route }) {
     );
 
     sendMessagesToFirestore(messages);
+    retrieveMessagesFromFirestore();
   }, []);
 
   const sendMessagesToFirestore = async (messages) => {
@@ -114,6 +115,7 @@ export default function DoctorChatScreen({ route }) {
       <InputToolbar
         {...props}
         containerStyle={styles.inputToolbar}
+        textInputStyle={{color:'black'}}
       />
     );
   };
@@ -174,10 +176,10 @@ export default function DoctorChatScreen({ route }) {
               />
               }/>
               <View style={styles.nameAndClass}>
-                <Text style={styles.username}>
+                <Text style={[styles.username, {color:'black'}]}>
                   {patient.firstName} {patient.lastName}
                 </Text>
-                <Text style={styles.class}>
+                <Text style={[styles.class, {color:'black'}]}>
                   {patient.contact}
                 </Text>
               </View>
@@ -275,7 +277,6 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 20,
-
   },
 
   sendIcon: {

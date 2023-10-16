@@ -24,8 +24,10 @@ import { FlatList } from 'react-native-gesture-handler';
 const AppointmentCard = ( props ) => {
   const { userData, updateUser } = useUserContext();
   const doctor_name = props.doctorName;
+  const patient_name = props.patientName
   const date = props.date;
 
+  const nameToDisplay = userData?.role === 1 ? patient_name : `Dr. ${doctor_name}`;
   const timestamp = new Date(
     date.seconds * 1000 + date.nanoseconds / 1000000
   );
@@ -42,7 +44,7 @@ const AppointmentCard = ( props ) => {
 
   return(
     <View style={{display:'flex',
-      backgroundColor:'white', 
+      backgroundColor:'#65A89F', 
       width:'100%', 
       justifyContent:'center', 
       alignContent:'center',
@@ -54,19 +56,20 @@ const AppointmentCard = ( props ) => {
       >
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>
         <View style={{flexDirection:'column', flex:1}}>  
-          <Text>Appointment Date</Text>
-          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>{formattedDate} {formattedTime}</Text>
+          <Text style={{color:'white'}}>Appointment Date</Text>
+          <Text style={{fontWeight:'bold', color:'white', fontSize:16}}>{formattedDate} {formattedTime}</Text>
         </View>
-        <TouchableOpacity onPress={()=>{console.log(props.doctorName)}}>
-          <Icon name="ellipsis-vertical" style={{fontSize:20}}/>
-        </TouchableOpacity>
       </View>
-      <Divider/>
+      <Divider color='white'/>
       <View style={{marginTop: 6, paddingVertical:12, flexDirection:'row'}}>
-        <Avatar image={{ uri: "https://mui.com/static/images/avatar/1.jpg" }}/>
+        <Avatar
+          image={{
+            uri: userData?.role === 0 ? props?.docPic : props?.patientPic
+          }}
+        />
         <View style={{marginLeft: 10, flexDirection:'column'}}>
-          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>Dr. {doctor_name}</Text>
-          <Text style={{}}>Orthopedic</Text>
+          <Text style={{fontWeight:'bold', color:'white', fontSize:16}}>{nameToDisplay}</Text>
+          <Text style={{color:'white', fontSize:16}}>{props?.name}</Text>
         </View>
       </View>
     </View>
@@ -233,11 +236,23 @@ const Schedule = () => {
   ]);
 
   const fetchAppointments = async () => {
+
+    const role = userData?.role;
+    let whereField, whereValue;
+
+    if (role === 1) {
+      whereField = 'doctor_assigned';
+      whereValue = trimmedUid;
+    } else {
+      whereField = 'patient_assigned';
+      whereValue = trimmedUid;
+    }
+
     try {
       const appointmentsSnapshot = await firestore()
         .collection('appointments')
         .where('status', '==', 1)
-        .where('patient_assigned', '==', trimmedUid)
+        .where(whereField, '==', whereValue)
         .get();
 
       const appointmentsData = await Promise.all(
@@ -258,7 +273,9 @@ const Schedule = () => {
           return {
             ...appointmentData,
             doctorName: doctorData.firstName,
-            patientName: patientData.firstName,
+            patientName: patientData.firstName + ' ' + patientData.lastName,
+            patientPic: patientData.profilePictureURL,
+            docPic: doctorData.profilePictureURL
           };
         })
       );
@@ -325,8 +342,8 @@ const Schedule = () => {
         filteredAppointments.length === 0 ? (
           value === 'upcoming' ? 
           <View style={{display:'flex', justifyContent:'center', alignContent:'center', alignItems:'center'}}>
-            <Icon style={{fontSize:100}} name="calendar-clear-outline"/>
-            <Text style={{fontSize:20}}>No upcoming appointments</Text> 
+            <Icon style={{fontSize:100, color:'#696969'}} name="calendar-clear-outline"/>
+            <Text style={{fontSize:20, color:'#696969'}}>No upcoming appointments</Text> 
           </View>
           : 
           <View style={{display:'flex', justifyContent:'center', alignContent:'center', alignItems:'center'}}>

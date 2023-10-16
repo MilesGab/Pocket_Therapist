@@ -21,7 +21,7 @@ const SearchResult = ({ result, doctorId, updateDoctorField}) => {
                         style={{marginRight: 12}} 
                         image={{ uri: result?.profilePictureURL || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
                         }}/>
-                    <Text style={{fontSize: 18}}>{result?.name || result?.firstName} {result?.lastName}</Text>
+                    <Text style={{fontSize: 18, color:'black'}}>{result?.name || result?.firstName} {result?.lastName}</Text>
                 </View>
             </TouchableOpacity>
             { result?.doctor === doctorId ? (
@@ -107,12 +107,12 @@ const PatientSearch = () => {
                     style={{ width: '85%' }}
                 />
                 <TouchableOpacity onPress={handleCancel}>
-                    <Text style={{fontSize: 18}}>Cancel</Text>
+                    <Text style={{fontSize: 18, color:"black"}}>Cancel</Text>
                 </TouchableOpacity>
             </View>
             <View>
             {resultsList
-            .filter(result => result?.firstName?.toLowerCase().includes(searchQuery))
+            .filter(result => result?.firstName?.toLowerCase().startsWith(searchQuery.toLowerCase()))
             .map((result, index) => (
                 <SearchResult key={index} result={result} doctorId={trimmedUid} updateDoctorField={updateDoctorField}/>
             ))}

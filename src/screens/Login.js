@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderRadius: 10,
     padding: 12,
+    color:'black'
   },
 
   whiteSheet: {

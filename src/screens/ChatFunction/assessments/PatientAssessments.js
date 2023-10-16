@@ -134,30 +134,33 @@ const PatientAssessment = ({ route }) => {
     }, []);
 
     return(
-        <View style={styles.container}>
-            <View style={{marginBottom: 20}}>
-                <Text style={{fontSize: 28, fontWeight:'bold'}}>{patientInfo.firstName}'s Assessments</Text>
-                <TouchableOpacity onPress={handleList} style={styles.videoContainer}>
-                    <View style={styles.buttonWrapper}>
-                        <Icon name="walk-outline" size={20}/>
-                        <Text>{patientInfo.firstName}'s exercise list</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-            {isLoading ? (
-                <ActivityIndicator size={'large'} color='gray'/>
-            ) : (
-                <FlatList
-                horizontal={false}
-                data={assessmentList}
-                keyExtractor={(item) => item.uid}
-                renderItem={({ item }) => (
-                    <AssessmentCard {...item} />
+        <ScrollView>
+            <View style={styles.container}>
+                <View style={{marginBottom: 20}}>
+                    <Text style={{fontSize: 28, fontWeight:'bold', color:'black'}}>{patientInfo.firstName}'s Assessments</Text>
+                    <TouchableOpacity onPress={handleList} style={styles.videoContainer}>
+                        <View style={styles.buttonWrapper}>
+                            <Icon name="walk-outline" size={20} color='black'/>
+                            <Text style={{color:'black'}}>{patientInfo.firstName}'s exercise list</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                {isLoading ? (
+                    <ActivityIndicator size={'large'} color='gray'/>
+                ) : (
+                    <FlatList
+                    horizontal={false}
+                    data={assessmentList}
+                    keyExtractor={(item) => item.uid}
+                    renderItem={({ item }) => (
+                        <AssessmentCard {...item} />
+                    )}
+                    showsVerticalScrollIndicator={false} 
+                    scrollEnabled={false}
+                    />
                 )}
-                showsVerticalScrollIndicator={false} 
-                />
-            )}
-        </View>
+            </View>
+        </ScrollView>
     )
 }
 
@@ -177,7 +180,8 @@ const styles = StyleSheet.create({
     },
     
     cardText: {
-        color:'white'
+        color:'white',
+        fontSize: 16
     },
 
     buttonWrapper: {
