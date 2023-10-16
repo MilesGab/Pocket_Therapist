@@ -13,11 +13,11 @@ import { useNavigation } from '@react-navigation/native';
 
 const InformationSection = (props) => {
   const { userData, updateUser } = useUserContext();
-  const fullName = userData.firstName + " " + userData.lastName;
+  const fullName = userData?.firstName + " " + userData?.lastName;
   const [date, setDate] = React.useState(userData?.dateOfBirth);
   
   const timestamp = new Date(
-     date.seconds * 1000 + date.nanoseconds / 1000000
+     date?.seconds * 1000 + date?.nanoseconds / 1000000
   );
 
   const formattedDate = timestamp.toLocaleDateString('en-US', {
@@ -65,7 +65,7 @@ const InformationSection = (props) => {
         <Text style={styles.infoTxt}>Complete Name</Text>
       </View>
       <View style={styles.rowTxt}>
-        <Text style={styles.userInfoTxt}>{userData.firstName} {userData.lastName}</Text>
+        <Text style={styles.userInfoTxt}>{userData?.firstName} {userData?.lastName}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.infoTxt}>Age</Text>
@@ -83,19 +83,19 @@ const InformationSection = (props) => {
         <Text style={styles.infoTxt}>Sex assigned at birth</Text>
       </View>
       <View style={styles.rowTxt}>
-        <Text style={styles.userInfoTxt}>{sexMap[userData.sex] || '---'}</Text>
+        <Text style={styles.userInfoTxt}>{sexMap[userData?.sex] || '---'}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.infoTxt}>E-mail Address</Text>
       </View>
       <View style={styles.rowTxt}>
-        <Text style={styles.userInfoTxt}>{userData.email}</Text>
+        <Text style={styles.userInfoTxt}>{userData?.email}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.infoTxt}>Contact Number</Text>
       </View>
       <View style={styles.rowTxt}>
-        <Text style={styles.userInfoTxt}>{userData.contact}</Text>
+        <Text style={styles.userInfoTxt}>{userData?.contact}</Text>
       </View>
     </>
   )
@@ -179,7 +179,7 @@ const EditSection = (props) => {
   };
 
   const timestamp = new Date(
-    date.seconds * 1000 + date.nanoseconds / 1000000
+    date?.seconds * 1000 + date?.nanoseconds / 1000000
  );
 
   const formattedDate = timestamp.toLocaleDateString('en-US', {
@@ -320,8 +320,8 @@ const EditSection = (props) => {
 }
 
 const Profile = () => {
-  const { userData, updateUser } = useUserContext();
-  const fullName = userData.firstName + " " + userData.lastName;
+  const { userData, logout } = useUserContext();
+  const fullName = userData?.firstName + " " + userData?.lastName;
   const navigation = useNavigation();
   const [isEditMode, setEditMode] = React.useState(false);
   const [image, setProfilePicture] = React.useState(null);
@@ -334,6 +334,7 @@ const Profile = () => {
     auth()
       .signOut()
       .then(() => {
+        logout();
         console.log('Logout successful!');
         navigation.navigate('Login');
       })

@@ -17,8 +17,10 @@ import VoiceChat from '../screens/ChatFunction/call/VoiceChat.js';
 import Media from '../screens/Media.js';
 import PatientAssessment from '../screens/ChatFunction/assessments/PatientAssessments.js';
 import Exercises from '../screens/ChatFunction/assessments/Exercises.js';
+import AssessmentPage from '../screens/ChatFunction/assessments/AssessmentPage.js';
 import PatientScreen from '../screens/Homescreen/roles/PatientScreen.js';
 import DoctorScreen from '../screens/Homescreen/roles/DoctorScreen.js';
+import PatientSearch from '../screens/Homescreen/roles/components/SearchPatient.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -120,6 +122,7 @@ function MyTabs() {
 
 const HomeStack = () => {
   const { userData, updateUser } = useUserContext();
+
   useEffect(() => {
     if (userData) {
       if (userData.role === 0) {
@@ -145,19 +148,13 @@ return (
         options={{headerShown: false, initialParams: { role: 1 } }} // role 1 is for doctors
       />
     )}
-    <Stack.Screen 
-    name= "DoctorChatScreen" 
-    component={DoctorChatScreen} 
-    options={({route}) => ({
-      headerTitle: `Messages`,
-        headerStyle: {
-          backgroundColor:'#DCEDF9',
-          height: 80
-        },
-    }
-    )
-  } 
+
+  <Stack.Screen 
+    name="PatientSearch"
+    component={PatientSearch}
+    options={{headerShown: false}}
     />
+
   </Stack.Navigator>
 );
 };
@@ -198,9 +195,8 @@ return (
           backgroundColor:'#DCEDF9',
           height: 80
         },
-    }
-    )
-  } 
+      })
+    } 
     />
     <Stack.Screen 
     name="VoiceChat"
@@ -219,6 +215,12 @@ return (
     component={Exercises}
     options={{headerShown: false}}
     />
+
+    <Stack.Screen 
+    name="AssessmentPage"
+    component={AssessmentPage}
+    options={{headerShown: false}}
+    />
   </Stack.Navigator>
 );
 };
@@ -230,10 +232,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingTop: 10,
-    borderRadius: 32,
-    marginHorizontal: 12,
-    marginBottom: 12,
-    elevation: 4,
   },
   tabItemContainer: {
     alignItems: 'center',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
-import { Avatar, IconButton, Box } from "@react-native-material/core";
+import { Avatar, IconButton, Box, Divider } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
 import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
@@ -17,7 +17,7 @@ const PatientScreen = ({ navigation }) => {
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);
 
-  const trimmedUid = userData.doctor;
+  const trimmedUid = userData?.uid.trim();
 
   React.useEffect(() => {
     setLoading(true);
@@ -25,6 +25,7 @@ const PatientScreen = ({ navigation }) => {
       try {
         const appointmentsSnapshot = await firestore()
           .collection('appointments')
+          .where('patient_assigned', '==', trimmedUid)
           .limit(1)
           .get();
 
@@ -45,8 +46,9 @@ const PatientScreen = ({ navigation }) => {
             
             return {
               ...appointmentData,
-              doctorName: doctorData.lastName,
-              patientName: patientData.firstName,
+              doctorName: doctorData?.lastName,
+              doctorPhoto: doctorData?.profilePictureURL,
+              patientName: patientData?.firstName,
             };
           })
         );
@@ -62,43 +64,65 @@ const PatientScreen = ({ navigation }) => {
     fetchAppointments();
   }, []);
 
-  const Item = ({item, onPress, backgroundColor, textColor}) => {
-    
-    const timestamp = new Date(
-        item.date.seconds * 1000 + item.date.nanoseconds / 1000000
-      );
-    
-    const formattedDate = timestamp.toLocaleDateString('en-US', {
-        weekday: 'long',
-        day: '2-digit',
-      });
+const Item = ({ item, onPress, backgroundColor, textColor }) => {
+  
+  const timestamp = new Date(
+      item.date.seconds * 1000 + item.date.nanoseconds / 1000000
+    );
+  
+  const formattedDate = timestamp.toLocaleDateString('en-US', {
+      month: 'long',
+      weekday: 'long',
+      day: '2-digit',
+    });
 
-    const formattedTime = timestamp.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true,
-      });
+  const formattedTime = timestamp.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    });
 
-    return(
-        <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
+  return(
+      <View style={[styles.item, {backgroundColor}]}>
         <View style={{display: 'flex', flexDirection: 'row', justifyContent:'flex-start', paddingHorizontal: 12, paddingVertical: 18,gap: 12}}>
-            <Box style={{borderRadius: 20, paddingVertical: 8, paddingLeft:20}}>
-            <Text style={[styles.title, { color: textColor, fontSize: 32, fontWeight: 'bold', width: 50}]}>
-                {formattedDate}
-            </Text>          
+            <Box style={{borderRadius: 20, paddingVertical: 8, paddingLeft:6}}>
+              <Avatar label={item.firstName} size={55} 
+                image={
+                  <Image
+                  source={{ uri: item?.doctorPhoto || 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'}}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    borderRadius: 28,
+                  }}
+                  />
+                  }
+                />
             </Box>
             <Box style={{paddingVertical: 8}}>
-            <Text style={[styles.title, {color:textColor}]}>{formattedTime}</Text>
-            <Text style={[styles.title, {color:textColor, fontWeight: 'bold'}]}>Dr. {item.doctorName}</Text>
-            <Text style={[styles.title, {color: textColor}]}>{item.name}</Text>
+              <Text style={[styles.title, {color:textColor, fontWeight: 'bold'}]}>Dr. {item.doctorName}</Text>
+              <Text style={[styles.title, {color: textColor}]}>{item.name}</Text>
             </Box>
         </View>
-        </TouchableOpacity>
-        )
-    };
+        <View style={{display: 'flex', flexDirection: 'row', marginHorizontal: 12, marginBottom: 20, backgroundColor:'#A8D5BA', borderRadius:4, paddingVertical: 4,paddingHorizontal: 12, gap: 32}}>
+          <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', gap: 6,flex: 1}}>
+            <Icon name="calendar-outline" size={20}/>
+            <Text>{formattedDate}</Text>
+          </View>
+          <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', gap: 6}}>
+            <Icon name="time-outline" size={20}/>
+            <Text>{formattedTime}</Text>
+          </View>
+        </View>
+      </View>
+      )
+  };
 
   const renderItem = ({item}) => {
-    const backgroundColor = item.id === selectedId ? '#1C6BA4' : '#257cba';
+    const backgroundColor = item.id === selectedId ? '#65A89F' : '#257cba';
     const color = item.id === selectedId ? 'white' : 'black';
 
     return (
@@ -163,45 +187,23 @@ const PatientScreen = ({ navigation }) => {
               <IconButton
                 onPress={() => navigation.navigate('Profile')}
                 style={{
-                  backgroundColor: '#DCEDF9',
-                  width: 80,
+                  backgroundColor: '#D1B655',
+                  width: '50%',
                   height: 80,
                   borderRadius: 8,
                 }}
-                icon={props => <Icon name="clipboard-outline" color={'#1C6BA4'} size={36} />}
+                icon={props => <Icon name="clipboard-outline" color={'#F2F2F2'} size={36} />}
               />
               {/* 2nd button */}
               <IconButton
                 onPress={() => navigation.navigate('Assessment')}
                 style={{
-                  backgroundColor: '#F2E3E9',
-                  width: 80,
+                  backgroundColor: '#D1B655',
+                  width: '50%',
                   height: 80,
                   borderRadius: 8,
                 }}
-                icon={props => <Icon name="accessibility-outline" color={'#9D4C6C'} size={36} />}
-              />
-              {/* 3rd button */}
-              <IconButton
-                onPress={() => navigation.navigate('Profile')}
-                style={{
-                  backgroundColor: '#DCEDF9',
-                  width: 80,
-                  height: 80,
-                  borderRadius: 8,
-                }}
-                icon={props => <Icon name="clipboard-outline" color={'#1C6BA4'} size={36} />}
-              />
-              {/* 4th button */}
-              <IconButton
-                onPress={() => navigation.navigate('Profile')}
-                style={{
-                  backgroundColor: '#DCEDF9',
-                  width: 80,
-                  height: 80,
-                  borderRadius: 8,
-                }}
-                icon={props => <Icon name="clipboard-outline" color={'#1C6BA4'} size={36} />}
+                icon={props => <Icon name="accessibility-outline" color={'#F2F2F2'} size={36} />}
               />
               </View>
         </View>
@@ -211,14 +213,16 @@ const PatientScreen = ({ navigation }) => {
           {isLoading ? (
             <ActivityIndicator size="large"/>
           ) : (
-            <FlatList
-            horizontal={true}
-            data={appointmentList}
-            renderItem={renderItem}
-            keyExtractor={item => item.uid}
-            extraData={selectedId}
-            showsHorizontalScrollIndicator={false}
-            />
+            <View style={{justifyContent:'center', alignContent:'center', alignItems:'center'}}>
+              <FlatList
+                horizontal={true}
+                data={appointmentList}
+                renderItem={renderItem}
+                keyExtractor={item => item.uid}
+                extraData={selectedId}
+                showsHorizontalScrollIndicator={false}
+              />
+            </View>
           )}
             
         </View>
@@ -230,7 +234,9 @@ const LatestResults = () =>{
   const { userData, updateUser } = useUserContext();
   const [dataList, setDataList] = React.useState({});
   const [isLoading, setLoading] = React.useState(false);
-  
+  const trimmedUid = userData?.uid.trim();
+
+
   const resultsMap = [
     'YES'
   ];
@@ -244,6 +250,7 @@ const LatestResults = () =>{
     try {
       const assessmentsSnapshot = await firestore()
         .collection('assessments')
+        .where('patient', '==', trimmedUid)
         .orderBy('date', 'desc')
         .limit(1)
         .get();
@@ -260,24 +267,26 @@ const LatestResults = () =>{
   };
 
   const timestamp = new Date(
-    dataList.date?.seconds * 1000 + dataList.date?.nanoseconds / 1000000
+    dataList?.date?.seconds * 1000 + dataList?.date?.nanoseconds / 1000000
   );
 
   const formattedDate = timestamp.toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric' 
   });
 
+  const outputDate = formattedDate !== 'Invalid Date' ? formattedDate : '';
+
   return(
     <View style={styles.stats}>
-      <Box w={'100%'} h={'100%'} style={{ backgroundColor: "#FAF0DB", borderRadius: 32 }}>
+      <Box w={'100%'} h={'100%'} style={{ backgroundColor: "rgba(174, 223, 247, 0.7)", borderRadius: 20 }}>
           <Box style={{padding: 16, paddingHorizontal: 20, display: 'flex', flexDirection: 'row'}}>
             <Box style={{flex: 1}}>
-              <Box style={{display:'flex', flexDirection:'row'}}>
-                <Text style={{fontFamily: 'Nunito Sans', fontWeight:'bold', fontSize: 20, color: 'black', flex:1}}>Your Health</Text>
+              <Box style={{display:'flex', flexDirection:'row', marginBottom: 20}}>
+                <Text style={{fontFamily: 'Nunito Sans', fontWeight:'bold', fontSize: 20, color: 'black', flex:1}}>Last Assessment</Text>
                 {isLoading ? (
                   <Text>Getting date...</Text>
                 ) : (
-                  <Text>{formattedDate}</Text>
+                  <Text>{outputDate}</Text>
                 )}
               </Box>
               {isLoading ? (
@@ -287,23 +296,32 @@ const LatestResults = () =>{
                 </View>
               ) : (
                 <>
-                  <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black', marginBottom: 12}}>These are your latest test results: </Text>
-                  <Box style={{display:'flex', flexDirection:'row'}}>
-                    <Box style={{flexDirection:'column', flex:1}}>
-                      <Text>Physical Assessment</Text>
-                      {dataList.phyiscalData?.map((item, index) => (
-                        <Text key={index}>{item || ''}</Text>
-                      ))}
-                    </Box>
-                    <Box style={{flexDirection:'column'}}>
-                      <Text>Pain Assessment</Text>
-                      {dataList.painData?.map((item, index) => (
-                        <Text key={index}>{item || ''}</Text>
-                      ))}
-                    </Box>
-                  </Box>
-                  <Text>Range of Motion</Text>
-                  <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black'}}>Max wrist flexion: {dataList.maxAngle}°</Text>
+                  <View style={{marginBottom: 60}}>
+                    <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black', marginBottom: 12}}>Maximum wrist range of motion:</Text>
+                    <Text style={{fontSize: 32, fontWeight:'bold'}}>{dataList.maxAngle}°</Text>
+                  </View>
+                  {dataList && dataList.painData ? (
+                  <View style={{display:'flex', flexDirection:'row', borderTopWidth: 1, justifyContent:'space-around'}}>
+                    <View style={{borderRightWidth: 1, paddingHorizontal: 4,minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>VAS Score</Text>
+                      <Text>{dataList?.painData[0]}</Text>
+                    </View>
+                    <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>Pain</Text>
+                      <Text>{dataList?.painData[1]}</Text>
+                    </View>
+                    <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>Warm?</Text>
+                      <Text>{dataList?.phyiscalData[3]}</Text>
+                    </View>
+                    <View style={{paddingHorizontal: 4, minWidth: 60}}>
+                      <Text style={{fontWeight:'bold'}}>VAS Score</Text>
+                      <Text>6</Text>
+                    </View>
+                  </View>
+                  ) : (
+                    null
+                  )}
                 </>
               )}
             </Box>
@@ -314,57 +332,67 @@ const LatestResults = () =>{
 }
 
 const styles = StyleSheet.create({
+  
   container: {
     height:'100%',
     justifyContent: 'space-between',
     padding: 20,
     paddingTop: 32
   },
+
   header: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 32
   },
+
   headerText: {
     fontFamily: 'Nunito Sans',
     fontSize: 16,
-    color: 'black',
+    color: '#343434',
     fontStyle: 'normal',
     fontWeight: 'bold'
   },
+
   services: {
-    marginBottom: 16
+    marginBottom: 16,
+    paddingHorizontal: 16
   },
+
   servicesText: {
     fontFamily: 'Nunito Sans',
     fontSize: 20,
-    color: 'black',
+    color: '#343434',
     fontStyle: 'normal',
     fontWeight: 'bold'
   },
+
   stats: {
     height: '35%',
     marginBottom: 16
   },
-  footer: {
 
+  footer: {
+    width: '100%'
   },
 
   footerText: {
     fontFamily: 'Nunito Sans',
     fontSize: 20,
-    color: 'black',
+    color: '#343434',
     fontStyle: 'normal',
     fontWeight: 'bold'
   },
+
   item: {
-    height: 132,
-    width: 260,
-    borderRadius: 28,
+    paddingHorizontal: 12,
+    height: 'auto',
+    width: 'auto',
+    borderRadius: 12,
     marginVertical: 8,
-    marginHorizontal: 8,
   },
+
   title: {
     fontSize: 18
   }

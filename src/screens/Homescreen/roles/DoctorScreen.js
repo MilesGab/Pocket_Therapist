@@ -113,6 +113,10 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
       }
     };
 
+  React.useEffect(()=>{
+    countPatients();
+  }, []);
+
   const countPatients = async () => {
     try{
       const querySnapshot = await firestore()
@@ -128,10 +132,6 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
       console.error('Error fetching patients: ', error);
     }
   }
-
-  React.useEffect(()=>{
-    countPatients();
-  }, []);
 
   const countAppointments = async () => {
     try {
@@ -202,8 +202,11 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
       );
     
     const formattedDate = timestamp.toLocaleDateString('en-US', {
-        weekday: 'long',
         day: '2-digit',
+      });
+
+    const formattedDay = timestamp.toLocaleDateString('en-US', {
+        weekday: 'short',
       });
 
     const formattedTime = timestamp.toLocaleTimeString('en-US', {
@@ -260,6 +263,10 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
       });
   };
 
+  const handleSearch = () =>{
+    navigation.navigate('PatientSearch');
+  }
+
 
   return (
       <View style={styles.container}>
@@ -285,7 +292,7 @@ messaging().onNotificationOpenedApp(async (remoteMessage) => {
               color: 'black',
               }}>Dr. {userData?.firstName || '---'} {userData?.lastName || '---'}</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleSearch}>
             <Icon name="person-add-outline" color={'black'} size={26} />
           </TouchableOpacity>
         </View>

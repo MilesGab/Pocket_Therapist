@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
+import { Bubble, GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {Avatar} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useUserContext } from '../../../contexts/UserContext';
 import firestore from '@react-native-firebase/firestore';
-import { requestUserPermission, NotificationListener } from '../../notifications';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 export default function DoctorChatScreen({ route }) {
   const { patientData } = route.params;
@@ -15,12 +14,14 @@ export default function DoctorChatScreen({ route }) {
   const [patient, setPatient] = React.useState({});
   const {userData, updateUser} = useUserContext();
   const trimmedUid = userData.uid.trim();
+  const navigation = useNavigation();
+
 
   const senderData = {
     _id: trimmedUid,
     name: userData.firstName,
     avatar:
-      'https://55knots.com.au/wp-content/uploads/2021/01/Zanj-Avatar-scaled.jpg',
+      userData?.profilePictureURL,
   };
 
   const fetchPatient = async () => {
@@ -48,28 +49,6 @@ export default function DoctorChatScreen({ route }) {
 
   const retrieveMessagesFromFirestore = async () => {
     try {
-      // const querySnapshot = await firestore()
-      //   .collection('messages')
-      //   .where('user._id', '==', patientData) // Match patientData
-      //   .orderBy('createdAt', 'desc')
-      //   .get();
-
-      // const messages = [];
-
-      // querySnapshot.forEach((documentSnapshot) => {
-      //   const messageData = documentSnapshot.data();
-      //   const message = {
-      //     _id: documentSnapshot.id,
-      //     user: messageData.user,
-      //     text: messageData.text,
-      //     createdAt: messageData.createdAt.toDate(),
-      //   };
-
-      //   messages.push(message);
-      // });
-
-      // setMessages(messages);
-
       const chatRef = firestore().collection('messages');
       chatRef.where('sendTo', 'in', [patientData, trimmedUid])
              .where('user._id', 'in', [patientData, trimmedUid])
@@ -82,7 +61,7 @@ export default function DoctorChatScreen({ route }) {
                      _id: change.doc.id,
                      user: messageData.user,
                      text: messageData.text,
-                     createdAt: messageData?.createdAt.toDate(),
+                     createdAt: messageData?.createdAt?.toDate() || new Date(),
                    };
                    setMessages((prevMessages) => {
                     if (prevMessages.some((message) => message._id === newMessage._id)) {
@@ -121,6 +100,7 @@ export default function DoctorChatScreen({ route }) {
             user: senderData,
             text: message.text,
             createdAt: firestore.FieldValue.serverTimestamp(),
+            sendTo: patientData
           });
       }
     } catch (error) {
@@ -146,6 +126,26 @@ export default function DoctorChatScreen({ route }) {
       </Send>
     );
   };
+
+  const renderBubble = (props) => {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          right: {
+            backgroundColor: '#3A97F9',
+          },
+          left: {
+            backgroundColor: 'white',
+          },
+        }}
+      />
+    );
+  };
+
+  const handleCall = () => {
+    navigation.navigate('VoiceChat');
+  }
 
   return (
     <TouchableWithoutFeedback
@@ -182,6 +182,9 @@ export default function DoctorChatScreen({ route }) {
                 </Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity onPress={handleCall}>
+              <Icon name="phone" size={24}/>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.toolbarContainer}>
@@ -191,6 +194,7 @@ export default function DoctorChatScreen({ route }) {
             user={{ _id: trimmedUid }}
             renderSend={(props) => renderSend(props)}
             renderInputToolbar={(props) => customInputToolbar(props)}
+            renderBubble={(props) => renderBubble(props)} // Pass the custom renderBubble function here
             alwaysShowSend={true}
           />
         </View>
