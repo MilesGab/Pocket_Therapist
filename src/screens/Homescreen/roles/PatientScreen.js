@@ -207,6 +207,11 @@ const PatientScreen = ({ navigation }) => {
                 keyExtractor={item => item.uid}
                 extraData={selectedId}
                 showsHorizontalScrollIndicator={false}
+                ListEmptyComponent={() => (
+                  <View style={{marginTop: 12, padding: 20}}>
+                    <Text style={{ textAlign: 'center' }}>No upcoming appointments</Text>
+                  </View>
+                )}
               />
             </View>
           )}

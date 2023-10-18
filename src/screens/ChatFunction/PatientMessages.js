@@ -51,30 +51,7 @@ export default function PatientMessages() {
   }, []);
 
   const retrieveMessagesFromFirestore = async () => {
-    try {
-      // const querySnapshot = await firestore()
-      //   .collection('messages')
-      //   .where('sendTo', 'in', [doctorId, trimmedUid])
-      //   .where('user._id', 'in', [doctorId, trimmedUid])
-      //   .orderBy('createdAt', 'desc')
-      //   .get();
-  
-      // const messages = [];
-  
-      // querySnapshot.forEach((documentSnapshot) => {
-      //   const messageData = documentSnapshot.data();
-      //   const message = {
-      //     _id: documentSnapshot.id,
-      //     user: messageData.user,
-      //     text: messageData.text,
-      //     createdAt: messageData.createdAt.toDate(),
-      //   };
-  
-      //   messages.push(message);
-      // });
-  
-      // setMessages(messages);
-  
+    try {  
       const chatRef = firestore().collection('messages');
       chatRef.where('sendTo', 'in', [trimmedUid, doctorId])
              .where('user._id', 'in', [doctorId, trimmedUid])

@@ -106,7 +106,7 @@ function MyTabs() {
           tabBarLabel: 'Notifications',
         }}
       />
-      { userData?.role === 1 ? (
+      {/* { userData?.role === 1 ? (
         <Tab.Screen
         name="Media"
         component={Media}
@@ -116,7 +116,7 @@ function MyTabs() {
           tabBarLabel: 'Media',
         }}
       />
-      ) : (null)}
+      ) : (null)} */}
     </Tab.Navigator>
   );
 }

@@ -49,13 +49,13 @@ const AppointmentCard = ( props ) => {
       justifyContent:'center', 
       alignContent:'center',
       paddingHorizontal:10, 
-      paddingVertical:6,
-      borderRadius:12,
+      paddingVertical:12,
+      borderRadius:20,
       marginBottom: 16
       }}
       >
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>
-        <View style={{flexDirection:'column', flex:1}}>  
+        <View style={{flexDirection:'column', flex:1, paddingVertical: 2, paddingHorizontal: 2}}>  
           <Text style={{color:'white'}}>Appointment Date</Text>
           <Text style={{fontWeight:'bold', color:'white', fontSize:16}}>{formattedDate} {formattedTime}</Text>
         </View>
