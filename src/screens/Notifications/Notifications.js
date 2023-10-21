@@ -19,7 +19,7 @@ import AssessmentList from './components/AssessmentList';
 
 const Notification = ({ item, fetchApptRequest }) => {
   const { userData, updateUser } = useUserContext();
-  const doctor_name = item.patientName;
+  const patient_name = item.patientName;
   const date = item.date;
   const appointmentId = item.uid;
 
@@ -82,7 +82,7 @@ const Notification = ({ item, fetchApptRequest }) => {
 
   return(
     <View style={{display:'flex',
-      backgroundColor:'white', 
+      backgroundColor:'#faf0be', 
       width:'100%', 
       justifyContent:'center', 
       alignContent:'center',
@@ -93,7 +93,7 @@ const Notification = ({ item, fetchApptRequest }) => {
       }}
       >
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>
-        <View style={{flexDirection:'column', flex:1}}>  
+        <View style={{marginHorizontal: 5, flexDirection:'column', flex:1}}>  
           <Text>Appointment Date</Text>
           <View style={{flexDirection:'row'}}>
             <Text style={{fontWeight:'bold', color:'black', fontSize:16, flex:1}}>{formattedDate} {formattedTime}</Text>
@@ -103,8 +103,9 @@ const Notification = ({ item, fetchApptRequest }) => {
       </View>
       <Divider/>
       <View style={{marginTop: 6, paddingVertical:12, flexDirection:'row', width:'100%'}}>
-        <View style={{marginLeft: 10, flexDirection:'column', width:'100%'}}>
-          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>Patient: {doctor_name}</Text>
+        <View style={{marginLeft: 5, flexDirection:'column', width:'100%'}}>
+          <Text>Patient Name</Text>
+          <Text style={{fontWeight:'bold', color:'black', fontSize:16, marginBottom: 10}}>{patient_name}</Text>
           <View style={{display:'flex', flexDirection:'row', justifyContent:'flex-end', alignItems:'center', paddingHorizontal: 20, gap: 12}}>
             <TouchableOpacity onPress={handleReject} style={{borderWidth: 1, borderColor:'#DC6F6F', paddingVertical:4, paddingHorizontal: 6, borderRadius:4}}>
               <Text style={{color:'red'}}>Reject</Text>

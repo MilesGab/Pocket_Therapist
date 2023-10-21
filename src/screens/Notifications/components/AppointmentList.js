@@ -18,7 +18,7 @@ const AppointmentCard = ({ doctor, date }) => {
     return(
         <View style={styles.notifCard}>
             <View style={styles.content}>
-                <Avatar size={60} image={{uri: doctor.profilePictureURL}} color='white' style={{marginRight: 8}}/>
+            <Icon style={{fontSize:50, color:'#002147'}} name="id-card"/>
                 <Text style={styles.contentText}>Your appointment for {formattedDate} has been approved by Dr. {doctor?.firstName || '---'} {doctor?.lastName || '---'}</Text>
             </View>
         </View>
@@ -101,9 +101,9 @@ const AppointmentList = () => {
 
 const styles = StyleSheet.create({
     notifCard: {
-        backgroundColor: 'white',
+        backgroundColor: '#aaf0d1',
         borderRadius: 12,
-        padding: 12,
+        padding: 18,
         marginBottom:12,
         height:'auto'
     },
@@ -112,11 +112,14 @@ const styles = StyleSheet.create({
         width:'100%',
         display:'flex',
         flexDirection:'row',
-        alignItems:'center'
+        alignItems:'top'
     },
     
     contentText: {
         width: '80%',
+        fontStyle: 'normal',
+        fontSize: 16,
+        marginHorizontal: 12,
         color:'black'
     }
 })
