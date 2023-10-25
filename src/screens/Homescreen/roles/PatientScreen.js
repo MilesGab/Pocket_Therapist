@@ -289,7 +289,7 @@ const LatestResults = () =>{
                 <>
                   <View style={{marginBottom: 60}}>
                     <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black', marginBottom: 12}}>Maximum wrist range of motion:</Text>
-                    <Text style={{fontSize: 32, fontWeight:'bold', color:'#696969'}}>{dataList.maxAngle.toFixed(3)}°</Text>
+                    <Text style={{fontSize: 32, fontWeight:'bold', color:'#696969'}}>{dataList?.maxAngle?.toFixed(3)}°</Text>
                   </View>
                   {dataList && dataList.painData ? (
                   <View style={{display:'flex', flexDirection:'row', borderTopWidth: 1, justifyContent:'space-around'}}>
