@@ -5,7 +5,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
-import messaging from '@react-native-firebase/messaging';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
@@ -76,27 +75,7 @@ const DoctorScreen = ({ navigation }) => {
   const [patientCount, setPatientCount] = React.useState(0);
 
   const [loading, setLoading] = React.useState(true);
-  
 
-  const requestUserPermission = async () =>{
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL
-  
-    if (enabled){
-      console.log('Authorization:', authStatus);
-    }
-  }
-  
-  if (requestUserPermission()){ // <-- Corrected
-    messaging().getToken().then(token =>{
-      console.log(token);
-    });
-  }
-  else{
-    console.log("Failed token", authStatus);
-  }
 
   const countPatients = async () => {
     try{
