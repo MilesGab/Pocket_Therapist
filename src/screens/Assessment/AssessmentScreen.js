@@ -20,7 +20,7 @@ const AssessmentScreen = () => {
 
         <Text style={styles.questionTitle}>Do you want to start the Assessment?</Text>
         <TouchableOpacity  onPress={() => navigation.navigate('Questionnaire')} style={styles.startButton}>
-          <Text style={styles.startButtonText}>START</Text>
+          <Text style={styles.startButtonText}>Start</Text>
         </TouchableOpacity>
         
       </View> 
@@ -68,11 +68,11 @@ const styles = StyleSheet.create({
   },
 
   startButton: {
-    backgroundColor: '#4843fa',  // Background color
-        borderRadius: 8,          // Border radius
-        paddingVertical: 10,      // Vertical padding
-        paddingHorizontal: 20,    // Horizontal padding
-        alignItems: 'center',     // Center the content horizontally
+    backgroundColor: '#65A89F', 
+        borderRadius: 8,       
+        paddingVertical: 10,      
+        paddingHorizontal: 20,    
+        alignItems: 'center',     
         marginBottom: 400
   },
 
