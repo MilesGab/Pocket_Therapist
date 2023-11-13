@@ -23,8 +23,10 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   const [isPainAssessment, setIsPainAssessment] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [dropDownValue, setDropDownValue] = useState('');
-  const [image, setImage] = useState(null)
-  const [imageUri, setImageUri] = useState(null);
+  const [imageLibrary, setImageLibrary] = useState(null)
+  const [imageCamera, setImageCamera] = useState(null);
+  const [downloadURL, setDownloadURL] = useState(null);
+  const [tempURI, setTempURI] = useState(null);
 
   const [dropDownItems, setDropDownItems] = useState([
     { value: 'Sharp', label: 'Sharp: Sudden, intense, and localized pain sensation.' },
@@ -42,11 +44,11 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   const [painDuration, setPainDuration] = useState('');
 
   const painDurationItems = [
-    {value:'few_days', label: 'Few Days'},
-    {value:'few_weeks', label: 'Few Weeks'},
-    {value:'few_months', label: 'Few Months'},
-    {value:'several_months', label: 'Several Months'},
-    {value:'years', label: 'Years'},
+    {value:'Few Days', label: 'Few Days'},
+    {value:'Few Weeks', label: 'Few Weeks'},
+    {value:'Few Months', label: 'Few Months'},
+    {value:'Several Months', label: 'Several Months'},
+    {value:'Years', label: 'Years'},
   ];
 
   const [currentPainQuestion, setCurrentPainQuestion] = useState(0);
@@ -88,7 +90,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     });
 
     if (!result.didCancel){
-      setImage(result.assets[0].uri);
+      setImageLibrary(result.assets[0].uri);
       console.log('image selected from library');
     }
   };
@@ -104,28 +106,38 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         maxWidth: 1000,
         maxHeight: 1000,
       });
-      setImageUri(result.assets[0].uri);
+      setImageCamera(result.assets[0].uri);
       console.log('image captured from camera');
     }
   };
 
   const uploadUserAssessmentPics = async () => {
-    if (image) {
-      const filename = image.substring(image.lastIndexOf('/') + 1);
-      const assessmentsRef = storage().ref(`userAssessment/${filename}`);
-      const response = await fetch(image);
-      const blob = await response.blob();
-      await assessmentsRef.put(blob);
-  
-      console.log('Image on hold for upload');
-    } else {
-      alert('There is an error while saving, please try again');
+    try{
+        let imageURL = imageCamera || imageLibrary; 
+
+      if (imageURL) {
+        const filename = imageURL.substring(imageURL.lastIndexOf('/') + 1);
+        const assessmentsRef = storage().ref(`userAssessment/${filename}`);
+        const response = await fetch(imageURL);
+        const blob = await response.blob();
+        await assessmentsRef.put(blob);
+
+        const downloadURL = await assessmentsRef.getDownloadURL();
+        setDownloadURL(downloadURL);
+        
+        console.log('Image on hold for upload');
+
+      } else {
+        alert('There is an error while saving, please try again');
+      }
+    }catch (error){
+      console.log('Error uploading image')
     }
   };
-
+  
   const unselectImage = () => {
-    setImage(null);
-    setImageUri(null);
+    setImageCamera(null);
+    setImageLibrary(null);
     console.log('image removed');
   };
 
@@ -134,7 +146,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     : ((currentQuestion + 1) / questions.length) * 100;
 
   const handleSensorPage = () => {
-    updatePainData([sliderValue, dropDownValue, painDuration, image]);
+    updatePainData([sliderValue, dropDownValue, painDuration, downloadURL]);
     updatePhysicalData(painAnswers);
     navigation.navigate('JointAssessment');
   }
@@ -148,7 +160,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
       </Text>
 
       <View style={styles.top}>
-        <ProgressBar progress={progress / 100} color="#f9bc27" />
+        <ProgressBar progress={progress / 100} color="#65A89F" />
 
         {isPainAssessment ? (
           <View>
@@ -248,17 +260,18 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
       ) : (
         !isPainAssessment && (
           <View>
-          {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
-          {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
+          {imageLibrary && <Image source={{ uri: imageLibrary }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
+          {imageCamera && <Image source={{ uri: imageCamera }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
           
-          {image && <TouchableHighlight 
+          {imageLibrary &&
+            <TouchableHighlight 
               onPress={unselectImage} 
               underlayColor={'white'}
               style={styles.unselectBtn}>
                 <Text>Remove photo</Text>
             </TouchableHighlight>}
 
-          {imageUri && 
+          {imageCamera && 
             <TouchableHighlight 
               onPress={unselectImage}
               underlayColor={'white'}
@@ -266,7 +279,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                 <Text>Remove photo</Text>
             </TouchableHighlight>}
         
-          {imageUri || image ? (
+          {imageCamera || imageLibrary ? (
             <TouchableOpacity
               style={[styles.imagePicker, styles.disabledPicker]}
             >
@@ -283,7 +296,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
             </TouchableOpacity>
           )}
         
-          {imageUri || image ? (
+          {imageCamera || imageLibrary ? (
             <TouchableOpacity
               style={[styles.imagePicker, styles.disabledPicker]}
             >
