@@ -65,7 +65,7 @@ const Results = ({ painData, phyiscalData }) => {
             <Box style={{ backgroundColor: '#65A89F', borderRadius: 20, marginBottom: 12 }}>
             <View style={styles.physicalResults}>
                 <Text style={{fontWeight:'bold',color:'white'}} >Physical Assessment</Text>
-                {questions.map((question, index) => (
+                {questions.map((question, index)=> (
                     <Text style={{color:'white', fontSize: 16}} key={question}>
                         {question} {phyiscalData[index] || '---'}
                     </Text>
@@ -86,7 +86,14 @@ const Results = ({ painData, phyiscalData }) => {
             <Box style={{ backgroundColor: '#65A89F', borderRadius: 20, marginBottom: 20 }}>
             <View style={styles.wristResults}>
                 <Text style={{fontWeight:'bold',color:'white'}} >Range of Motion Assessment</Text>
-                <Text style={{color:'white', fontSize: 16}} >Max wrist flexion: {maxAngle || '---'} </Text>
+                <Text style={{color:'white', fontSize: 16}} >Max wrist flexion: {maxAngle?.toFixed(3) || '---'} </Text>
+            </View>
+            </Box>
+
+            <Box style={{ backgroundColor: '#65A89F', borderRadius: 20, marginBottom: 20 }}>
+            <View style={styles.wristResults}>
+                <Text style={{ fontWeight: 'bold', color: 'white' }}>Photo of affected wrist</Text>
+                <Image source={{ uri: painData[3] || '---' }} style={{ alignSelf: 'center', width: 200, height: 200 }} />
             </View>
             </Box>
 

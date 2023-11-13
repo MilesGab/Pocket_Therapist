@@ -21,6 +21,11 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   const [isPainAssessment, setIsPainAssessment] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [dropDownValue, setDropDownValue] = useState('');
+  const [imageLibrary, setImageLibrary] = useState(null)
+  const [imageCamera, setImageCamera] = useState(null);
+  const [downloadURL, setDownloadURL] = useState(null);
+  const [tempURI, setTempURI] = useState(null);
+
   const [dropDownItems, setDropDownItems] = useState([
     { value: 'Sharp', label: 'Sharp: Sudden, intense, and localized pain sensation.' },
     { value: 'Dull', label: 'Dull: Aching or throbbing pain that is not sharp or intense.' },
@@ -38,11 +43,11 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   const [painDuration, setPainDuration] = useState('');
 
   const painDurationItems = [
-    {value:'few_days', label: 'Few Days'},
-    {value:'few_weeks', label: 'Few Weeks'},
-    {value:'few_months', label: 'Few Months'},
-    {value:'several_months', label: 'Several Months'},
-    {value:'years', label: 'Years'},
+    {value:'Few Days', label: 'Few Days'},
+    {value:'Few Weeks', label: 'Few Weeks'},
+    {value:'Few Months', label: 'Few Months'},
+    {value:'Several Months', label: 'Several Months'},
+    {value:'Years', label: 'Years'},
   ];
 
   const [currentPainQuestion, setCurrentPainQuestion] = useState(0);
@@ -75,44 +80,64 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     }
   };
 
-  const handleImageLibraryPicker = () => {
-    const options = {
-      title: 'Select Image',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else {
-        setSelectedImage(response);
-      }
+  const pickImage = async () => {
+    let result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 1, //adjust values after testing in real device
+      maxWidth: 1920,
+      maxHeight: 1800,
     });
+
+    if (!result.didCancel){
+      setImageLibrary(result.assets[0].uri);
+      console.log('image selected from library');
+    }
   };
 
-  const handleCameraPicker = () => {
-    const options = {
-      title: 'Take a Picture',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
+  const captureImage = async () => {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED){
+      let result = await launchCamera({
+        mediaType: 'photo',
+        quality: 0.5,//adjust values after testing in real device
+        maxWidth: 1000,
+        maxHeight: 1000,
+      });
+      setImageCamera(result.assets[0].uri);
+      console.log('image captured from camera');
+    }
+  };
 
-    launchCamera(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image capture');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
+  const uploadUserAssessmentPics = async () => {
+    try{
+        let imageURL = imageCamera || imageLibrary; 
+
+      if (imageURL) {
+        const filename = imageURL.substring(imageURL.lastIndexOf('/') + 1);
+        const assessmentsRef = storage().ref(`userAssessment/${filename}`);
+        const response = await fetch(imageURL);
+        const blob = await response.blob();
+        await assessmentsRef.put(blob);
+
+        const downloadURL = await assessmentsRef.getDownloadURL();
+        setDownloadURL(downloadURL);
+        
+        console.log('Image on hold for upload');
+
       } else {
-        setSelectedImage(response);
+        alert('There is an error while saving, please try again');
       }
-    });
+    }catch (error){
+      console.log('Error uploading image')
+    }
+  };
+  
+  const unselectImage = () => {
+    setImageCamera(null);
+    setImageLibrary(null);
+    console.log('image removed');
   };
 
   const progress = isPainAssessment
@@ -120,7 +145,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     : ((currentQuestion + 1) / questions.length) * 100;
 
   const handleSensorPage = () => {
-    updatePainData([sliderValue, dropDownValue, painDuration]);
+    updatePainData([sliderValue, dropDownValue, painDuration, downloadURL]);
     updatePhysicalData(painAnswers);
     navigation.navigate('JointAssessment');
   }
@@ -133,7 +158,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
       </Text>
 
       <View style={styles.top}>
-        <ProgressBar progress={progress / 100} color="#f9bc27" />
+        <ProgressBar progress={progress / 100} color="#65A89F" />
 
         {isPainAssessment ? (
           <View>
@@ -232,22 +257,59 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         </View>
       ) : (
         !isPainAssessment && (
-        <View>
-          <TouchableOpacity
-            onPress={handleImageLibraryPicker}
-            style={styles.imagePicker}
-          >
-            <Icon name="image-outline" size={30} color="white" />
-            <Text style={styles.imagePickerText}>Select from Gallery</Text>
-          </TouchableOpacity>
+          <View>
+          {imageLibrary && <Image source={{ uri: imageLibrary }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
+          {imageCamera && <Image source={{ uri: imageCamera }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
+          
+          {imageLibrary &&
+            <TouchableHighlight 
+              onPress={unselectImage} 
+              underlayColor={'white'}
+              style={styles.unselectBtn}>
+                <Text>Remove photo</Text>
+            </TouchableHighlight>}
 
-          <TouchableOpacity
-            onPress={handleCameraPicker}
-            style={styles.cameraPicker}
-          >
-            <Icon name="camera-outline" size={30} color="white" />
-            <Text style={styles.cameraPickerText}>Take a Picture</Text>
-          </TouchableOpacity>
+          {imageCamera && 
+            <TouchableHighlight 
+              onPress={unselectImage}
+              underlayColor={'white'}
+              style={styles.unselectBtn}>
+                <Text>Remove photo</Text>
+            </TouchableHighlight>}
+        
+          {imageCamera || imageLibrary ? (
+            <TouchableOpacity
+              style={[styles.imagePicker, styles.disabledPicker]}
+            >
+              <Icon name="image-outline" size={30} color="white" />
+              <Text style={styles.imagePickerText}>Image Selected</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={pickImage}
+              style={styles.imagePicker}
+            >
+              <Icon name="image-outline" size={30} color="white" />
+              <Text style={styles.imagePickerText}>Select from Gallery</Text>
+            </TouchableOpacity>
+          )}
+        
+          {imageCamera || imageLibrary ? (
+            <TouchableOpacity
+              style={[styles.imagePicker, styles.disabledPicker]}
+            >
+              <Icon name="camera-outline" size={30} color="white" />
+              <Text style={styles.cameraPickerText}>Image Selected</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={captureImage}
+              style={styles.imagePicker}
+            >
+              <Icon name="camera-outline" size={30} color="white" />
+              <Text style={styles.cameraPickerText}>Take a Picture</Text>
+            </TouchableOpacity>
+          )}
         </View>
         )
       )}
