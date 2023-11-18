@@ -103,7 +103,6 @@ const Results = ({ painData, phyiscalData }) => {
             </View>
         </View>
     )
-
 }
 
 const styles = {

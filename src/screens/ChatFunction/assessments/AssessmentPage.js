@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Dialog, DialogContent, DialogHeader, Provider, TextInput } from '@react-native-material/core';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Slider from "@react-native-community/slider";
 import { ScrollView } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
@@ -17,7 +17,8 @@ const PhysicalQuestions = [
 const PainQuestions = [
     'Describe the pain based on the choices provided',
     'How long have you been experiencing pain on your wrist?',
-    'Maximum range of motion: '
+    'Image of affected wrist',
+    'Maximum range of motion'
 ];
 
 const PhysicalDataResults = ({ question, answer }) => {
@@ -35,9 +36,8 @@ const PhysicalDataResults = ({ question, answer }) => {
 
 }
 
-const VASScoreDisplay = () => {
-
-    const [sliderValue, setSliderValue] = React.useState(2);
+const VASScoreDisplay = ({ initialValue }) => {
+    const [sliderValue, setSliderValue] = React.useState(initialValue || 0);
 
     return (
         <View style={{ backgroundColor: '#477674', padding: 12, borderRadius: 12, marginBottom: 12 }}>
@@ -62,7 +62,6 @@ const VASScoreDisplay = () => {
             </View>
         </View>
     )
-
 }
 
 const NoteDialog = (props) => {
@@ -199,18 +198,29 @@ const AssessmentPage = ({ route }) => {
                         </View>
                         <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>Pain Assessment</Text>
                         <View style={{ paddingHorizontal: 12 }}>
-                            <VASScoreDisplay />
-                            {PainQuestions.map((question, index) => (
-                                <PhysicalDataResults
-                                    key={index}
-                                    question={question}
-                                    answer={
-                                        patientData.painData[index + 1]
-                                            ? patientData.painData[index + 1]
-                                            : patientData.maxAngle
-                                    }
+                        <VASScoreDisplay initialValue={patientData.painData[0]} />
+                        {PainQuestions.map((question, index) => (
+                            <React.Fragment key={index}>
+                            {index === 2 && patientData.painData[index + 1] ? (
+                                <View style={styles.imgContainer}>
+                                    <Text style={{ color: 'white', fontSize: 18, alignSelf: 'flex-start', paddingBottom: 10}}>Image of affected wrist</Text>
+                                    <Image
+                                    source={{ uri: patientData.painData[index + 1] }}
+                                    style={{ width: 200, height: 200 }}
                                 />
-                            ))}
+                                </View>
+                            ) : (
+                                <PhysicalDataResults
+                                question={question}
+                                answer={
+                                    patientData.painData[index + 1]
+                                    ? patientData.painData[index + 1]
+                                    : patientData.maxAngle
+                                }
+                                />
+                            )}
+                            </React.Fragment>
+                        ))}
                         </View>
                         <TouchableOpacity onPress={() => { setVisible(true) }} style={{ backgroundColor: 'white', justifyContent: 'center', alignContent: 'center', alignItems: 'center', padding: 12, borderRadius: 12 }}>
                             <Text style={{ color: 'black' }}>Notes and diagnosis</Text>
@@ -231,6 +241,14 @@ const styles = StyleSheet.create({
         padding: 12,
         height:'100%',
         backgroundColor: '#65A89F'
+    },
+
+    imgContainer:{
+        backgroundColor: '#477674',
+        padding: 12, 
+        borderRadius: 12, 
+        marginBottom: 12,
+        alignItems: 'center'
     },
 
     patientInfoContainer:{
