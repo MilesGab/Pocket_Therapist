@@ -30,7 +30,7 @@ const PhysicalDataResults = ({ question, answer }) => {
                 <Text style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>
                     {answer}
                 </Text>
-            </View>
+            </View>l 
         </View>
     )
 
@@ -66,29 +66,61 @@ const VASScoreDisplay = () => {
 
 }
 
-const NoteDialog = ( props ) => {
+const NoteDialog = (props) => {
+    const [diagnosis, setDiagnosis] = React.useState('');
+    const [notes, setNotes] = React.useState('');
+    const assessmentId = props?.assessmentId;
 
-    return(
+    const handleDiagnosisChange = (text) => {
+        setDiagnosis(text);
+    }
+
+    const handleNotesChange = (text) => {
+        setNotes(text);
+    }
+
+    const handleSave = async () => {
+        try {
+            const assessmentsRef = firestore().collection('assessments').doc(assessmentId);
+
+            await assessmentsRef.update({
+                diagnosis: diagnosis,
+                notes: notes
+            });
+        } catch (error) {
+            console.error('Failed to save assessment notes: ', error);
+        } finally {
+            console.log('SAVED!');
+            props?.setVisible(false);
+        }
+    }
+
+    return (
         <Dialog visible={props?.visible} onDismiss={() => props?.setVisible(false)}>
-            <DialogHeader title="Review Assessment"/>
+            <DialogHeader title="Review Assessment" />
             <DialogContent>
-                <View style={{gap: 12}}>
-                    <View style={{display:'flex', flexDirection:'column'}}>
+                <View style={{ gap: 12 }}>
+                    <View style={{ display: 'flex', flexDirection: 'column' }}>
                         <Text>Diagnosis</Text>
-                        <TextInput />   
+                        <TextInput
+                            value={diagnosis}
+                            onChangeText={handleDiagnosisChange}
+                        />
                     </View>
                     <View>
-                        <Text>Notes</Text> 
-                        <TextInput />   
+                        <Text>Notes</Text>
+                        <TextInput
+                            value={notes}
+                            onChangeText={handleNotesChange}
+                        />
                     </View>
                     <View>
-                        <Button onPress={() => props?.setVisible(false)} color={'lightgray'} title={'Save'} />
+                        <Button onPress={handleSave} color={'lightgray'} title={'Save'} />
                     </View>
                 </View>
             </DialogContent>
         </Dialog>
-    ) 
-
+    )
 }
 
 const AssessmentPage = ({ route }) => {
@@ -98,6 +130,7 @@ const AssessmentPage = ({ route }) => {
     const [visible, setVisible] = React.useState(false);
 
     const trimmedUid = patientData?.patient.trim();
+    const assessmentId = patientData?.uid;
 
     React.useEffect(()=>{
         fetchPatientData();
@@ -158,7 +191,7 @@ const AssessmentPage = ({ route }) => {
                         <TouchableOpacity onPress={()=>{setVisible(true)}} style={{backgroundColor: 'white', justifyContent:'center', alignContent:'center', alignItems:'center', padding: 12, borderRadius: 12}}>
                             <Text style={{color:'black'}}>Notes and diagnosis</Text>
                         </TouchableOpacity> 
-                        <NoteDialog visible={visible} setVisible={setVisible} />
+                        <NoteDialog visible={visible} setVisible={setVisible} assessmentId={assessmentId}/>
                 </View>
             </View>
         </ScrollView>

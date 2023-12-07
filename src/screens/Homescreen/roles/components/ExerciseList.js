@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -6,14 +6,13 @@ import firestore from '@react-native-firebase/firestore';
 import Video from 'react-native-video';
 import { ActivityIndicator, Avatar } from "@react-native-material/core";
 
-const Exercises = ({ route }) => {
-  const { patientData } = route.params;
-  const [videos, setVideos] = useState([]);
+const ExerciseList = () => {
+  const [videos, setVideos] = React.useState([]);
   const [isLoading, setLoading] = React.useState(true);
-  const [paused, setPaused] = useState(true);
-  const [selectedVideos, setSelectedVideos] = useState({});
+  const [paused, setPaused] = React.useState(true);
+  const [selectedVideos, setSelectedVideos] = React.useState({});
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchVideoDetails = async () => {
       try {
         const snapshot = await firestore().collection('exerciseVids').get();
@@ -22,6 +21,7 @@ const Exercises = ({ route }) => {
         if (videoData) {
           setVideos(videoData);
         }
+
       } catch (error) {
         console.error('Error fetching video details from the database:', error);
       } finally {
@@ -30,7 +30,11 @@ const Exercises = ({ route }) => {
     };
 
     fetchVideoDetails();
-    console.log(patientData);
+
+    // Cleanup function to stop video playback when component unmounts
+    return () => {
+      setPaused(true);
+    };
   }, []);
 
   const toggleCheckbox = (videoId) => {
@@ -42,28 +46,18 @@ const Exercises = ({ route }) => {
 
   const renderVideo = ({ item }) => {
     return (
-      <View>
-      <BouncyCheckbox
-          value={!!selectedVideos[item.id]}
-          onPress={() => toggleCheckbox(item.id)}
-      />
-        <TouchableOpacity style={styles.videoContainer}>
-          <Text style={styles.videoTitle}>{item.video_name}</Text>
-          <Text>{item.video_description}</Text>
-          <Video
-            source={{ uri: item.video_path }}
-            style={styles.videoPlayer}
-            controls={true}
-            resizeMode="contain"
-            paused={paused}
-          />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.videoContainer}>
+        <Text style={styles.videoTitle}>{item.video_name}</Text>
+        <Text>{item.video_description}</Text>
+        <Video
+          source={{ uri: item.video_path }}
+          style={styles.videoPlayer}
+          controls={true}
+          resizeMode="contain"
+          paused={paused}
+        />
+      </TouchableOpacity>
     );
-  };
-
-  const handlePress = () => {
-    console.log('Button clicked!');
   };
 
   return (
@@ -81,7 +75,6 @@ const Exercises = ({ route }) => {
           renderItem={renderVideo}
         />
       )}
-      <Button title="Click me" onPress={handlePress} />
     </View>
   );
 };
@@ -108,8 +101,9 @@ const styles = StyleSheet.create({
   videoContainer: {
     marginBottom: 20,
     backgroundColor: '#f8f8f8',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 10,
+    elevation: 4
   },
   videoTitle: {
     fontSize: 18,
@@ -119,11 +113,11 @@ const styles = StyleSheet.create({
   videoPlayer: {
     width: '100%',
     aspectRatio: 16 / 9,
-    borderRadius: 10,
+    borderRadius: 20,
   },
   loading: {
     paddingTop: 300
   }
 });
 
-export default Exercises;
+export default ExerciseList;

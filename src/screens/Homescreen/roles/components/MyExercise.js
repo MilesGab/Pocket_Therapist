@@ -17,9 +17,12 @@ const MyExercises = () => {
         try {
           const snapshot = await firestore().collection('exerciseVids').get();
           const videoData = snapshot.docs.map(doc => doc.data());
-  
+      
           if (videoData) {
-            setVideos(videoData);
+            // Filter videos based on patient_access including patient id
+            const filteredVideos = videoData.filter(video => video.patient_access && video.patient_access.includes('eiNBRNBkpwVFg8ZYXPTsMUpXLDo2'));
+
+            setVideos(filteredVideos);
           }
         } catch (error) {
           console.error('Error fetching video details from the database:', error);
@@ -96,8 +99,9 @@ const styles = StyleSheet.create({
       videoContainer: {
         marginBottom: 20,
         backgroundColor: '#f8f8f8',
-        borderRadius: 10,
+        borderRadius: 20,
         padding: 10,
+        elevation: 4
       },
       videoTitle: {
         fontSize: 18,
@@ -107,7 +111,7 @@ const styles = StyleSheet.create({
       videoPlayer: {
         width: '100%',
         aspectRatio: 16 / 9,
-        borderRadius: 10,
+        borderRadius: 20,
       },
       loading: {
         paddingTop: 300

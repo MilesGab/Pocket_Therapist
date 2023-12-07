@@ -95,7 +95,7 @@ const DoctorScreen = ({ navigation }) => {
 
   React.useEffect(()=>{
     countPatients();
-  }, []);
+  }, [userData]);
 
   const countAppointments = async () => {
     try {
@@ -114,7 +114,7 @@ const DoctorScreen = ({ navigation }) => {
 
   React.useEffect(() => {
     countAppointments();
-  }, []);
+  }, [userData]);
 
   const fetchAppointments = async () => {
     const dateToday = new Date();
@@ -160,7 +160,7 @@ const DoctorScreen = ({ navigation }) => {
 
   React.useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [userData]);
 
   const handleSearch = () =>{
     navigation.navigate('PatientSearch');
