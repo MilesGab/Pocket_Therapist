@@ -14,6 +14,7 @@ import firestore from '@react-native-firebase/firestore';
 export default function PatientMessages() {
   const [messages, setMessages] = useState([]);
   const [doctorData, setDoctor] = React.useState({});
+  const [appointmentList, setAppointmentList] = React.useState();
   const [appointmentState, setAppointmentState] = React.useState(false);
   const { userData } = useUserContext();
   const trimmedUid = userData.uid.trim();
@@ -51,30 +52,7 @@ export default function PatientMessages() {
   }, []);
 
   const retrieveMessagesFromFirestore = async () => {
-    try {
-      // const querySnapshot = await firestore()
-      //   .collection('messages')
-      //   .where('sendTo', 'in', [doctorId, trimmedUid])
-      //   .where('user._id', 'in', [doctorId, trimmedUid])
-      //   .orderBy('createdAt', 'desc')
-      //   .get();
-  
-      // const messages = [];
-  
-      // querySnapshot.forEach((documentSnapshot) => {
-      //   const messageData = documentSnapshot.data();
-      //   const message = {
-      //     _id: documentSnapshot.id,
-      //     user: messageData.user,
-      //     text: messageData.text,
-      //     createdAt: messageData.createdAt.toDate(),
-      //   };
-  
-      //   messages.push(message);
-      // });
-  
-      // setMessages(messages);
-  
+    try {  
       const chatRef = firestore().collection('messages');
       chatRef.where('sendTo', 'in', [trimmedUid, doctorId])
              .where('user._id', 'in', [doctorId, trimmedUid])
@@ -107,6 +85,43 @@ export default function PatientMessages() {
   useEffect(() => {
     retrieveMessagesFromFirestore();
   }, []);
+
+  const fetchApprovedAssessments = async () => {
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate());
+
+    try{
+      const assessmentQuerySnapshot = await firestore()
+        .collection('appointments')
+        .where('patient_assigned', '==', trimmedUid)
+        .where('date', '>=', oneWeekAgo)
+        .where('status', '==', 1)
+        .orderBy('date', 'desc')
+        .get()
+
+      const assessments = [];
+      assessmentQuerySnapshot.forEach((doc) => {
+        const assessmentData = doc.data();
+        assessments.push(assessmentData);
+      });
+      
+      if(assessments.length > 0){
+        setAppointmentState(true);
+        setAppointmentList(assessments);
+      } else{
+        setAppointmentState(false);
+      }
+      
+      console.log(assessments);  
+    } catch (error) {
+      console.error('Failed to fetch approved appointments: ', error);
+    }
+  }
+
+  useEffect(()=>{
+    fetchApprovedAssessments();
+  },[])
 
   const onSend = useCallback((messages = []) => {
     setMessages((previousMessages) =>
@@ -203,19 +218,22 @@ export default function PatientMessages() {
                 size={55} />
               <View style={styles.nameAndClass}>
                 <Text style={styles.username}>
-                  {doctorData.firstName} {doctorData.lastName}
-                </Text>
-                <Text style={styles.class}>
-                  Orthopedic Doctor (St. Lukes Hospital)
+                  Dr. {doctorData.firstName} {doctorData.lastName}
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Icon name="video-camera" size={24}/>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleCall}>
-              <Icon name="phone" size={24}/>
-            </TouchableOpacity>
+            <View style={{display:'flex', flexDirection:'row'}}>
+              {/* <TouchableOpacity>
+                <Icon name="video-camera" size={24}/>
+              </TouchableOpacity> */}
+              {appointmentState ? (
+                <TouchableOpacity onPress={handleCall}>
+                  <Icon name="phone" size={24}/>
+                </TouchableOpacity>
+              ) : (
+                null
+              )}
+            </View>
           </View>
         </View>
         <View style={styles.toolbarContainer}>

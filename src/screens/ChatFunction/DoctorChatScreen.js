@@ -196,7 +196,7 @@ export default function DoctorChatScreen({ route }) {
             user={{ _id: trimmedUid }}
             renderSend={(props) => renderSend(props)}
             renderInputToolbar={(props) => customInputToolbar(props)}
-            renderBubble={(props) => renderBubble(props)} // Pass the custom renderBubble function here
+            renderBubble={(props) => renderBubble(props)}
             alwaysShowSend={true}
           />
         </View>

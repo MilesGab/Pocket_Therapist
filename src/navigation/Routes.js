@@ -22,6 +22,7 @@ import PatientScreen from '../screens/Homescreen/roles/PatientScreen.js';
 import DoctorScreen from '../screens/Homescreen/roles/DoctorScreen.js';
 import PatientSearch from '../screens/Homescreen/roles/components/SearchPatient.js';
 import MyExercises from '../screens/Homescreen/roles/components/MyExercise.js';
+import ExerciseList from '../screens/Homescreen/roles/components/ExerciseList.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -108,12 +109,12 @@ function MyTabs() {
       />
       { userData?.role === 1 ? (
         <Tab.Screen
-        name="Media"
-        component={Media}
+        name="Exercises"
+        component={ExerciseList}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => <Icon name="images-outline" color={color} size={size} />,
-          tabBarLabel: 'Media',
+          tabBarLabel: 'Exercises',
         }}
       />
       ) : (null)}
@@ -153,12 +154,6 @@ return (
   <Stack.Screen 
     name="PatientSearch"
     component={PatientSearch}
-    options={{headerShown: false}}
-    />
-
-  <Stack.Screen 
-    name="MyExercises"
-    component={MyExercises}
     options={{headerShown: false}}
     />
 
@@ -264,6 +259,7 @@ const Routes = (props) => {
             <Stack.Screen name="MyTabs" component={MyTabs}/>
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="Assessment" component={Assessment} />
+            <Stack.Screen name="MyExercises" component={MyExercises}/>
         </Stack.Navigator>
     )
 }

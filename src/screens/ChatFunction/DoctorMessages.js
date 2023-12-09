@@ -102,6 +102,10 @@ const DoctorMessages = ({navigation}) => {
      navigation.navigate('PatientAssessment', {patientData: userid});
     }
 
+    const handleExercises = (userid) => {
+      navigation.navigate('Exercises', {patientData: userid});
+    }
+
     const handleDropDown = (index) => {
       setSelectedItemIndex(index);
       setDropMenu(true);
@@ -161,6 +165,12 @@ const DoctorMessages = ({navigation}) => {
                                 <View style={styles.menuContent}>
                                   <Icon name="pulse-outline" size={20} />
                                   <Text>View Assessments</Text>
+                                </View>
+                              </TouchableOpacity>
+                              <TouchableOpacity onPress={()=>handleExercises(item.id)} >
+                                <View style={styles.menuContent}>
+                                  <Icon name="accessibility-outline" size={20} />
+                                  <Text>View Exercises</Text>
                                 </View>
                               </TouchableOpacity>
                             </View>

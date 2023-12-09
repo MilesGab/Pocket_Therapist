@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
-import { Avatar, IconButton, Box, Divider } from "@react-native-material/core";
+import { View, Text, StyleSheet, Image } from 'react-native';
+
+import { Avatar, IconButton, Box } from "@react-native-material/core";
+import { Divider } from 'react-native-paper';
+
+
 import Icon from 'react-native-vector-icons/Ionicons';
-import { blue } from 'react-native-reanimated';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
-import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
-import { QuerySnapshot } from 'firebase/firestore';
 import { ActivityIndicator } from "@react-native-material/core";
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
@@ -207,6 +208,11 @@ const PatientScreen = ({ navigation }) => {
                 keyExtractor={item => item.uid}
                 extraData={selectedId}
                 showsHorizontalScrollIndicator={false}
+                ListEmptyComponent={() => (
+                  <View style={{marginTop: 12, padding: 20}}>
+                    <Text style={{ textAlign: 'center' }}>No upcoming appointments</Text>
+                  </View>
+                )}
               />
             </View>
           )}
@@ -264,8 +270,8 @@ const LatestResults = () =>{
 
   return(
     <View style={styles.stats}>
-      <Box w={'100%'} h={'100%'} style={{ backgroundColor: "rgba(174, 223, 247, 0.7)", borderRadius: 20 }}>
-          <Box style={{padding: 16, paddingHorizontal: 20, display: 'flex', flexDirection: 'row'}}>
+      <Box w={'100%'} h={'auto'} style={{ backgroundColor: "rgba(174, 223, 247, 0.7)", borderRadius: 16}}>
+          <Box style={{padding: 16, display: 'flex', flexDirection: 'row'}}>
             <Box style={{flex: 1}}>
               <Box style={{display:'flex', flexDirection:'row', marginBottom: 20}}>
                 <Text style={{fontFamily: 'Nunito Sans', fontWeight:'bold', fontSize: 20, color: 'black', flex:1}}>Last Assessment</Text>
@@ -282,27 +288,29 @@ const LatestResults = () =>{
                 </View>
               ) : (
                 <>
-                  <View style={{marginBottom: 60}}>
-                    <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: 'black', marginBottom: 12}}>Maximum wrist range of motion:</Text>
-                    <Text style={{fontSize: 32, fontWeight:'bold', color:'#696969'}}>{dataList.maxAngle}°</Text>
+                  <View style={{marginBottom: 40}}>
+                    <Text style={{fontFamily: 'Nunito Sans', fontWeight:'normal', fontSize: 16, color: '#696969', fontWeight:'bold'}}>Maximum wrist range of motion:</Text>
+                    <Text style={{fontSize: 32, fontWeight:'bold', color:'black'}}>{dataList.maxAngle}°</Text>
                   </View>
                   {dataList && dataList.painData ? (
-                  <View style={{display:'flex', flexDirection:'row', borderTopWidth: 1, justifyContent:'space-around'}}>
-                    <View style={{borderRightWidth: 1, paddingHorizontal: 4,minWidth: 60}}>
-                      <Text style={{fontWeight:'bold', color:'black' }}>VAS Score</Text>
-                      <Text style={{color:'#696969' }}>{dataList?.painData[0]}</Text>
+                  <View style={{display:'flex', flexDirection:'row', borderTopWidth: 1, justifyContent:'space-evenly'}}>
+                    <View style={{paddingTop: 4}}>
+                      <Text style={{fontWeight:'bold', color:'#696969', fontSize: 12 }}>VAS Score</Text>
+                      <Text style={{color:'black', fontSize: 24, fontWeight:'bold'}}>{dataList?.painData[0]}</Text>
                     </View>
-                    <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
-                      <Text style={{fontWeight:'bold',color:'black'}}>Pain</Text>
-                      <Text style={{color:'#696969' }}>{dataList?.painData[1]}</Text>
+
+                    <View style={{borderLeftWidth: 1, borderColor: 'black'}} />
+
+                    <View style={{paddingTop: 4}}>
+                      <Text style={{fontWeight:'bold', color:'#696969', fontSize: 12 }}>Pain</Text>
+                      <Text style={{color:'black', fontSize: 24, fontWeight:'bold'}}>{dataList?.painData[1]}</Text>
                     </View>
-                    <View style={{borderRightWidth: 1, paddingHorizontal: 4, minWidth: 60}}>
-                      <Text style={{fontWeight:'bold', color:'black'}}>Warm?</Text>
-                      <Text style={{color:'#696969' }}>{dataList?.phyiscalData[3]}</Text>
-                    </View>
-                    <View style={{paddingHorizontal: 4, minWidth: 60}}>
-                      <Text style={{fontWeight:'bold', color:'black'}}>VAS Score</Text>
-                      <Text style={{color:'#696969' }}>6</Text>
+
+                    <View style={{borderLeftWidth: 1, borderColor: 'black'}} />
+                    
+                    <View style={{paddingTop: 4}}>
+                      <Text style={{fontWeight:'bold', color:'#696969', fontSize: 12 }}>Warm?</Text>
+                      <Text style={{color:'black', fontSize: 24, fontWeight:'bold'}}>{dataList?.phyiscalData[3]}</Text>
                     </View>
                   </View>
                   ) : (
@@ -356,7 +364,7 @@ const styles = StyleSheet.create({
 
   stats: {
     height: '35%',
-    marginBottom: 16
+    marginBottom: 2
   },
 
   footer: {

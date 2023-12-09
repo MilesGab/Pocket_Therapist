@@ -88,7 +88,7 @@ const Notification = ({ item, fetchApptRequest }) => {
       alignContent:'center',
       paddingHorizontal:10, 
       paddingVertical:6,
-      borderRadius:12,
+      borderRadius:16,
       marginBottom: 16
       }}
       >
@@ -156,9 +156,32 @@ const RequestDialog = (props) => {
   )
 }
 
+const Assessments = ({ item }) => {
+
+  return(
+    <View style={{display:'flex',
+      backgroundColor:'white', 
+      width:'100%', 
+      justifyContent:'center', 
+      alignContent:'center',
+      paddingHorizontal:10, 
+      paddingVertical:6,
+      borderRadius:16,
+      marginBottom: 16
+      }}
+      >
+      <Text>{item.patientFirstName} has completed an assessment</Text>
+    </View>
+  )
+
+}
+
 const Notifications = () => {
-  const { userData, updateUser } = useUserContext();
+  const { userData } = useUserContext();
+  
   const [apptReqList, setApptReqList] = React.useState([]);
+  const [assessmentList, setAssessmentList] = React.useState([]);
+
   const [isLoading, setLoading] = React.useState(true);
   const trimmedUid = userData.uid.trim();
 
@@ -205,6 +228,47 @@ const Notifications = () => {
     fetchApptRequest();
   }, []);
 
+  const fetchAssessmentResults = async (doctorId) => {
+    try {
+      const patientQuerySnapshot = await firestore()
+        .collection('users')
+        .where('doctor', '==', doctorId)
+        .get();
+  
+      const assessments = [];
+  
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  
+      for (const patientDoc of patientQuerySnapshot.docs) {
+        const patientId = patientDoc.id;
+        const patientFirstName = patientDoc.data().firstName + ' ' + patientDoc.data().lastName;
+  
+        const assessmentQuerySnapshot = await firestore()
+          .collection('assessments')
+          .where('patient', '==', patientId)
+          .where('date', '>=', oneWeekAgo)
+          .where('status', '==', 'unreviewed')
+          .orderBy('date', 'desc')
+          .get();
+  
+        assessmentQuerySnapshot.forEach((assessmentDoc) => {
+          const data = assessmentDoc.data();
+          data.patientFirstName = patientFirstName;
+          assessments.push(data);
+        });
+      }
+  
+      setAssessmentList(assessments);
+    } catch (error) {
+      console.error('Error fetching assessments:', error);
+    }
+  };
+  
+  React.useEffect(()=>{
+    fetchAssessmentResults(trimmedUid);
+  },[]);
+
   return (
     <Provider>
     <View style={styles.container}>
@@ -215,7 +279,7 @@ const Notifications = () => {
         {userData.role === 1 ? (
           <>
           <Text style={[styles.notifHeader, {color:'black'}]}>Appointment Requests</Text>
-            <View>
+            <View style={{marginBottom: 12}}>
               {isLoading ? (
               <ActivityIndicator size="large" color="rgba(0,0,0,0.4)" style={{marginTop: 60}}/>
               ) : 
@@ -228,7 +292,7 @@ const Notifications = () => {
                 <Notification
                   item={item}
                   fetchApptRequest={fetchApptRequest}
-                />
+                  />
               )}
               ListEmptyComponent={() => (
                 <View>
@@ -236,16 +300,39 @@ const Notifications = () => {
                 </View>
               )}
               showsVerticalScrollIndicator={false}
-            />
-            )}
+              />
+              )}
             </View>
+          <Text style={[styles.notifHeader, {color:'black'}]}>Recent Assessments</Text>
+            <View style={{marginBottom: 12}}>
+              {isLoading ? (
+                <ActivityIndicator size="large" color="rgba(0,0,0,0.4)" style={{marginTop: 60}}/>
+                ) : 
+                (
+                <FlatList
+                horizontal={false}
+                data={assessmentList}
+                keyExtractor={(item) => item.uid}
+                renderItem={({ item }) => (
+                  <Assessments
+                    item={item}
+                  />
+                )}
+                ListEmptyComponent={() => (
+                  <View>
+                    <Text>No new assessments</Text>
+                  </View>
+                )}
+                showsVerticalScrollIndicator={false}
+                />
+              )}
+            </View>
+            
           </>
         ) : (
           <>
             <Text style={[styles.notifHeader, {color:'black'}]}>Approved Appointments</Text>
               <View>
-                <AppointmentList />
-                <AppointmentList />
                 <AppointmentList />
               </View>
             <Text style={[styles.notifHeader, {color:'black'}]}>Asessments</Text>
@@ -254,9 +341,6 @@ const Notifications = () => {
               </View>
           </>
         )}
-            {/* <TouchableOpacity onPress={()=>{console.log(apptReqList)}}>
-              <Text style={styles.notifHeader}>HI</Text>
-            </TouchableOpacity> */}
       </View>
     </View>
     </Provider>
