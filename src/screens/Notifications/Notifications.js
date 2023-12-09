@@ -19,7 +19,7 @@ import AssessmentList from './components/AssessmentList';
 
 const Notification = ({ item, fetchApptRequest }) => {
   const { userData, updateUser } = useUserContext();
-  const doctor_name = item.patientName;
+  const patient_name = item.patientName;
   const date = item.date;
   const appointmentId = item.uid;
 
@@ -87,7 +87,7 @@ const Notification = ({ item, fetchApptRequest }) => {
 
   return(
     <View style={{display:'flex',
-      backgroundColor:'white', 
+      backgroundColor:'#faf0be', 
       width:'100%', 
       justifyContent:'center', 
       alignContent:'center',

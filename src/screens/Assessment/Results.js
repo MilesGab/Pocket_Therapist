@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { Box, Button } from '@react-native-material/core';
 import { useNavigation } from "@react-navigation/native";
@@ -35,7 +35,7 @@ const Results = ({ painData, phyiscalData }) => {
             patient: trimmedUid,
             painData,
             phyiscalData,
-            maxAngle
+            maxAngle,
           });
   
           const generatedUID = appointmentRef.id;
@@ -103,7 +103,6 @@ const Results = ({ painData, phyiscalData }) => {
             </View>
         </View>
     )
-
 }
 
 const styles = {

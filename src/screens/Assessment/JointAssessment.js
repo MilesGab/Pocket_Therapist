@@ -80,7 +80,7 @@ const JointAssessment = () => {
           <>
             <Image style={styles.instructionImage} source={Instructions}/>
             <Text style={styles.instructions}>Please hold your phone in a 90° angle and press start whenever ready</Text>
-            <Button onPress={()=>{setIsReady(true)}} title="Ready" />
+            <Button onPress={()=>{setIsReady(true)}} title="Ready" backgroundColor='#65A89F' />
           </>
          )}
       </View>

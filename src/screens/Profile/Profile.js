@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingTop: StatusBar.currentHeight,
-    height: 950
+    height: 880
   },
 
   whiteSheet: {
@@ -426,6 +426,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 22,
     color: 'black',
+  },
+
+  avtrpos:{
+    paddingTop: 20,
   },
 
   divider:{

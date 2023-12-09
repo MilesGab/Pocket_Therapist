@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, SafeAreaView, TouchableOpacity, StatusBar, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { StyleSheet, Text, View, TextInput, SafeAreaView, TouchableOpacity, StatusBar, TouchableWithoutFeedback, Keyboard, Image } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -52,9 +52,20 @@ export default function Login({ navigation }) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
-        <View style={styles.image_container}/>
         <View style={styles.whiteSheet} />
         <SafeAreaView style={styles.form}>
+        <View>
+          <Image
+            source={require('../../assets/images/pt_icon.png')}
+            style={{
+                width: 150,
+                height: 140,
+                marginTop: 40,
+                marginBottom: 20,
+                alignSelf: 'center'
+            }}
+          />
+      </View>
           <Toast
             position='bottom'
             bottomOffset={50}
@@ -124,21 +135,7 @@ const styles = StyleSheet.create({
     padding: 12,
     color:'black'
   },
-  image_container: {
-    // backgroundColor: 'blue',
-    // height: 400,
-    // alignItems: 'center',
-    // justifyContent: 'center',
-  },
-  // backImage: {6fa8dc
-  //   display: 'flex',
-  //   alignItems: 'center',   // Center horizontally
-  //   justifyContent: 'center',   // Center vertically
-  //   width: 160,
-  //   height: 150,
-  //   top: 16,
-  //   resizeMode: 'cover',
-  // },
+
   whiteSheet: {
     shadowColor: '#171717',
     shadowOffset: {width: -2, height: 4},
@@ -152,11 +149,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 60,
     borderTopRightRadius: 60,
   },
+
   form: {
     flex: 1,
     justifyContent: 'center',
     marginHorizontal: 40,
   },
+
   button: {
     backgroundColor: '#65A89F',
     height: 58,
@@ -165,4 +164,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 40,
   },
+
 });

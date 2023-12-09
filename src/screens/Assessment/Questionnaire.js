@@ -1,23 +1,25 @@
 import { TextInput } from "@react-native-material/core";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Image, PermissionsAndroid, TouchableHighlight} from "react-native";
 import { ProgressBar } from "react-native-paper";
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Slider from "@react-native-community/slider";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
+import { ScrollView } from "react-native-gesture-handler";
+import firestore from '@react-native-firebase/firestore';
+
+import storage from '@react-native-firebase/storage';
+import auth from '@react-native-firebase/auth';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 
 const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   const navigation = useNavigation();
-
-  // State for tracking the current question, answers, and selected image
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [painAnswers, setPainAnswers] = useState(Array(questions.length).fill(''));
-  const [selectedImage, setSelectedImage] = useState(null);
   const [sliderValue, setSliderValue] = useState(0);
-
   const [isPainAssessment, setIsPainAssessment] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [dropDownValue, setDropDownValue] = useState('');
@@ -39,7 +41,6 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     { value: 'Sore', label: 'Sore: Tenderness or discomfort in the wrist, often associated with overuse or strain.' },
     { value: 'Others', label: 'Others'}
   ]);
-
   const [painDuration, setPainDuration] = useState('');
 
   const painDurationItems = [
@@ -151,6 +152,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   }
 
   return (
+    <ScrollView>
     <View style={styles.container}>
       <Text style={styles.title}>Assessment</Text>
       <Text style={isPainAssessment ? styles.titlePortion : styles.titlePortion}>
@@ -172,9 +174,9 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                   minimumValue={0}
                   maximumValue={10}
                   step={1}
-                  minimumTrackTintColor="blue"
+                  minimumTrackTintColor='#65A89F'
                   maximumTrackTintColor="lightgray"
-                  thumbTintColor="blue"
+                  thumbTintColor='#65A89F'
                   value={sliderValue}
                   onValueChange={(value) => setSliderValue(value)}
                 />
@@ -216,9 +218,9 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                   <TouchableOpacity 
                     onPress={() => {setPainDuration(pain.value)}}
                     style={{
-                      backgroundColor: painDuration === pain.value ? 'white' : '#4843fa',
+                      backgroundColor: painDuration === pain.value ? 'white' : '#65A89F',
                       borderWidth: painDuration === pain.value ? 1 : 0,
-                      borderColor: '#4843fa',
+                      borderColor: '#65A89F',
                       padding: 12,
                       paddingHorizontal: 16,
                       borderRadius: 16,
@@ -230,7 +232,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                       fontFamily: 'Nunito Sans',
                       fontSize: 16,
                       fontWeight: '300',
-                      color: painDuration === pain.value ? '#4843fa' : 'white'
+                      color: painDuration === pain.value ? '#65A89F' : 'white'
                     }}>{pain.label}</Text>
                   </TouchableOpacity>
                 ))}
@@ -247,10 +249,10 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
           {isPainAssessment ? null : (
             <React.Fragment>
               <TouchableOpacity onPress={() => handleNextQuestion('YES')} style={styles.ansButton}>
-                <Text style={styles.ansButtonText}>YES</Text>
+                <Text style={styles.ansButtonText}>Yes</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleNextQuestion('NO')} style={styles.ansButton}>
-                <Text style={styles.ansButtonText}>NO</Text>
+                <Text style={styles.ansButtonText}>No</Text>
               </TouchableOpacity>
             </React.Fragment>
           )}
@@ -314,11 +316,6 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         )
       )}
 
-      {/* Display the selected image */}
-      {selectedImage && (
-        <Image source={{ uri: selectedImage.uri }} style={styles.selectedImage} />
-      )}
-
       <View style={styles.bottom}>
         <TouchableOpacity
           onPress={isPainAssessment ? 
@@ -328,15 +325,15 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
             : handlePreviousQuestion}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>BACK</Text>
+          <Text style={styles.buttonText}>Back</Text>
         </TouchableOpacity>
 
         {!isPainAssessment && currentQuestion === 4 ? (
           <>
           <TouchableOpacity
-              onPress={() => setIsPainAssessment(true)}
+              onPress={() =>{uploadUserAssessmentPics(); setIsPainAssessment(true)}}
               style={{
-                borderColor: '#4843fa',
+                borderColor: '#65A89F',
                 borderWidth: 1,
                 backgroundColor: 'white',
                 padding: 12,
@@ -347,7 +344,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                 marginBottom: 30
             }}
             >
-              <Text style={[styles.buttonText, {color:'#4843fa'}]}>PROCEED TO PAIN ASSESSMENT</Text>
+              <Text style={[styles.buttonText, {color:'#65A89F'}]}>Proceed to pain assessment</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -360,7 +357,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                 : ()=>handleNextQuestion('')}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>NEXT</Text>
+              <Text style={styles.buttonText}>Next</Text>
             </TouchableOpacity>
           </>
         )}
@@ -375,6 +372,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         </Text>
       </TouchableOpacity>
     </View>
+    </ScrollView>
   );
 }
 
@@ -392,13 +390,21 @@ const painAssessmentQuestions = [
   'Question 3: How long have you been experiencing pain on your wrist?',
 ];
 
-
 const styles = StyleSheet.create({
 container: {
     padding: 40,
     paddingHorizontal: 20,
     height: '100%',
     backgroundColor: 'white'
+},
+
+unselectBtn:{
+  alignSelf:'center',
+  marginTop: 10
+},
+
+disabledPicker: {
+  opacity: 0.5,
 },
 
 title: {
@@ -438,7 +444,7 @@ textInputs: {
 },
 
 ansButton: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 16,
     borderRadius: 16,
@@ -464,7 +470,7 @@ bottom: {
 },
 
 button: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 26,
     borderRadius: 10,
@@ -480,33 +486,33 @@ buttonText: {
 },
 
 cameraPicker: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 16,
-    borderRadius: 10, // Use a large value to make it oval-shaped
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 15,
   },
   cameraPickerText: {
     color: 'white',
-    marginLeft: 10, // Adjust the spacing between the icon and label
+    marginLeft: 10,
   },
 
   imagePicker: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 16,
-    borderRadius: 10, // Use a large value to make it oval-shaped
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 15,
   },
   imagePickerText: {
     color: 'white',
-    marginLeft: 10, // Adjust the spacing between the icon and label
+    marginLeft: 10,
   },
 
   slider: {
-    width: 358, // Adjust the width of the slider
+    width: 358,
     marginLeft: 3,
   },
 
