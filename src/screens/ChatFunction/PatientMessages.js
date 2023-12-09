@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { Bubble, GiftedChat, InputToolbar, Send,} from 'react-native-gifted-chat'
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Keyboard, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {Avatar} from "@react-native-material/core";
+import {Avatar, ActivityIndicator} from "@react-native-material/core";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { useUserContext } from '../../../contexts/UserContext';
@@ -151,6 +151,7 @@ export default function PatientMessages() {
   }
 
   return (
+    
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
       accessible={false}
@@ -182,9 +183,6 @@ export default function PatientMessages() {
                 <Text style={styles.username}>
                   {doctorData.firstName} {doctorData.lastName}
                 </Text>
-                <Text style={styles.class}>
-                  Orthopedic Doctor (St. Lukes Hospital)
-                </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity>
@@ -195,7 +193,11 @@ export default function PatientMessages() {
             </TouchableOpacity>
           </View>
         </View>
+        {isLoading ? (
+          <ActivityIndicator size="large" color='#65A89F'/>
+      ) : (
         <View style={styles.toolbarContainer}>
+          
           <GiftedChat
             messages={messages}
             onSend={onSend}
@@ -206,12 +208,11 @@ export default function PatientMessages() {
             alwaysShowSend={true}
           />
         </View>
+      )}
       </View>
     </TouchableWithoutFeedback>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {

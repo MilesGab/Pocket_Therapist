@@ -282,7 +282,7 @@ const Notifications = () => {
           <Text style={[styles.notifHeader, {color:'black'}]}>Appointment Requests</Text>
             <View style={{marginBottom: 12}}>
               {isLoading ? (
-              <ActivityIndicator size="large" color="rgba(0,0,0,0.4)" style={{marginTop: 60}}/>
+              <ActivityIndicator size="large" color="#65A89F" style={{marginTop: 60}}/>
               ) : 
               (
               <FlatList
@@ -307,7 +307,7 @@ const Notifications = () => {
           <Text style={[styles.notifHeader, {color:'black'}]}>Recent Assessments</Text>
             <View style={{marginBottom: 12}}>
               {isLoading ? (
-                <ActivityIndicator size="large" color="rgba(0,0,0,0.4)" style={{marginTop: 60}}/>
+                <ActivityIndicator size="large" color="#65A89F" style={{marginTop: 60}}/>
                 ) : 
                 (
                 <FlatList
