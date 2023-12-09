@@ -85,46 +85,48 @@ const Exercises = ({ route }) => {
     );
   };
 
-  const handlePress = async () => {
-    try {
-      const updatedVideos = Object.entries(selectedVideos)
+const handlePress = async () => {
+  try {
+    const updatedVideos = Object.entries(selectedVideos)
       .filter(([key, value]) => value === true)
-      .map(([key, value]) => key);
-      
-      await Promise.all(
-        updatedVideos.map(async video => {
-          const videoRef = firestore().collection('exerciseVids').doc(video);
-          const patientAccess = video.patient_access || [];
-          
-          if (!patientAccess.includes(patientData)) {
-            patientAccess.push(patientData);
-            await videoRef.update({ patient_access: patientAccess });
-          }
-        })
-      );
+      .map(([key]) => key);
 
-      const deletedAccess = Object.entries(selectedVideos)
+    const deletedAccess = Object.entries(selectedVideos)
       .filter(([key, value]) => value === false)
-      .map(([key, value]) => key);
+      .map(([key]) => key);
 
-      await Promise.all(
-        deletedAccess.map(async video => {
-          const videoRef = firestore().collection('exerciseVids').doc(video);
-          const patientAccess = video.patient_access || [];
-          
-          // Filter out the patientData from the patientAccess array
-          const updatedPatientAccess = patientAccess.filter(patient => patient !== patientData);
+    const videosToUpdate = updatedVideos.map(async video => {
+      const videoRef = firestore().collection('exerciseVids').doc(video);
+      const videoDoc = await videoRef.get();
+      if (videoDoc.exists) {
+        const patientAccess = videoDoc.data().patient_access || [];
 
-          // Update the video document with the updated patientAccess array
-          await videoRef.update({ patient_access: updatedPatientAccess });
-        })
-      );
+        if (!patientAccess.includes(patientData)) {
+          patientAccess.push(patientData);
+          await videoRef.update({ patient_access: patientAccess });
+        }
+      }
+    });
 
-      console.log('Successfully updated access to the following videos: ', updatedVideos);
-    } catch (error) {
-      console.error('Error updating videos in the database:', error);
-    }
-  };
+    const videosToRemoveAccess = deletedAccess.map(async video => {
+      const videoRef = firestore().collection('exerciseVids').doc(video);
+      const videoDoc = await videoRef.get();
+      if (videoDoc.exists) {
+        const patientAccess = videoDoc.data().patient_access || [];
+
+        const updatedPatientAccess = patientAccess.filter(patient => patient !== patientData);
+        await videoRef.update({ patient_access: updatedPatientAccess });
+      }
+    });
+
+    await Promise.all([...videosToUpdate, ...videosToRemoveAccess]);
+
+    console.log('Successfully updated access to the following videos: ', updatedVideos);
+  } catch (error) {
+    console.error('Error updating videos in the database:', error);
+  }
+};
+
 
   const toggleEdit = () => {
     setEditMode(!editMode);
