@@ -337,7 +337,7 @@ const Schedule = () => {
       marginTop: 16,
     }}>
       {isLoading ? (
-        <ActivityIndicator size="large" color='#65A89F'/>
+        <ActivityIndicator size="large" color='#CEDDF7'/>
       ) : (
         filteredAppointments.length === 0 ? (
           value === 'upcoming' ? 

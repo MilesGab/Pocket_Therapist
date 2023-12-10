@@ -127,7 +127,7 @@ const DoctorMessages = ({navigation}) => {
                 <Text style ={styles.headerTxt}>Patients</Text>
             </View> 
             {isLoading ? (
-              <ActivityIndicator size="large" color= "#65A89F"/>
+              <ActivityIndicator size="large" color= "#CEDDF7"/>
             ) : (
               <FlatList
                 data={patientList}
