@@ -72,7 +72,7 @@ const Exercises = ({ route }) => {
         }
         <TouchableOpacity style={styles.videoContainer}>
           <Text style={styles.videoTitle}>{item.video_name}</Text>
-          <Text>{item.video_description}</Text>
+          <Text style={{color: 'gray'}}>{item.video_description}</Text>
           <Video
             source={{ uri: item.video_path }}
             style={styles.videoPlayer}
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   videoTitle: {
+    color: "gray",
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,

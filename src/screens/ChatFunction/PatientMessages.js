@@ -25,7 +25,7 @@ export default function PatientMessages() {
     _id: trimmedUid,
     name: userData.firstName,
     avatar:
-      userData?.profilePictureURL,
+    userData?.profilePictureURL,
   };
 
   const fetchDoctor = async () => {
@@ -204,7 +204,7 @@ export default function PatientMessages() {
                 label={doctorData.firstName} 
                 image={
                   <Image
-                    source={{ uri: doctorData?.profilePictureURL }}
+                  source={doctorData?.profilePictureURL ? { uri: doctorData.profilePictureURL } : require('../../../assets/images/default.png')}
                     style={{
                       position: "absolute",
                       top: 0,
@@ -223,9 +223,6 @@ export default function PatientMessages() {
               </View>
             </TouchableOpacity>
             <View style={{display:'flex', flexDirection:'row'}}>
-              {/* <TouchableOpacity>
-                <Icon name="video-camera" size={24}/>
-              </TouchableOpacity> */}
               {appointmentState ? (
                 <TouchableOpacity onPress={handleCall}>
                   <Icon name="phone" size={24}/>
