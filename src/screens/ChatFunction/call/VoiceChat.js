@@ -18,14 +18,17 @@ import Sound from 'react-native-sound';
 import Ringtone from '../../../../assets/audio/ptring.mp3';
 
 import firestore from '@react-native-firebase/firestore';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 
 const appId = '8c9007f71b7c429d971501377a0772fe';
 const channelName = 'newcall';
 // const token = '007eJxTYHDgmGkis9NL3H5hkM1dnm+v/33g2fRJ7PMMx/ebZgUe375KgcEi2dLAwDzN3DDJPNnEyDLF0tzQ1MDQ2Nw80cDc3CgtdVFXZWpDICODx2FtFkYGCATx2RnyUsuTE3NyGBgAvgMg3Q==';
-const uid = 0;
 
 const VoiceChat = () =>{
+    const { userData } = useUserContext();
+    const trimmedUid = userData.uid.trim();
+    const uid = 0;
     const agoraEngineRef = useRef(IRtcEngine); // Agora engine instance
     const [isJoined, setIsJoined] = useState(false); // Indicates if the local user has joined the channel
     const [isDoctorJoined, setIsDoctorJoined] = useState(false);
@@ -54,7 +57,7 @@ const VoiceChat = () =>{
     const retrieveToken = async () =>{
         try{
             const userRef = await firestore().collection('users')
-                                       .where('uid', '==', 'eiNBRNBkpwVFg8ZYXPTsMUpXLDo2')
+                                       .where('uid', '==', trimmedUid)
                                        .get();
 
            if (!userRef.empty) {
