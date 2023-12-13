@@ -105,24 +105,25 @@ const PatientAssessment = ({ route }) => {
 
     const fetchPatientResults = async () => {
         try {
-            const querySnapshot = await firestore()
-            .collection("assessments")
-            .where("patient", "==", trimmedUid)
-            .get();
-
-            const assessments = [];
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                assessments.push(data);
-            });
-
-            setAssessmentList(assessments);
-
-        } catch (error) {
-            console.error('Error fetching assessments: ', error);
-        } finally {
+            const unsubscribe = firestore()
+              .collection("assessments")
+              .where("patient", "==", trimmedUid)
+              .onSnapshot((querySnapshot) => {
+                const assessments = [];
+                querySnapshot.forEach((doc) => {
+                  const data = doc.data();
+                  assessments.push(data);
+                });
+                setAssessmentList(assessments);
+                setLoading(false);
+              });
+        
+            // Return the unsubscribe function to stop listening to changes when needed
+            return unsubscribe;
+          } catch (error) {
+            console.error('Error subscribing to assessments: ', error);
             setLoading(false);
-        }
+          }
     }
 
     React.useEffect(()=>{

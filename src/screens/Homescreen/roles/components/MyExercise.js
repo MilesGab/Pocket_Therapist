@@ -5,8 +5,10 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import Video from 'react-native-video';
 import { ActivityIndicator, Avatar } from "@react-native-material/core";
+import Icon from 'react-native-vector-icons/Ionicons';
 
-const MyExercises = () => {
+const MyExercises = ({ route }) => {
+    const { patientData } = route.params;
     const [videos, setVideos] = React.useState([]);
     const [isLoading, setLoading] = React.useState(true);
     const [paused, setPaused] = React.useState(true);
@@ -20,7 +22,7 @@ const MyExercises = () => {
       
           if (videoData) {
             // Filter videos based on patient_access including patient id
-            const filteredVideos = videoData.filter(video => video.patient_access && video.patient_access.includes('eiNBRNBkpwVFg8ZYXPTsMUpXLDo2'));
+            const filteredVideos = videoData.filter(video => video.patient_access && video.patient_access.includes(patientData));
 
             setVideos(filteredVideos);
           }
@@ -33,14 +35,7 @@ const MyExercises = () => {
   
       fetchVideoDetails();
     }, []);
-  
-    const toggleCheckbox = (videoId) => {
-      setSelectedVideos(prevState => ({
-        ...prevState,
-        [videoId]: !prevState[videoId],
-      }));
-    };
-  
+
     const renderVideo = ({ item }) => {
       return (
           <TouchableOpacity style={styles.videoContainer}>
@@ -64,13 +59,18 @@ const MyExercises = () => {
         </View>
         {isLoading ? (
           <ActivityIndicator size="large" color='#CEDDF7' style={styles.loading} />
-        ) : (
+        ) : videos.length > 0 ? (
           <FlatList
             style={styles.vidlist}
             data={videos}
             keyExtractor={(item) => item.video_id.toString()}
             renderItem={renderVideo}
           />
+        ) : (
+          <View style={styles.noExercisesContainer}>
+            <Icon name="accessibility-outline" color={'black'} size={36} />
+            <Text style={styles.noExercisesText}>No Exercises Available</Text>
+          </View>
         )}
       </View>
     );
@@ -113,9 +113,22 @@ const styles = StyleSheet.create({
         aspectRatio: 16 / 9,
         borderRadius: 20,
       },
+
       loading: {
         paddingTop: 300
-      }
+      },
+
+      noExercisesContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        height:'100%'
+      },
+      
+      noExercisesText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'black',
+      },
 });
 
 export default MyExercises;

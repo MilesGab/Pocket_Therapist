@@ -30,7 +30,7 @@ const PhysicalDataResults = ({ question, answer }) => {
                 <Text style={{color: 'white', fontSize: 20, fontWeight: 'bold'}}>
                     {answer}
                 </Text>
-            </View>l 
+            </View>
         </View>
     )
 

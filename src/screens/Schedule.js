@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ToastAndroid } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useUserContext } from '../../contexts/UserContext';
@@ -19,6 +19,7 @@ import {
 } from "@react-native-material/core";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { FlatList } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 
 const AppointmentCard = ( props ) => {
@@ -302,12 +303,24 @@ const Schedule = () => {
     }
   });
 
+  const triggerDialog = () => {
+    if(!userData.doctor){
+      ToastAndroid.showWithGravity(
+        'You must have a doctor to assign an appointment',
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER,
+      );
+    }else{
+      setDialogOpen(true)
+    }
+  }
+
   return (
     <Provider>
     <View style={styles.container}>
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom: 48}}>
         <Text style={{fontSize: 32, color: 'black', fontWeight:'bold', flex: 1}}>Schedule</Text>
-        <TouchableOpacity onPress={()=>{setDialogOpen(true)}}>
+        <TouchableOpacity onPress={()=>{triggerDialog()}}>
           <Icon name="add-circle-outline" style={{fontSize:38, color:'black', marginRight: 12}}/>
         </TouchableOpacity>
         <AddAppointment visible={dialogOpen} setVisible={setDialogOpen} fetchList={fetchAppointments}/>
@@ -337,7 +350,7 @@ const Schedule = () => {
       marginTop: 16,
     }}>
       {isLoading ? (
-        <ActivityIndicator size="large" color="blue" />
+        <ActivityIndicator size="large" color='#CEDDF7'/>
       ) : (
         filteredAppointments.length === 0 ? (
           value === 'upcoming' ? 

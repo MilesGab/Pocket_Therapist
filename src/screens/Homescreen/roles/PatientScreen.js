@@ -78,20 +78,18 @@ const PatientScreen = ({ navigation }) => {
 
   React.useEffect(() => {
     setLoading(true);
-    const fetchAppointments = async () => {
-
-      const dateToday = new Date();
-
+  
+    const dateToday = new Date();
+    const appointmentsRef = firestore()
+      .collection('appointments')
+      .where('patient_assigned', '==', trimmedUid)
+      .where('date', '>=', dateToday)
+      .limit(1);
+  
+    const unsubscribe = appointmentsRef.onSnapshot(async (querySnapshot) => {
       try {
-        const appointmentsSnapshot = await firestore()
-          .collection('appointments')
-          .where('patient_assigned', '==', trimmedUid)
-          .where('date', '>=', dateToday)
-          .limit(1)
-          .get();
-
         const appointmentsData = await Promise.all(
-          appointmentsSnapshot.docs.map(async doc => {
+          querySnapshot.docs.map(async (doc) => {
             const appointmentData = doc.data();
             const doctorSnapshot = await firestore()
               .collection('users')
@@ -101,10 +99,10 @@ const PatientScreen = ({ navigation }) => {
               .collection('users')
               .doc(trimmedUid)
               .get();
-            
+  
             const doctorData = doctorSnapshot.data();
             const patientData = patientSnapshot.data();
-            
+  
             return {
               ...appointmentData,
               doctorName: doctorData?.lastName,
@@ -113,18 +111,19 @@ const PatientScreen = ({ navigation }) => {
             };
           })
         );
-
+  
         setAppointmentList(appointmentsData);
       } catch (error) {
         console.error('Error fetching appointments:', error);
-      } finally{
+      } finally {
         setLoading(false);
       }
-    };
-
-    fetchAppointments();
-  }, []);
-
+    });
+  
+    // The unsubscribe function will stop listening when the component unmounts or when you explicitly call it
+    return () => unsubscribe();
+  }, [trimmedUid]);
+  
   const renderItem = ({item}) => {
     const backgroundColor = item.id === selectedId ? '#65A89F' : '#257cba';
     const color = item.id === selectedId ? 'white' : 'black';
@@ -138,6 +137,10 @@ const PatientScreen = ({ navigation }) => {
       />
     );
   };
+
+  const handleExercisesPage = (userid) => {
+    navigation.navigate('MyExercises', {patientData: userid});
+  }
 
   return (
       <View style={styles.container}>
@@ -183,7 +186,7 @@ const PatientScreen = ({ navigation }) => {
               />
               {/* 2nd button */}
               <IconButton
-                onPress={() => navigation.navigate('MyExercises')}
+                onPress={() => handleExercisesPage(trimmedUid)}
                 style={{
                   backgroundColor: '#D1B655',
                   width: '50%',
@@ -240,23 +243,26 @@ const LatestResults = () =>{
 
   const fetchResults = async () => {
     try {
-      const assessmentsSnapshot = await firestore()
+      const assessmentsRef = firestore()
         .collection('assessments')
         .where('patient', '==', trimmedUid)
         .orderBy('date', 'desc')
-        .limit(1)
-        .get();
+        .limit(1);
   
-      assessmentsSnapshot.forEach((doc) => {
-        setDataList(doc.data());
+      const unsubscribe = assessmentsRef.onSnapshot((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          setDataList(doc.data());
+        });
+        setLoading(false);
       });
-
+  
+      return () => unsubscribe();
     } catch (error) {
       console.error('Error fetching appointments:', error);
-    } finally{
       setLoading(false);
     }
   };
+  
 
   const timestamp = new Date(
     dataList?.date?.seconds * 1000 + dataList?.date?.nanoseconds / 1000000

@@ -185,7 +185,7 @@ export default function DoctorChatScreen({ route }) {
               </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleCall}>
-              <Icon name="phone" size={24}/>
+              <Text>Join Meeting</Text>
             </TouchableOpacity>
           </View>
         </View>

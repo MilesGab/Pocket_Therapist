@@ -117,7 +117,7 @@ const VoiceChat = () =>{
                 {isJoined ? (
                 <Text>Local user uid: {uid}</Text>
                 ) : (
-                <Text>Ringing...</Text>
+                <Text>Waiting for patient...</Text>
                 )}
                 {isJoined && remoteUid !== 0 ? (
                 <Text>Remote user uid: {remoteUid}</Text>
