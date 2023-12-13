@@ -31,7 +31,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
               <Avatar label={item.firstName} size={55} 
                 image={
                   <Image
-                  source={{ uri: item?.profilePictureURL || 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'}}
+                  source={userData?.profilePictureURL ? { uri: userData.profilePictureURL } : require('../../../../assets/images/default.png')}
                   style={{
                     position: "absolute",
                     top: 0,
@@ -186,13 +186,13 @@ const DoctorScreen = ({ navigation }) => {
         <View style={styles.header}>
         <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
           <Image
-          source={{ uri: userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png' }}
+          source={userData?.profilePictureURL ? { uri: userData.profilePictureURL } : require('../../../../assets/images/default.png')}
           color='#CEDDF7'
           style={{
           width: 80,
           height: 80,
           borderRadius: 75,
-          borderWidth: 5,
+          borderWidth: 4,
           borderColor: 'white',
           }}
         />

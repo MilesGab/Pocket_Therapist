@@ -1,11 +1,7 @@
-
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList, Text, Image, TouchableWithoutFeedback } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-
-import Sana from '../../assets/images/user1.png';
-import Kim from '../../assets/images/user2.png';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ActivityIndicator, Avatar} from "@react-native-material/core";
@@ -57,10 +53,6 @@ const DoctorMessages = ({navigation}) => {
                 patient.messageTime = 'No messages';
                 patient.messageText = '';
               }
-        
-              // const userImageRef = storage().ref().child(`users/7b574a23f46c10a63c1b5061249c92ab.jpg`);
-              // const userImageUrl = await userImageRef.getDownloadURL();
-              // patient.userImg = Sana;
 
               patientData.push(patient);
             }
@@ -136,7 +128,7 @@ const DoctorMessages = ({navigation}) => {
                     <TouchableOpacity onPress={() => handleDropDown(index)} style={styles.cardStyle} activeOpacity={1}>
                         <View style={styles.userInfo}>
                             <View style={styles.userImgWrapper}>
-                                <Image style={styles. userImgStyle} source={{uri: item.userImg}} />
+                                <Image style={styles. userImgStyle} source={item?.userImg ? { uri: item.userImg } : require('../../../assets/images/default.png')}/>
                             </View>
                               <View style={styles.messageSection}>
                                   <View style={styles.messageDetails}>
@@ -145,12 +137,12 @@ const DoctorMessages = ({navigation}) => {
                                   <View>
                                     <View style={{display:'flex', flexDirection:'column'}}>
                                       <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
-                                        <Icon name="chatbox-ellipses-outline" size={18}/>
+                                        <Icon name="chatbox-ellipses-outline" size={18} color="gray"/>
                                         <Text style={styles.messagePreview}>{item.messageText} · </Text>
                                         <Text style={styles.timeReceived}>{item.messageTime}</Text>
                                       </View>
                                       <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
-                                        <Icon name="pulse-outline" size={18}/>
+                                        <Icon name="pulse-outline" size={18} color="gray"/>
                                         <Text style={[styles.messagePreview, {fontSize: 14}]}>New assessment available!</Text>
                                       </View>
                                     </View>
@@ -161,19 +153,19 @@ const DoctorMessages = ({navigation}) => {
                             <View style={styles.dropMenu}>
                               <TouchableOpacity onPress={()=>handleMessage(item.id)}>
                                 <View style={styles.menuContent}>
-                                  <Icon name="chatbox-ellipses-outline" size={20} />
+                                  <Icon name="chatbox-ellipses-outline" size={20} color="gray" />
                                   <Text>View Messages</Text>
                                 </View>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={()=>handleAssessments(item.id)} >
                                 <View style={styles.menuContent}>
-                                  <Icon name="pulse-outline" size={20} />
+                                  <Icon name="pulse-outline" size={20} color="gray" />
                                   <Text>View Assessments</Text>
                                 </View>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={()=>handleExercises(item.id)} >
                                 <View style={styles.menuContent}>
-                                  <Icon name="accessibility-outline" size={20} />
+                                  <Icon name="accessibility-outline" size={20} color="gray" />
                                   <Text>View Exercises</Text>
                                 </View>
                               </TouchableOpacity>
@@ -208,7 +200,7 @@ userInfo: {
     justifyContent: 'flex-start',
     padding: 5,
     paddingHorizontal: 12,
-    elevation: 2
+    elevation: 2,
 },
 
 userImgWrapper: {
@@ -241,6 +233,7 @@ userName: {
   fontSize: 14,
   fontWeight: 'bold',
   fontFamily: 'Lato-Regular',
+  color: '#3339',
 },
 
 timeReceived: {
@@ -252,7 +245,7 @@ timeReceived: {
 messagePreview: {
   marginLeft: 4,
   fontSize: 16,
-  color: '#333333'
+  color: 'gray'
 },
 
 
@@ -285,7 +278,8 @@ dropMenu: {
 menuContent: {
   display:'flex', 
   flexDirection:'row',
-  gap: 4
+  gap: 4,
+  color:'gray'
 }
 })
 

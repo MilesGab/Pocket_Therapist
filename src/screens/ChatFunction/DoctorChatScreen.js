@@ -164,7 +164,7 @@ export default function DoctorChatScreen({ route }) {
               <Avatar label={patient.firstName} size={55} 
               image={
                 <Image
-                source={{ uri: patient?.profilePictureURL || 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png'}}
+                source={{ uri: patient?.profilePictureURL || 'https://pixabay.com/get/g04616649d2deb8069beb136041a0345db6fd29c4095c927d9b567c35ad860d63150c59d5e0348995baafbda762d357a654801d90345b9de1ddae54764a3052570c74a79f6af772c33407c4d322dfae48_640.png'}}
                 style={{
                   position: "absolute",
                   top: 0,

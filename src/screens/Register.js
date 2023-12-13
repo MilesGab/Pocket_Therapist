@@ -53,7 +53,8 @@ export default function Register({ navigation }) {
             <TextInput
               style={[styles.input, { marginRight: 0, width: 160, alignSelf: 'flex-start'}]}
               placeholder="First name"
-              autoCapitalize="none"
+              placeholderTextColor="gray"
+              autoCapitalize='sentences'
               keyboardType="default"
               textContentType="name"
               autoFocus={false}
@@ -63,7 +64,8 @@ export default function Register({ navigation }) {
             <TextInput
               style={[styles.input, {width: 160, justifyContent: 'flex-end', alignContent: 'flex-end', alignSelf: 'flex-end'}]}
               placeholder="Last name"
-              autoCapitalize="none"
+              placeholderTextColor="gray"
+              autoCapitalize='sentences'
               keyboardType="default"
               textContentType="name"
               autoFocus={false}
@@ -74,8 +76,9 @@ export default function Register({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Contact Number"
+          placeholderTextColor="gray"
           autoCapitalize="none"
-          keyboardType="default"
+          keyboardType="numeric"
           textContentType="telephoneNumber"
           autoFocus={false}
           value={contact}
@@ -84,6 +87,7 @@ export default function Register({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="gray"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
@@ -94,6 +98,7 @@ export default function Register({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Password"
+          placeholderTextColor="gray"
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry={true}
@@ -105,7 +110,7 @@ export default function Register({ navigation }) {
           <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}>Sign Up</Text>
         </TouchableOpacity>
         <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
-          <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Alreadt have an accout? </Text>
+          <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Already have an accout? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text style={{color: '#65A89F', fontWeight: '600', fontSize: 14}}> Sign In</Text>
           </TouchableOpacity>

@@ -5,8 +5,6 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
 import { useUserContext } from "../../contexts/UserContext";
-const backImage = require("../../assets/images/pt_icon.png");
-
 
 export default function Login({ navigation }) {
 
@@ -65,6 +63,7 @@ export default function Login({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Enter email"
+          placeholderTextColor="gray"
           autoCapitalize="none"
           keyboardType="email-address"
           textContentType="emailAddress"
@@ -75,6 +74,7 @@ export default function Login({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Enter password"
+          placeholderTextColor="gray"
           autoCapitalize="none"
           autoCorrect={false}
           secureTextEntry={true}

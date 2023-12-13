@@ -44,7 +44,7 @@ const InformationSection = (props) => {
     <>
       <View style= {styles.avtrpos}>
         <Image
-          source={{ uri: userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png' }}
+          source={userData?.profilePictureURL ? { uri: userData.profilePictureURL } : require('../../../assets/images/default.png')}
           color='#CEDDF7'
           style={{
           width: 150,
@@ -58,7 +58,7 @@ const InformationSection = (props) => {
       <View style={styles.heading}>
       <Text style={[styles.headingTxt, {flex:1}]}>Personal Information</Text>
       <TouchableOpacity onPress={()=>props.handleEditMode()}>
-        <Icon name="create-outline" size={26}/>
+        <Icon name="create-outline" size={26} color="gray"/>
       </TouchableOpacity>
       </View>
       <View style={styles.row}>
@@ -114,7 +114,7 @@ const EditSection = (props) => {
   const userLastName = '' + userData?.lastName;
   const userEmail = '' + userData?.email;
   const userContact = '' + userData?.contact;
-  const userPic = '' + userData?.profilePictureURL || 'https://cdn.vox-cdn.com/thumbor/yIoKynT0Jl-zE7yWwzmW2fy04xc=/0x0:706x644/1400x1400/filters:focal(353x322:354x323)/cdn.vox-cdn.com/uploads/chorus_asset/file/13874040/stevejobs.1419962539.png';
+  const userPic = '' + userData?.profilePictureURL || '../../../assets/images/default.png';
 
   //Edit Values
   const [firstName, setFirstName] = React.useState(userFirstName);
@@ -125,13 +125,13 @@ const EditSection = (props) => {
   const [contactNumber, setContactNumber] = React.useState(userContact);
   const [image, setProfilePicture] = React.useState(userPic);
 
-
   const handleCancel = () => {
     props.handleEditMode();
   }
 
   const handleUserUpdate = async (uid, newData) => {
     const userRef = firestore().collection('users').doc(uid);
+    props.handleEditMode();
   
     return userRef.update(newData)
       .then(() => {
@@ -197,31 +197,36 @@ const EditSection = (props) => {
   };
 
   const handleUploadProfilePicture = async () => {
-    if (image) {
-      const filename = image.substring(image.lastIndexOf('/') + 1);
-      const storageRef = storage().ref(`profilePictures/${filename}`);
-      const response = await fetch(image);
-      const blob = await response.blob();
-      await storageRef.put(blob);
-  
-      const trimmedUid = userData.uid.trim();
-      const uid = trimmedUid;
-      const userRef = firestore().collection('users').doc(uid);
-      await userRef.update({
-        profilePictureURL: await storageRef.getDownloadURL(),
-      });
-  
-      alert('Changes Saved!');
-    } else {
-      alert('There is an error while saving, please try again');
-    }
-  };
+    try{ 
+      if (image) {
+        const filename = image.substring(image.lastIndexOf('/') + 1);
+        const storageRef = storage().ref(`profilePictures/${filename}`);
+        const response = await fetch(image);
+        const blob = await response.blob();
+        await storageRef.put(blob);
+    
+        const trimmedUid = userData.uid.trim();
+        const uid = trimmedUid;
+        const userRef = firestore().collection('users').doc(uid);
+        await userRef.update({
+          profilePictureURL: await storageRef.getDownloadURL(),
+        });
+    
+        alert('Changes Saved!');
+
+      } else {
+        throw new Error('There is an error while saving, please try again');
+      }
+    } catch (error) {
+    alert(error.message);
+  }
+};
   
   return (
     <>
     <View style= {styles.avtrpos}>
       <Image
-        source={{ uri: image  }}
+        source={image ? { uri: image } : require('../../../assets/images/default.png')}
         color='#CEDDF7'
         style={{
           width: 150,
@@ -311,8 +316,11 @@ const EditSection = (props) => {
           style={[styles.textInput]}/>
       </View>
       <View style={{display:'flex', flexDirection:'row', gap:12,justifyContent:'center', alignContent:'center', alignItems:'center', marginTop: 20}}>
-        <TouchableOpacity onPress ={() => {handleSave(); handleUploadProfilePicture();}} style={{width:'50%', backgroundColor:'#f57c00', borderRadius: 10, padding:12}}>
+        <TouchableOpacity onPress ={() => {handleSave(); handleUploadProfilePicture();}} style={{width:'50%', backgroundColor:'#257cba', borderRadius: 10, padding:12}}>
           <Text style={{textAlign:'center', color:'white', fontSize:20, fontWeight: '500'}}>Save Changes</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress ={handleCancel} style={{width:'50%', backgroundColor:'gray', borderRadius: 10, padding:12}}>
+          <Text style={{textAlign:'center', color:'white', fontSize:20, fontWeight: '500'}}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -356,7 +364,11 @@ return (
         {/* Footer Section */}
         <View style={{justifyContent:'center', alignContent:'center', alignItems:'center', marginTop: 20}}>
           {isEditMode ? (null) : (
+<<<<<<< HEAD
             <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'orange', borderRadius: 14, padding:12}}>
+=======
+            <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'#257cba', borderRadius: 14, padding:12}}>
+>>>>>>> b927417b2367da6f449a55d21cf6387c2f3eb914
               <Text style={{textAlign:'center', color:'white', fontSize:26, fontWeight:'500'}}>Log Out</Text>
             </TouchableOpacity>
           )}
@@ -369,7 +381,11 @@ return (
 
 const styles = StyleSheet.create({
   container: {
+<<<<<<< HEAD
     backgroundColor: '#CEDDF7',
+=======
+    backgroundColor: '#257cba',
+>>>>>>> b927417b2367da6f449a55d21cf6387c2f3eb914
     flex: 1,
     justifyContent: 'center',
     paddingTop: StatusBar.currentHeight,
