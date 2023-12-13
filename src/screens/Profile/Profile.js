@@ -364,11 +364,7 @@ return (
         {/* Footer Section */}
         <View style={{justifyContent:'center', alignContent:'center', alignItems:'center', marginTop: 20}}>
           {isEditMode ? (null) : (
-<<<<<<< HEAD
-            <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'orange', borderRadius: 14, padding:12}}>
-=======
             <TouchableOpacity onPress={handleLogout} style={{width:'50%', backgroundColor:'#257cba', borderRadius: 14, padding:12}}>
->>>>>>> b927417b2367da6f449a55d21cf6387c2f3eb914
               <Text style={{textAlign:'center', color:'white', fontSize:26, fontWeight:'500'}}>Log Out</Text>
             </TouchableOpacity>
           )}
@@ -381,11 +377,7 @@ return (
 
 const styles = StyleSheet.create({
   container: {
-<<<<<<< HEAD
-    backgroundColor: '#CEDDF7',
-=======
     backgroundColor: '#257cba',
->>>>>>> b927417b2367da6f449a55d21cf6387c2f3eb914
     flex: 1,
     justifyContent: 'center',
     paddingTop: StatusBar.currentHeight,

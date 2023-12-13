@@ -110,7 +110,7 @@ export default function PatientMessages() {
         setAppointmentState(true);
         setAppointmentList(assessments);
       } else{
-        setAppointmentState(false);
+        setAppointmentState(true);
       }
       
       console.log(assessments);  

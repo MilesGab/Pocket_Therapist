@@ -6,6 +6,7 @@ import {
 ClientRoleType,
 createAgoraRtcEngine,
 IRtcEngine,
+RtcSurfaceView,
 ChannelProfileType,
 } from 'react-native-agora';
 
@@ -16,10 +17,13 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
 import Ringtone from '../../../../assets/audio/ptring.mp3';
 
+import firestore from '@react-native-firebase/firestore';
+
+
 const appId = '8c9007f71b7c429d971501377a0772fe';
 const channelName = 'newcall';
-const token = '007eJxTYDhyUUl4mnSKW0acy7rT7NopG5qKGdtvmMxbWPiUJzTtf7ECg0WypYGBeZq5YZJ5somRZYqluaGpgaGxuXmigbm5UVrqL2+N1IZARgYddnsWRgYIBPHZGfJSy5MTc3IYGADtBh1v';
-const uid = 1;
+// const token = '007eJxTYHDgmGkis9NL3H5hkM1dnm+v/33g2fRJ7PMMx/ebZgUe375KgcEi2dLAwDzN3DDJPNnEyDLF0tzQ1MDQ2Nw80cDc3CgtdVFXZWpDICODx2FtFkYGCATx2RnyUsuTE3NyGBgAvgMg3Q==';
+const uid = 0;
 
 const VoiceChat = () =>{
     const agoraEngineRef = useRef(IRtcEngine); // Agora engine instance
@@ -27,6 +31,46 @@ const VoiceChat = () =>{
     const [isDoctorJoined, setIsDoctorJoined] = useState(false);
     const [remoteUid, setRemoteUid] = useState(0); // Uid of the remote user
     const [message, setMessage] = useState(''); // Message to the user
+    const [token, setToken] = useState('');
+    const [isVideoEnabled, setIsVideoEnabled] = useState(false);
+
+
+    const toggleVideo = () => {
+        if (isJoined) {
+            try {
+                if (isVideoEnabled) {
+                    agoraEngineRef.current?.muteLocalVideoStream(true);
+                } else {
+                    agoraEngineRef.current?.muteLocalVideoStream(false);
+                }
+                setIsVideoEnabled(!isVideoEnabled);
+                showMessage(`Video ${isVideoEnabled ? 'disabled' : 'enabled'}`);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    };
+
+    const retrieveToken = async () =>{
+        try{
+            const userRef = await firestore().collection('users')
+                                       .where('uid', '==', 'eiNBRNBkpwVFg8ZYXPTsMUpXLDo2')
+                                       .get();
+
+           if (!userRef.empty) {
+            const userData = userRef.docs[0].data();
+            setToken(userData.user_token)
+            } else {
+                console.log('No doctor found with the provided ID.');
+            }
+        }catch(e){
+            console.error('Error fetching token:', e);
+        }
+    };
+
+    useEffect(()=>{
+        retrieveToken();
+    },[])
 
     const sound = new Sound(Ringtone, Sound.MAIN_BUNDLE, (error) => {
         if (error) {
@@ -40,6 +84,7 @@ const VoiceChat = () =>{
         if (Platform.OS === 'android') {
             await PermissionsAndroid.requestMultiple([
                 PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+                PermissionsAndroid.PERMISSIONS.CAMERA,
             ]);
         }
     };
@@ -48,12 +93,46 @@ const VoiceChat = () =>{
         setMessage(msg);
     }
 
-    useEffect(() => {
+    // useEffect(() => {
+    //     // Initialize Agora engine when the app starts
+    //     setupVoiceSDKEngine();
+    //  });
+     
+    //  const setupVoiceSDKEngine = async () => {
+    //     try {
+    //     // use the helper function to get permissions
+    //     if (Platform.OS === 'android') { await getPermission()};
+    //     agoraEngineRef.current = createAgoraRtcEngine();
+    //     const agoraEngine = agoraEngineRef.current;
+    //     agoraEngine.registerEventHandler({
+    //         onJoinChannelSuccess: () => {
+    //             showMessage('Successfully joined the channel ' + channelName);
+    //             setIsJoined(true);
+    //         },
+    //         onUserJoined: (_connection, Uid) => {
+    //             showMessage('Remote user joined with uid ' + Uid);
+    //             setRemoteUid(Uid);
+    //             setIsDoctorJoined(true);
+    //         },
+    //         onUserOffline: (_connection, Uid) => {
+    //             showMessage('Remote user left the channel. uid: ' + Uid);
+    //             setRemoteUid(0);
+    //         },
+    //     });
+    //     agoraEngine.initialize({
+    //         appId: appId,
+    //     });
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    //  };
+
+     useEffect(() => {
         // Initialize Agora engine when the app starts
-        setupVoiceSDKEngine();
+        setupVideoSDKEngine();
      });
      
-     const setupVoiceSDKEngine = async () => {
+     const setupVideoSDKEngine = async () => {
         try {
         // use the helper function to get permissions
         if (Platform.OS === 'android') { await getPermission()};
@@ -67,7 +146,6 @@ const VoiceChat = () =>{
             onUserJoined: (_connection, Uid) => {
                 showMessage('Remote user joined with uid ' + Uid);
                 setRemoteUid(Uid);
-                setIsDoctorJoined(true);
             },
             onUserOffline: (_connection, Uid) => {
                 showMessage('Remote user left the channel. uid: ' + Uid);
@@ -76,7 +154,9 @@ const VoiceChat = () =>{
         });
         agoraEngine.initialize({
             appId: appId,
+            channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
         });
+        agoraEngine.enableVideo();
         } catch (e) {
             console.log(e);
         }
@@ -90,6 +170,7 @@ const VoiceChat = () =>{
             agoraEngineRef.current?.setChannelProfile(
                 ChannelProfileType.ChannelProfileCommunication,
             );
+            agoraEngineRef.current?.startPreview();
             agoraEngineRef.current?.joinChannel(token, channelName, uid, {
                 clientRoleType: ClientRoleType.ClientRoleBroadcaster,
             });
@@ -110,69 +191,112 @@ const VoiceChat = () =>{
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Avatar size={100} icon={<Icon name="person-circle-outline" size={100}/>} style={{marginBottom:12}}/>
-                <Text style={{fontSize:28, color:'black'}}>Dr. Mico Ruiz Linco</Text>
+        <SafeAreaView style={styles.main}>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContainer}>
                 {isJoined ? (
-                <Text>Local user uid: {uid}</Text>
+                    <>
+                    </>
                 ) : (
-                <Text>Waiting for patient...</Text>
+                    <Text>Connecting..</Text>
                 )}
                 {isJoined && remoteUid !== 0 ? (
-                <Text>Remote user uid: {remoteUid}</Text>
+                    // <>
+                    // <React.Fragment key={0}>
+                    // <RtcSurfaceView canvas={{uid: 0}} style={[styles.videoView,{width:'50%'}]} />
+                    // <Text>Local user uid: {uid}</Text>
+                    // </React.Fragment>
+                    // <React.Fragment key={remoteUid}>
+                    // <RtcSurfaceView
+                    //     canvas={{uid: remoteUid}}
+                    //     style={styles.videoView}
+                    // />
+                    // <Text>Remote user uid: {remoteUid}</Text>
+                    // </React.Fragment>
+                    // </>
+                    <>
+                        <RtcSurfaceView
+                            canvas={{uid: remoteUid}}
+                            style={styles.videoView}
+                        />
+                        {isVideoEnabled ? (
+                            <RtcSurfaceView
+                            canvas={{uid: 0}}
+                            style={{position: 'absolute', top: 0, left: 0, zIndex: 1, width: '40%', height: 200, left: 20,top:20}}
+                        />
+                        ) : (
+                            null
+                        )}
+                    </>
                 ) : (
-                null
+                    <Text>Waiting for a remote user to join</Text>
                 )}
-            </View>
-            <View style={styles.footer}>
-                <TouchableOpacity onPress={leave} style={styles.endCall}>
-                    <Icon style={{}} name="call" color={'white'} size={40}/>
+                <Text style={styles.info}>{message}</Text>
+            </ScrollView>
+            <View style={styles.btnContainer}>
+                <Text onPress={join} style={styles.button}>
+                    Join
+                </Text>
+                <TouchableOpacity onPress={leave} style={[styles.button,{backgroundColor: 'red'}]}>
+                    <Icon name="call-outline" color="white" size={40}/>
                 </TouchableOpacity>
-                {isJoined ? (
-                    null
-                ) : (
-                <TouchableOpacity onPress={join} style={[styles.endCall, {backgroundColor:'#3dcc44'}]}>
-                    <Icon style={{}} name="call" color={'white'} size={40}/>
-                </TouchableOpacity>
-                )}
+                <Text onPress={toggleVideo} style={styles.button}>
+                    {isVideoEnabled ? ( 
+                        <Icon name="videocam-outline" color="white" size={40}/>
+                    ) : ( 
+                        <Icon name="videocam-off-outline" color="white" size={40}/>
+                    )}
+                </Text>
             </View>
-        </View>
+        </SafeAreaView>
     );
-
 }
 
 const styles = StyleSheet.create({
+    button: {
+        fontWeight: 'bold',
+        color: '#ffffff',
+        backgroundColor: '#0055cc',
+        margin: 5,
+        paddingHorizontal: 20,
+        paddingVertical: 20,
+        borderRadius: 60
+    },
 
-    container: {
-        height:'100%',
-        width:'100%',
-        display:'flex',
+    main: {
+        flex: 1, 
+        alignItems: 'center',
+    },
+
+    scroll: {
+        flex: 1, 
+        width: '100%'
+    },
+
+    scrollContainer: {
+        alignItems: 'center'
+    },
+
+    videoView: {
+        width: '100%', 
+        height: 600
+    },
+
+    btnContainer: {
+        flexDirection: 'row', 
         justifyContent: 'center',
-        alignContent:'center'
+        paddingVertical: 20
     },
 
-    header: {
-        justifyContent:'center',
-        alignItems:'center',
-        flex:1
+    head: {
+        fontSize: 20
     },
-
-    footer: {
-        flexDirection:'row',
-        gap: 32,
-        justifyContent:'center',
-        alignItems:'center',
-        marginBottom: 12
-    }, 
     
-    endCall: {
-        borderRadius: 40,
-        backgroundColor:'red',
-        padding: 20,
-        alignItems:'center'
+    info: {
+        backgroundColor: '#ffffe0', 
+        color: '#0000ff'
     }
-
-})
+});
 
 export default VoiceChat;
