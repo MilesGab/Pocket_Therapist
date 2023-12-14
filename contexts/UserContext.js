@@ -1,10 +1,12 @@
 import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Toast } from 'react-native'; // Assuming you are using a Toast library
 
 const UserContext = React.createContext();
 
 export function UserProvider({ children }) {
   const [userData, setUserData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     async function loadUserData() {
@@ -16,6 +18,9 @@ export function UserProvider({ children }) {
         }
       } catch (error) {
         console.error('Error loading user data:', error);
+        Toast.show('Error loading user data');
+      } finally {
+        setLoading(false);
       }
     }
     
@@ -23,25 +28,30 @@ export function UserProvider({ children }) {
   }, []);
 
   const updateUser = async (newUserData) => {
-    setUserData(newUserData);
+    const updatedUserData = { ...userData, ...newUserData };
+    setUserData(updatedUserData);
     try {
       await AsyncStorage.setItem('userData', JSON.stringify(newUserData));
     } catch (error) {
       console.error('Error saving user data:', error);
+      Toast.show('Error saving user data');
+    } finally {
+      console.log('Success in changing! New data: ', updatedUserData);
     }
-  };
+  }; 
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('userData'); // Remove user data from AsyncStorage
-      setUserData(null); // Clear the user data in the state
+      await AsyncStorage.removeItem('userData');
+      setUserData(null);
     } catch (error) {
       console.error('Error logging out:', error);
+      Toast.show('Error during logout');
     }
   };
 
   return (
-    <UserContext.Provider value={{ userData, updateUser, logout }}>
+    <UserContext.Provider value={{ userData, updateUser, logout, loading }}>
       {children}
     </UserContext.Provider>
   );

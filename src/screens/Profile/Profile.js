@@ -139,7 +139,10 @@ const EditSection = (props) => {
       })
       .catch((error) => {
         console.error('Error updating user data:', error);
-      });
+      })
+      .finally(()=>{
+        updateUser(newData);
+      })
 
   };
 
@@ -211,9 +214,6 @@ const EditSection = (props) => {
         await userRef.update({
           profilePictureURL: await storageRef.getDownloadURL(),
         });
-    
-        alert('Changes Saved!');
-
       } else {
         throw new Error('There is an error while saving, please try again');
       }
@@ -291,7 +291,8 @@ const EditSection = (props) => {
           items={dropDownItems}
           setOpen={setOpen}
           setValue={setDropDownValue}
-          setItems={setDropDownItems}/>
+          setItems={setDropDownItems}
+          />
       </View>
       <View style={styles.row}>
         <Text style={styles.infoTxt}>E-mail Address</Text>

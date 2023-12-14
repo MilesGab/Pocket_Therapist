@@ -26,6 +26,7 @@ const channelName = 'newcall';
 // const token = '007eJxTYHDgmGkis9NL3H5hkM1dnm+v/33g2fRJ7PMMx/ebZgUe375KgcEi2dLAwDzN3DDJPNnEyDLF0tzQ1MDQ2Nw80cDc3CgtdVFXZWpDICODx2FtFkYGCATx2RnyUsuTE3NyGBgAvgMg3Q==';
 
 const VoiceChat = () =>{
+    const navigation = useNavigation();
     const { userData } = useUserContext();
     const trimmedUid = userData.uid.trim();
     const uid = 0;
@@ -182,12 +183,21 @@ const VoiceChat = () =>{
         }
     };
 
+    useEffect(()=>{
+        if(!isJoined){
+            join();
+            console.log('channel joined')
+        }
+        console.log('joined channel: ', token);
+    },[token]);
+
     const leave = () => {
         try {
             agoraEngineRef.current?.leaveChannel();
             setRemoteUid(0);
             setIsJoined(false);
             showMessage('You left the channel');
+            navigation.goBack();
         } catch (e) {
             console.log(e);
         }
@@ -205,19 +215,6 @@ const VoiceChat = () =>{
                     <Text>Connecting..</Text>
                 )}
                 {isJoined && remoteUid !== 0 ? (
-                    // <>
-                    // <React.Fragment key={0}>
-                    // <RtcSurfaceView canvas={{uid: 0}} style={[styles.videoView,{width:'50%'}]} />
-                    // <Text>Local user uid: {uid}</Text>
-                    // </React.Fragment>
-                    // <React.Fragment key={remoteUid}>
-                    // <RtcSurfaceView
-                    //     canvas={{uid: remoteUid}}
-                    //     style={styles.videoView}
-                    // />
-                    // <Text>Remote user uid: {remoteUid}</Text>
-                    // </React.Fragment>
-                    // </>
                     <>
                         <RtcSurfaceView
                             canvas={{uid: remoteUid}}
@@ -231,27 +228,23 @@ const VoiceChat = () =>{
                         ) : (
                             null
                         )}
+                        <View style={styles.btnContainer}>
+                            <TouchableOpacity onPress={toggleVideo} style={styles.button}>
+                                {isVideoEnabled ? ( 
+                                    <Icon name="videocam-outline" color="white" size={40}/>
+                                ) : ( 
+                                    <Icon name="videocam-off-outline" color="white" size={40}/>
+                                )}
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={leave} style={[styles.button,{backgroundColor: 'red'}]}>
+                                <Icon name="call-outline" color="white" size={40}/>
+                            </TouchableOpacity>
+                        </View>
                     </>
                 ) : (
-                    <Text>Waiting for a remote user to join</Text>
+                    <Text>Waiting for users...</Text>
                 )}
-                <Text style={styles.info}>{message}</Text>
             </ScrollView>
-            <View style={styles.btnContainer}>
-                <Text onPress={join} style={styles.button}>
-                    Join
-                </Text>
-                <TouchableOpacity onPress={leave} style={[styles.button,{backgroundColor: 'red'}]}>
-                    <Icon name="call-outline" color="white" size={40}/>
-                </TouchableOpacity>
-                <Text onPress={toggleVideo} style={styles.button}>
-                    {isVideoEnabled ? ( 
-                        <Icon name="videocam-outline" color="white" size={40}/>
-                    ) : ( 
-                        <Icon name="videocam-off-outline" color="white" size={40}/>
-                    )}
-                </Text>
-            </View>
         </SafeAreaView>
     );
 }
@@ -282,14 +275,16 @@ const styles = StyleSheet.create({
     },
 
     videoView: {
-        width: '100%', 
-        height: 600
+        width: '100%',
+        height: 800,
     },
 
     btnContainer: {
         flexDirection: 'row', 
         justifyContent: 'center',
-        paddingVertical: 20
+        paddingVertical: 40,
+        position:'absolute',
+        bottom: 0,
     },
 
     head: {

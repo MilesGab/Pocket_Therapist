@@ -52,8 +52,11 @@ export default function DoctorChatScreen({ route }) {
       const chatRef = firestore().collection('messages');
       chatRef.where('sendTo', 'in', [patientData, trimmedUid])
              .where('user._id', 'in', [patientData, trimmedUid])
-             .orderBy('createdAt', 'desc')
+             .orderBy('createdAt', 'asc')
              .onSnapshot((snapshot) => {
+               if (!snapshot) {
+                 return;
+               }
                snapshot.docChanges().forEach((change) => {
                  if (change.type === 'added') {
                    const messageData = change.doc.data();
@@ -64,11 +67,11 @@ export default function DoctorChatScreen({ route }) {
                      createdAt: messageData?.createdAt?.toDate() || new Date(),
                    };
                    setMessages((prevMessages) => {
-                    if (prevMessages.some((message) => message._id === newMessage._id)) {
-                      return prevMessages;
-                    }
-                    return [...prevMessages, newMessage];
-                  });
+                     if (prevMessages.some((message) => message._id === newMessage._id)) {
+                       return prevMessages;
+                     }
+                     return GiftedChat.append(prevMessages, [newMessage]);
+                   });
                  }
                });
              });
@@ -84,10 +87,6 @@ export default function DoctorChatScreen({ route }) {
   }, []);
 
   const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-
     sendMessagesToFirestore(messages);
     retrieveMessagesFromFirestore();
   }, []);
@@ -268,7 +267,6 @@ const styles = StyleSheet.create({
   toolbarContainer:{
     flex:1,
     paddingTop: 15,
-    paddingBottom:15,
   },
 
   inputToolbar: {

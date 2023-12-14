@@ -9,7 +9,7 @@ import { useUserContext } from '../../../../contexts/UserContext';
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
   const timestamp = new Date(
-      item.date.seconds * 1000 + item.date.nanoseconds / 1000000
+      item?.date.seconds * 1000 + item?.date.nanoseconds / 1000000
     );
   
   const formattedDate = timestamp.toLocaleDateString('en-US', {
@@ -67,7 +67,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
 const DoctorScreen = ({ navigation }) => {
   
   const { userData } = useUserContext();
-  const trimmedUid = userData?.uid.trim();
+  const trimmedUid = userData?.uid?.trim();
   
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);

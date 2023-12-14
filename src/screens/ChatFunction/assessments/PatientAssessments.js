@@ -139,12 +139,6 @@ const PatientAssessment = ({ route }) => {
             <View style={styles.container}>
                 <View style={{marginBottom: 20}}>
                     <Text style={{fontSize: 28, fontWeight:'bold', color:'black'}}>{patientInfo.firstName}'s Assessments</Text>
-                    <TouchableOpacity onPress={handleList} style={styles.videoContainer}>
-                        <View style={styles.buttonWrapper}>
-                            <Icon name="walk-outline" size={20} color='black'/>
-                            <Text style={{color:'black'}}>{patientInfo.firstName}'s exercise list</Text>
-                        </View>
-                    </TouchableOpacity>
                 </View>
                 {isLoading ? (
                     <ActivityIndicator size={'large'} color='gray'/>

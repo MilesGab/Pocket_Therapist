@@ -7,6 +7,7 @@ import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
 import { ActivityIndicator } from "@react-native-material/core";
+import { useNavigation } from '@react-navigation/native';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
@@ -158,19 +159,17 @@ const PatientScreen = ({ navigation }) => {
               width: 80,
               height: 80,
               borderRadius: 75,
-              borderWidth: 5,
-              borderColor: 'white',
               }}
           />
           </TouchableOpacity>
         </View>
-
+        
+        <Text style={styles.servicesText}>Summary</Text>
         <LatestResults/>
 
         <View style={styles.services}>
           <Text style={styles.servicesText}>Services</Text>
-              <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center', paddingHorizontal: 16}}>
-              {/* 1st button */}
+              {/* <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center', paddingHorizontal: 16}}>
               <IconButton
                 onPress={() => navigation.navigate('Assessment')}
                 style={{
@@ -181,7 +180,6 @@ const PatientScreen = ({ navigation }) => {
                 }}
                 icon={props => <Icon name="clipboard-outline" color={'#F2F2F2'} size={36} />}
               />
-              {/* 2nd button */}
               <IconButton
                 onPress={() => handleExercisesPage(trimmedUid)}
                 style={{
@@ -192,6 +190,19 @@ const PatientScreen = ({ navigation }) => {
                 }}
                 icon={props => <Icon name="accessibility-outline" color={'#F2F2F2'} size={36} />}
               />
+              </View> */}
+              <View style={{backgroundColor:'white', padding: 12, borderRadius: 12, elevation: 4}}>
+                <TouchableOpacity onPress={() => navigation.navigate('Assessment')} style={styles.serviceBtn}>
+                  <Icon name="clipboard-outline" color={'#4a7fd4'} size={36} style={{right: 12}}/>
+                  <Text style={{fontSize: 16, fontWeight:'bold', color:'black', flex:1}}>Take Assessment</Text>
+                  <Icon name="chevron-forward-outline" size={20}/>
+                </TouchableOpacity>
+                <Divider style={{marginVertical: 12}}/>
+                  <TouchableOpacity onPress={() => handleExercisesPage(trimmedUid)} style={styles.serviceBtn}>
+                  <Icon name="accessibility-outline" color={'#d19245'} size={36} style={{right: 12}}/>
+                  <Text style={{fontSize: 16, fontWeight:'bold', color:'black', flex:1}}>View Exercises</Text>
+                  <Icon name="chevron-forward-outline" size={20}/>
+                </TouchableOpacity>
               </View>
         </View>
       
@@ -228,6 +239,7 @@ const LatestResults = () =>{
   const [isLoading, setLoading] = React.useState(false);
   const trimmedUid = userData?.uid.trim();
 
+  const navigation = useNavigation();
 
   const resultsMap = [
     'YES'
@@ -271,17 +283,25 @@ const LatestResults = () =>{
 
   const outputDate = formattedDate !== 'Invalid Date' ? formattedDate : '';
 
+  const handleAssessmentHistory = () =>{
+    navigation.navigate('AssessmentHistory')
+  }
+
   return(
     <View style={styles.stats}>
-      <Box w={'100%'} h={'auto'} style={{ backgroundColor: "rgba(174, 223, 247, 0.7)", borderRadius: 16}}>
+      <Box w={'100%'} h={'auto'} style={{ backgroundColor: "white", borderRadius: 16, elevation: 4}}>
           <Box style={{padding: 16, display: 'flex', flexDirection: 'row'}}>
             <Box style={{flex: 1}}>
-              <Box style={{display:'flex', flexDirection:'row', marginBottom: 20}}>
+              <Box style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom: 20}}>
+                <Icon name="heart-outline" color="red" size={20} style={{right: 4}}/>
                 <Text style={{fontFamily: 'Nunito Sans', fontWeight:'bold', fontSize: 20, color: 'black', flex:1}}>Last Assessment</Text>
                 {isLoading ? (
                   <Text>Getting date...</Text>
                 ) : (
-                  <Text>{outputDate}</Text>
+                  <TouchableOpacity onPress={()=>handleAssessmentHistory()} style={{display:'flex',flexDirection:'row', alignItems:'center'}}>
+                    <Text style={{color: '#696969'}}>{outputDate}</Text>
+                    <Icon name="chevron-forward-outline" size={14} color={'#696969'}/>
+                  </TouchableOpacity>
                 )}
               </Box>
               {isLoading ? (
@@ -341,7 +361,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 32
   },
 
   headerText: {
@@ -361,9 +380,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#343434',
     fontStyle: 'normal',
-    fontWeight: 'bold',
-    
+    fontWeight: 'bold',    
+    marginBottom: 12
   },
+
+  serviceBtn: {
+    display:'flex', 
+    flexDirection:'row',
+    alignContent:'center', 
+    alignItems:'center',
+    paddingHorizontal: 12
+    },
 
   stats: {
     height: '35%',

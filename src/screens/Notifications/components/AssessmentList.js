@@ -58,38 +58,50 @@ const AssessmentList = () => {
         fetchDoctor();
     }, []);
 
-    const fetchApprovedAssessments = async () => {
-        try{
-          const assessmentQuerySnapshot = await firestore()
-            .collection('assessments')
-            .where('patient', '==', trimmedUid)
-            .where('status', '==', 'reviewed')
-            .get()
+    const fetchApprovedAssessments = () => {
+      try {
+        const unsubscribe = firestore()
+          .collection('assessments')
+          .where('patient', '==', trimmedUid)
+          .where('status', '==', 'reviewed')
+          .onSnapshot(snapshot => {
+            const assessments = [];
+            snapshot.forEach(doc => {
+              assessments.push(doc.data());
+            });
     
-          const assessments = [];
-          assessmentQuerySnapshot.forEach((doc) => {
-            const assessmentData = doc.data();
-            assessments.push(assessmentData);
+            setAssessmentList(assessments);
+            console.log(assessments);
+          }, error => {
+            console.error('Failed to fetch approved assessments: ', error);
           });
-
-          setAssessmentList(assessments);  
-          console.log(assessments);  
-        } catch (error) {
-          console.error('Failed to fetch approved appointments: ', error);
-        }
+    
+        return unsubscribe;
+      } catch (error) {
+        console.error('Failed to set up onSnapshot listener: ', error);
       }
+    };
 
-      React.useEffect(()=>{
-        fetchApprovedAssessments();
-      },[])
+    React.useEffect(()=>{
+      fetchApprovedAssessments();
+    },[])
 
-      return (
-        <View>
-          {assessmentList.map((item, index) => (
-            <AssessmentCard key={index} doctor={doctor} date={item.date}/>
-          ))}
-        </View>
-      );
+    React.useEffect(() => {
+      const unsubscribe = fetchApprovedAssessments();
+    
+      // Cleanup function
+      return () => {
+        unsubscribe();
+      };
+    }, []);
+
+    return (
+      <View>
+        {assessmentList.map((item, index) => (
+          <AssessmentCard key={index} doctor={doctor} date={item.date}/>
+        ))}
+      </View>
+    );
 
 }
 

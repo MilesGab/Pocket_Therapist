@@ -154,6 +154,14 @@ const AssessmentPage = ({ route }) => {
         }
     };
 
+    const timestamp = new Date(
+        patientData?.date.seconds * 1000 + patientData?.date.nanoseconds / 1000000
+      );
+
+    const formattedDate = timestamp.toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric' 
+      });
+
     return (
         <Provider>
         <ScrollView>
@@ -163,7 +171,7 @@ const AssessmentPage = ({ route }) => {
                     <View style={{marginLeft:12, color:'white'}}>
                         <Text style={{color:'white'}}>{patientInfo?.firstName} {patientInfo?.lastName}</Text>
                         <Text style={{color:'white'}}>Patient</Text>
-                        <Text style={{color:'white'}}>Assessment Taken: October 10, 2023</Text>
+                        <Text style={{color:'white'}}>Assessment Taken: {formattedDate}</Text>
                     </View>
                 </View>
                 <View>

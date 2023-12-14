@@ -24,6 +24,8 @@ import PatientSearch from '../screens/Homescreen/roles/components/SearchPatient.
 import MyExercises from '../screens/Homescreen/roles/components/MyExercise.js';
 import ExerciseList from '../screens/Homescreen/roles/components/ExerciseList.js';
 import Goniometer from '../screens/Homescreen/roles/components/Goniometer.js';
+import { ActivityIndicator } from '@react-native-material/core';
+import AssessmentHistory from '../screens/Homescreen/roles/components/AssessmentHistory.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -135,17 +137,27 @@ function MyTabs() {
 }
 
 const HomeStack = () => {
-  const { userData, updateUser } = useUserContext();
+  const { userData } = useUserContext();
+  const [isLoading, setLoading] = React.useState(true);
 
   useEffect(() => {
-    if (userData) {
-      if (userData.role === 0) {
-        console.log('Homescreen accessed as patient');
-      } else if (userData.role === 1) {
-        console.log('Homescreen accessed as doctor');
-      }
-    }
+    checkUserRole();
+    console.log(userData);
   }, [userData]);
+
+  const checkUserRole = async () => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
+if (isLoading) {
+  return (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color="#0000ff" />
+    </View>
+  );
+}
 
 return (
   <Stack.Navigator>
@@ -174,16 +186,7 @@ return (
 };
 
 const MessageStack = () => {
-  const { userData, updateUser } = useUserContext();
-  useEffect(() => {
-    if (userData) {
-      if (userData.role === 0) {
-        console.log('Chat accessed as patient');
-      } else if (userData.role === 1) {
-        console.log('Chat accessed as doctor');
-      }
-    }
-  }, [userData]);
+  const { userData } = useUserContext();
 
 return (
   <Stack.Navigator>
@@ -255,6 +258,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 10
   },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
 const Routes = (props) => {
@@ -272,6 +281,7 @@ const Routes = (props) => {
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="Assessment" component={Assessment} />
             <Stack.Screen name="MyExercises" component={MyExercises}/>
+            <Stack.Screen name="AssessmentHistory" component={AssessmentHistory}/>
         </Stack.Navigator>
     )
 }

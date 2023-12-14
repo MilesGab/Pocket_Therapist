@@ -17,8 +17,8 @@ export default function PatientMessages() {
   const [appointmentList, setAppointmentList] = React.useState();
   const [appointmentState, setAppointmentState] = React.useState(false);
   const { userData } = useUserContext();
-  const trimmedUid = userData.uid.trim();
-  const doctorId = userData.doctor.trim();
+  const trimmedUid = userData?.uid.trim();
+  const doctorId = userData?.doctor.trim();
   const navigation = useNavigation();
 
   const senderData = {
@@ -201,7 +201,6 @@ export default function PatientMessages() {
               style={styles.profileAndOptions}
             >
               <Avatar 
-                label={doctorData.firstName} 
                 image={
                   <Image
                   source={doctorData?.profilePictureURL ? { uri: doctorData.profilePictureURL } : require('../../../assets/images/default.png')}
@@ -215,6 +214,7 @@ export default function PatientMessages() {
                     }}
                   />
                 } 
+                color='black'
                 size={55} />
               <View style={styles.nameAndClass}>
                 <Text style={styles.username}>
@@ -225,7 +225,7 @@ export default function PatientMessages() {
             <View style={{display:'flex', flexDirection:'row'}}>
               {appointmentState ? (
                 <TouchableOpacity onPress={handleCall}>
-                  <Icon name="phone" size={24}/>
+                  <Icon name="phone" size={24} color={'black'}/>
                 </TouchableOpacity>
               ) : (
                 null
@@ -259,12 +259,10 @@ const styles = StyleSheet.create({
 
   header: {
     flexDirection: 'row',
-    backgroundColor:'#DCEDF9',
-    paddingTop: 20,
-    paddingBottom: 10,
+    backgroundColor:'#f7f7f7',
     height:100,
     alignItems:'center',
- 
+    elevation: 4
   },
 
   backBtn:{
@@ -293,10 +291,10 @@ const styles = StyleSheet.create({
     flex: 4,
 
   },
-
   username:{
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: 'bold',
+    color:'black'
   },
 
   class:{

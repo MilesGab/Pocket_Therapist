@@ -45,14 +45,15 @@ const AppointmentCard = ( props ) => {
 
   return(
     <View style={{display:'flex',
-      backgroundColor:'#65A89F', 
+      backgroundColor:'rgba(101, 168, 159, 1)', 
       width:'100%', 
       justifyContent:'center', 
       alignContent:'center',
       paddingHorizontal:10, 
       paddingVertical:12,
-      borderRadius:20,
-      marginBottom: 16
+      borderRadius: 32,
+      marginBottom: 16,
+      elevation: 4
       }}
       >
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>

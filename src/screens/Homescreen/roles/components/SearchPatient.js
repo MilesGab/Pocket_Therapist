@@ -39,12 +39,29 @@ const SearchResult = ({ result, doctorId, updateDoctorField}) => {
 
 }
 
+const useDebouncedValue = (input, time = 500) => {
+    const [debouncedValue, setDebouncedValue] = React.useState(input);
+  
+    React.useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(input);
+      }, time);
+  
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [input, time]);
+  
+    return debouncedValue;
+  };
+
 const PatientSearch = () => {
 
     const { userData, updateUser } = useUserContext();
     const navigation = useNavigation();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [resultsList, setResultsList] = React.useState([]);
+    const debouncedSearchQuery = useDebouncedValue(searchQuery);
 
     const trimmedUid = userData.uid.trim();
 
@@ -95,7 +112,7 @@ const PatientSearch = () => {
 
     React.useEffect(()=>{
         searchPatient();
-    },[searchQuery])
+    },[debouncedSearchQuery])
 
     return(
         <View style={styles.container}>
@@ -111,11 +128,14 @@ const PatientSearch = () => {
                 </TouchableOpacity>
             </View>
             <View>
-            {resultsList
-            .filter(result => result?.firstName?.toLowerCase().startsWith(searchQuery.toLowerCase()))
-            .map((result, index) => (
-                <SearchResult key={index} result={result} doctorId={trimmedUid} updateDoctorField={updateDoctorField}/>
-            ))}
+                {resultsList
+                .filter(result => {
+                    const fullName = `${result.firstName || ''} ${result.middleName || ''} ${result.lastName || ''}`.toLowerCase();
+                    return fullName.includes(searchQuery.toLowerCase());
+                })
+                .map((result, index) => (
+                    <SearchResult key={index} result={result} doctorId={trimmedUid} updateDoctorField={updateDoctorField}/>
+                ))}
             </View>
         </View>
     )
