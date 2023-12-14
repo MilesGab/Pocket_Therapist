@@ -5,12 +5,14 @@ import { Divider } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
-import { useUserContext } from '../../../../contexts/UserContext';
 import { ActivityIndicator } from "@react-native-material/core";
 import { useNavigation } from '@react-navigation/native';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
+  const { userData } = useUserContext();
+
   const timestamp = new Date(
       item.date.seconds * 1000 + item.date.nanoseconds / 1000000
     );
@@ -34,14 +36,15 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
               <Avatar label={item.firstName} size={55} 
                 image={
                   <Image
-                  source={userData?.profilePictureURL ? { uri: userData.profilePictureURL } : require('../../../../assets/images/default.png')}
+                  source={item?.profilePictureURL ? { uri: item.profilePictureURL } : require('../../../../assets/images/default.png')}
                   style={{
-                    position: "absolute",
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
                     borderRadius: 28,
+                    width: '100%',
+                    height:'100%'
                   }}
                   />
                   }
@@ -153,7 +156,7 @@ const PatientScreen = ({ navigation }) => {
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <Image
-              source={userData?.profilePictureURL ? { uri: userData.profilePictureURL } : require('../../../../assets/images/default.png')}
+              source={userData?.profilePictureURL ? { uri: userData?.profilePictureURL } : require('../../../../assets/images/default.png')}
               color='#CEDDF7'
               style={{
               width: 80,
@@ -411,10 +414,11 @@ const styles = StyleSheet.create({
 
   item: {
     paddingHorizontal: 12,
-    height: 'auto',
+    height: 150,
     width: 'auto',
     borderRadius: 12,
     marginVertical: 8,
+    marginBottom: 12
   },
 
   title: {

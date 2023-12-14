@@ -8,6 +8,8 @@ import { useUserContext } from '../../../../contexts/UserContext';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
+  const { userData } = useUserContext();
+
   const timestamp = new Date(
       item?.date.seconds * 1000 + item?.date.nanoseconds / 1000000
     );
@@ -31,7 +33,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
               <Avatar label={item.firstName} size={55} 
                 image={
                   <Image
-                  source={userData?.profilePictureURL ? { uri: userData.profilePictureURL } : require('../../../../assets/images/default.png')}
+                  source={item?.profilePictureURL ? { uri: item.profilePictureURL } : require('../../../../assets/images/default.png')}
                   style={{
                     position: "absolute",
                     top: 0,
