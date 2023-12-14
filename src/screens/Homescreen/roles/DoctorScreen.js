@@ -98,11 +98,14 @@ const DoctorScreen = ({ navigation }) => {
   }, [userData]);
 
   const countAppointments = async () => {
+    const dateToday = new Date();
+
     try {
       const querySnapshot = await firestore()
       .collection('appointments')
       .where('doctor_assigned', '==', trimmedUid)
       .where('status', '==', 1)
+      .where('date', '>=', dateToday)
       .get();
         
         const count = querySnapshot.size;

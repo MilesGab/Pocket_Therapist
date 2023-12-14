@@ -6,9 +6,11 @@ import firestore from '@react-native-firebase/firestore';
 import Video from 'react-native-video';
 import { ActivityIndicator, Avatar } from "@react-native-material/core";
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
 const MyExercises = ({ route }) => {
     const { patientData } = route.params;
+    const navigation = useNavigation();
     const [videos, setVideos] = React.useState([]);
     const [isLoading, setLoading] = React.useState(true);
     const [paused, setPaused] = React.useState(true);
@@ -40,7 +42,7 @@ const MyExercises = ({ route }) => {
       return (
           <TouchableOpacity style={styles.videoContainer}>
             <Text style={styles.videoTitle}>{item.video_name}</Text>
-            <Text>{item.video_description}</Text>
+            <Text style={{color:'black'}}>{item.video_description}</Text>
             <Video
               source={{ uri: item.video_path }}
               style={styles.videoPlayer}
@@ -55,6 +57,10 @@ const MyExercises = ({ route }) => {
     return (
       <View style={styles.container}>
         <View style={styles.heading}>
+          <TouchableOpacity onPress={()=>navigation.goBack()} style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
+            <Icon name="chevron-back-outline" color="black"/>
+            <Text style={{color:'black'}}>Back</Text>
+          </TouchableOpacity>
           <Text style={styles.headingTxt}>Exercises</Text>
         </View>
         {isLoading ? (
@@ -88,7 +94,12 @@ const styles = StyleSheet.create({
     
       heading: {
         paddingTop: 30,
-        paddingLeft: 20
+        paddingLeft: 20,
+        display:'flex',
+        flexDirection:'row',
+        alignContent:'center',
+        alignItems:'center',
+        gap: 12
       },
     
       headingTxt: {
@@ -107,6 +118,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
+        color:'black'
       },
       videoPlayer: {
         width: '100%',

@@ -48,7 +48,7 @@ const ExerciseList = () => {
     return (
       <TouchableOpacity style={styles.videoContainer}>
         <Text style={styles.videoTitle}>{item.video_name}</Text>
-        <Text>{item.video_description}</Text>
+        <Text style={{color:'black'}}>{item.video_description}</Text>
         <Video
           source={{ uri: item.video_path }}
           style={styles.videoPlayer}
@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color:'black'
   },
   videoPlayer: {
     width: '100%',

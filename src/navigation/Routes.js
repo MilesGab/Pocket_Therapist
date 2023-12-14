@@ -23,6 +23,7 @@ import DoctorScreen from '../screens/Homescreen/roles/DoctorScreen.js';
 import PatientSearch from '../screens/Homescreen/roles/components/SearchPatient.js';
 import MyExercises from '../screens/Homescreen/roles/components/MyExercise.js';
 import ExerciseList from '../screens/Homescreen/roles/components/ExerciseList.js';
+import Goniometer from '../screens/Homescreen/roles/components/Goniometer.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -108,15 +109,26 @@ function MyTabs() {
         }}
       />
       { userData?.role === 1 ? (
+        <>
         <Tab.Screen
-        name="Exercises"
-        component={ExerciseList}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => <Icon name="images-outline" color={color} size={size} />,
-          tabBarLabel: 'Exercises',
-        }}
-      />
+          name="Exercises"
+          component={ExerciseList}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => <Icon name="images-outline" color={color} size={size} />,
+            tabBarLabel: 'Exercises',
+          }}
+        />
+        <Tab.Screen
+          name="Goniometer"
+          component={Goniometer}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => <Icon name="analytics-outline" color={color} size={size} />,
+            tabBarLabel: 'Goniometer',
+          }}
+        />
+        </>
       ) : (null)}
     </Tab.Navigator>
   );

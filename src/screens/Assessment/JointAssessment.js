@@ -21,7 +21,7 @@ const WristAngleSensor = (props) =>{
       countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
         if (toDegrees(pitch) > maxAngle) {
-          setMaxAngle(toDegrees(pitch));
+          setMaxAngle(toDegrees(Math.abs(pitch)));
         }
       }, 1000);
     } else {
@@ -43,7 +43,7 @@ const WristAngleSensor = (props) =>{
       <View style={styles.circle}>
         <View>
           <Text style={{textAlign: 'center', color:'black'}}>
-            Wrist: {toDegrees(pitch)}°
+            Wrist: {toDegrees(Math.abs(pitch))}°
           </Text>
         </View>
       </View>

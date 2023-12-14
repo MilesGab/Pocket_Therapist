@@ -340,8 +340,6 @@ const Profile = () => {
 
   const handleLogout = () => {
 
-    logout();
-
     auth()
       .signOut()
       .then(() => {
@@ -427,6 +425,13 @@ const styles = StyleSheet.create({
     textAlign: 'left',
 
   },
+
+  avtrpos:{
+    justifyContent:'center',
+    alignContent:'center',
+    alignItems:'center',
+    top: -30
+  },  
 
   userInfoTxt: {
     fontSize: 18, 
