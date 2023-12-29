@@ -232,7 +232,7 @@ const DoctorScreen = ({ navigation }) => {
                             <Icon style={{fontWeight:'bold', fontSize:18, color:'#F2F2F2'}} name="chevron-down-outline"/>
                         </View>
                         {loading ? (
-                      <ActivityIndicator color={'gray'} size="large"/>
+                      <ActivityIndicator color={'#CEDDF7'} size="large"/>
                       ): (
                         <Text style={{marginTop:8, color: '#F2F2F2', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
                         )}
@@ -253,7 +253,7 @@ const DoctorScreen = ({ navigation }) => {
                             <Icon style={{fontWeight:'bold', fontSize:18, color:'#F2F2F2'}} name="chevron-down-outline"/>
                         </View>
                     {loading ? (
-                      <ActivityIndicator color={'gray'} size="large"/>
+                      <ActivityIndicator color={'#CEDDF7'} size="large"/>
                       ): (
                       <Text style={{marginTop:8, color: '#F2F2F2', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
                       )}
@@ -272,7 +272,7 @@ const DoctorScreen = ({ navigation }) => {
             </View>
             {loading ? 
             (
-              <ActivityIndicator size="large"/>
+              <ActivityIndicator color = {'#CEDDF7'} size="large"/>
             ) : (
               <FlatList
                 horizontal={false}
