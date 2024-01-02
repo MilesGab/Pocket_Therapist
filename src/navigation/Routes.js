@@ -26,6 +26,7 @@ import ExerciseList from '../screens/Homescreen/roles/components/ExerciseList.js
 import Goniometer from '../screens/Homescreen/roles/components/Goniometer.js';
 import { ActivityIndicator } from '@react-native-material/core';
 import AssessmentHistory from '../screens/Homescreen/roles/components/AssessmentHistory.js';
+import TokenTest from '../screens/ChatFunction/call/TokenTest.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -222,6 +223,12 @@ return (
     />
 
     <Stack.Screen 
+    name="TokenTest"
+    component={TokenTest}
+    options={{headerShown: false}}
+    />
+
+    <Stack.Screen 
     name="PatientAssessment"
     component={PatientAssessment}
     options={{headerShown: false}}
@@ -267,8 +274,6 @@ const styles = StyleSheet.create({
 });
 
 const Routes = (props) => {
-  const { userData, updateUser } = useUserContext();
-
     return(
         <Stack.Navigator 
           initialRouteName={props.user ? 'MyTabs' : 'Login'} 

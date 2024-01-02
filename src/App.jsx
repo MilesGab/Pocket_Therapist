@@ -2,9 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import Routes from './navigation/Routes.js';
-import { UserProvider, useUserContext } from '../contexts/UserContext.js';
+import { UserProvider } from '../contexts/UserContext.js';
 import { NotificationListener, requestUserPermission } from './utils/pushnotification_helper.js';
-import { Alert } from 'react-native';
 
 export default function App() {
   const [initializing, setInitializing] = React.useState(true);

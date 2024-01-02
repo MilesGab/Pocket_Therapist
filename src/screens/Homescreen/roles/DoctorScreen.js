@@ -5,6 +5,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { FlatList, ScrollView, TouchableOpacity} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { Divider } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
@@ -79,63 +81,83 @@ const DoctorScreen = ({ navigation }) => {
   const [loading, setLoading] = React.useState(true);
 
 
-  const countPatients = async () => {
+  const updateFCMToken = async () => {
+
+    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
+
     try{
-      const querySnapshot = await firestore()
-      .collection('users')
-      .where('role', '==', 0)
-      .where('doctor', '==', trimmedUid)
-      .get();
 
-      const count = querySnapshot.size;
-      setPatientCount(count);
+      const userRef = firestore().collection('users')
+            .doc(trimmedUid);
 
-    } catch(error){
-      console.error('Error fetching patients: ', error);
+      userRef.update({
+        notification_token: fcmtoken
+      });
+
+      console.log('Updated notification token: ', fcmtoken)
+
+    } catch(e){
+      console.error(e);
     }
   }
 
   React.useEffect(()=>{
-    countPatients();
+    updateFCMToken();
+  },[userData]);
+
+  const countPatients = () => {
+    return firestore()
+      .collection('users')
+      .where('role', '==', 0)
+      .where('doctor', '==', trimmedUid)
+      .onSnapshot(snapshot => {
+        const count = snapshot.size;
+        setPatientCount(count);
+      }, error => {
+        console.error('Error fetching patients: ', error);
+      });
+  };
+  
+  React.useEffect(() => {
+    const unsubscribe = countPatients();
+    return () => unsubscribe();
   }, [userData]);
 
-  const countAppointments = async () => {
+  const countAppointments = () => {
     const dateToday = new Date();
-
-    try {
-      const querySnapshot = await firestore()
+  
+    return firestore()
       .collection('appointments')
       .where('doctor_assigned', '==', trimmedUid)
       .where('status', '==', 1)
       .where('date', '>=', dateToday)
-      .get();
-        
-        const count = querySnapshot.size;
+      .onSnapshot(snapshot => {
+        const count = snapshot.size;
         setAppointmentsCount(count);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    }
+      }, error => {
+        console.error('Error fetching appointments:', error);
+      });
   };
-
+  
   React.useEffect(() => {
-    countAppointments();
+    const unsubscribe = countAppointments();
+    return () => unsubscribe();
   }, [userData]);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = () => {
     const dateToday = new Date();
-
-    try {
-      const appointmentsSnapshot = await firestore()
-        .collection('appointments')
-        .where('doctor_assigned', '==', trimmedUid)
-        .where('date', '>=', dateToday)
-        .get();
-
+  
+    return firestore()
+      .collection('appointments')
+      .where('doctor_assigned', '==', trimmedUid)
+      .where('status', '==', 1)
+      .where('date', '>=', dateToday)
+      .onSnapshot(async snapshot => {
         const appointmentsData = await Promise.all(
-          appointmentsSnapshot.docs.map(async doc => {
+          snapshot.docs.map(async doc => {
             const appointmentData = doc.data();
-            const doctorId = appointmentData.doctor_assigned; // Get the doctor ID from appointment data
-            const patientId = appointmentData.patient_assigned; // Get the patient ID from appointment data
+            const doctorId = appointmentData.doctor_assigned;
+            const patientId = appointmentData.patient_assigned;
   
             // Fetch doctor and patient data separately
             const [doctorSnapshot, patientSnapshot] = await Promise.all([
@@ -154,17 +176,18 @@ const DoctorScreen = ({ navigation }) => {
             };
           })
         );
-
-      setAppointmentList(appointmentsData);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    } finally{
-      setLoading(false);
-    }
+  
+        setAppointmentList(appointmentsData);
+        setLoading(false);
+      }, error => {
+        console.error('Error fetching appointments:', error);
+        setLoading(false);
+      });
   };
-
+  
   React.useEffect(() => {
-    fetchAppointments();
+    const unsubscribe = fetchAppointments();
+    return () => unsubscribe();
   }, [userData]);
 
   const handleSearch = () =>{
@@ -172,7 +195,7 @@ const DoctorScreen = ({ navigation }) => {
   }
 
   const renderItem = ({item}) => {
-    const backgroundColor = item.id === selectedId ? '#65A89F' : '#257cba';
+    const backgroundColor = item.id === selectedId ? '#65A89F' : 'rgba(101, 168, 159, 1)';
     const color = item.id === selectedId ? 'white' : 'black';
   
     return (
@@ -197,8 +220,6 @@ const DoctorScreen = ({ navigation }) => {
           width: 80,
           height: 80,
           borderRadius: 75,
-          borderWidth: 4,
-          borderColor: 'white',
           }}
         />
           </TouchableOpacity>
@@ -216,50 +237,56 @@ const DoctorScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.services}>
-              <View style={{display: 'flex', flexDirection: 'row', gap: 20, justifyContent: 'center'}}>
+              <View style={{display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'space-evenly'}}>
+              <Text style={{color:'black', fontSize: 28, fontWeight:'bold'}}>Summary</Text>
               {/* 1st button */}
-              <Box style={{width:'40%'}}>
-                <Text style={{fontSize:18, color:'black'}}>Number of Patients</Text>
+              <Box style={{width:'100%'}}>
                 <Box 
                     style={{
                     display:'flex',
-                    backgroundColor: '#D1B655',
+                    backgroundColor: 'white',
                     width: '100%',
                     height: 120,
-                    borderRadius: 8}}>
-                        <View style={{display:'flex', flexDirection:'row', paddingHorizontal:12, paddingTop:6, alignItems:'center'}}>
-                            <Text style={{marginTop:8, color: '#F2F2F2', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
-                            <Icon style={{fontWeight:'bold', fontSize:18, color:'#F2F2F2'}} name="chevron-down-outline"/>
+                    borderRadius: 12,
+                    elevation: 4}}>
+                        <View style={{display:'flex', flexDirection:'row', gap: 4, paddingHorizontal:12, paddingTop:12, alignItems:'center'}}>
+                            <Icon name="body-outline" color={'#d15479'} size={24}/>
+                            <Text style={{color: '#696969', flex:1, fontWeight:'bold', fontSize:18}}>Patients</Text>
                         </View>
                         {loading ? (
                       <ActivityIndicator color={'gray'} size="large"/>
                       ): (
-                        <Text style={{marginTop:8, color: '#F2F2F2', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                        <>
+                        <Divider bold={true} style={{marginHorizontal: 12, marginTop: 4, backgroundColor:'#696969'}}/> 
+                        <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                        </>
                         )}
                 </Box>
               </Box>
               {/* 2nd button */}
-              <Box style={{width:'50%'}}>
-                <Text style={{fontSize:18, color:'black'}}>Number of Appointments</Text>
-                <Box 
+              <Box style={{width:'100%'}}>
+              <Box 
                     style={{
                     display:'flex',
-                    backgroundColor: '#D1B655',
+                    backgroundColor: 'white',
                     width: '100%',
                     height: 120,
-                    borderRadius: 8}}>
-                        <View style={{display:'flex', flexDirection:'row', paddingHorizontal:12, paddingTop:6, alignItems:'center'}}>
-                            <Text style={{marginTop:8, color: '#F2F2F2', flex:1, fontWeight:'bold', fontSize:18}}>Total</Text>
-                            <Icon style={{fontWeight:'bold', fontSize:18, color:'#F2F2F2'}} name="chevron-down-outline"/>
+                    borderRadius: 12,
+                    elevation: 4}}>
+                        <View style={{display:'flex', flexDirection:'row', gap: 4, paddingHorizontal:12, paddingTop:12, alignContent:'center', alignItems:'center'}}>
+                            <Icon name="calendar-outline" color={'#478acc'} size={24}/>
+                            <Text style={{ color: '#696969', flex:1, fontWeight:'bold', fontSize:18}}>Appointments</Text>
                         </View>
                     {loading ? (
                       <ActivityIndicator color={'gray'} size="large"/>
                       ): (
-                      <Text style={{marginTop:8, color: '#F2F2F2', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
+                      <>
+                        <Divider bold={true} style={{marginHorizontal: 12, marginTop: 12, backgroundColor:'#696969'}}/> 
+                        <Text style={{color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
+                      </>
                       )}
                 </Box>
               </Box>
-              {/* 3rd button */}
               </View>
         </View>
 

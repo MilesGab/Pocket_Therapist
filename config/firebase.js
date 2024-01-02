@@ -1,24 +1,19 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from 'firebase/storage'
+import firebase from '@react-native-firebase/app';
 
-import Constants from "expo-constants";
-// Firebase config
 const firebaseConfig = {
-  apiKey: Constants.expoConfig.extra.apiKey,
-  authDomain: Constants.expoConfig.extra.authDomain,
-  projectId: Constants.expoConfig.extra.projectId,
-  storageBucket: Constants.expoConfig.extra.storageBucket,
-  messagingSenderId: Constants.expoConfig.extra.messagingSenderId,
-  appId: Constants.expoConfig.extra.appId,
-  databaseURL: Constants.expoConfig.extra.databaseURL,
-//   @deprecated is deprecated Constants.manifest
+  apiKey: "AIzaSyC1Yia3LyR-FxtTforHbBFxgs4jUoy1K14",
+  authDomain: "pocket-therapist-ddbb0.firebaseapp.com",
+  projectId: "pocket-therapist-ddbb0",
+  storageBucket: "pocket-therapist-ddbb0.appspot.com",
+  messagingSenderId: "473959584342",
+  appId: "1:473959584342:web:aa6a54e71f3761cd7521f7",
+  measurementId: "G-GZ6BZSM927"
+};
+
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+} else {
+    firebase.app(); // if already initialized, use that one
 }
 
-// initialize firebase
-initializeApp(firebaseConfig);
-export const auth = getAuth();
-export const database = getFirestore();
-export const storage = getStorage();
-
+export default firebase;

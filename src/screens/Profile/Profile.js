@@ -330,6 +330,7 @@ const EditSection = (props) => {
 
 const Profile = () => {
   const { userData, logout } = useUserContext();
+  const trimmedUid = userData?.uid.trim();
   const fullName = userData?.firstName + " " + userData?.lastName;
   const navigation = useNavigation();
   const [isEditMode, setEditMode] = React.useState(false);
@@ -339,11 +340,30 @@ const Profile = () => {
     setEditMode(!isEditMode);
   };
 
+  const updateFCMToken = async () => {
+
+    try{
+
+      const userRef = firestore().collection('users')
+            .doc(trimmedUid);
+
+      userRef.update({
+        notification_token: ''
+      });
+
+      console.log('Deleted fcmtoken')
+
+    } catch(e){
+      console.error(e);
+    }
+  }
+
   const handleLogout = () => {
 
     auth()
       .signOut()
       .then(() => {
+        updateFCMToken();
         console.log('Logout successful!');
         navigation.navigate('Login');
       })

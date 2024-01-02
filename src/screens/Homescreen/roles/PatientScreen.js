@@ -8,6 +8,8 @@ import firestore from '@react-native-firebase/firestore';
 import { ActivityIndicator } from "@react-native-material/core";
 import { useNavigation } from '@react-navigation/native';
 import { useUserContext } from '../../../../contexts/UserContext';
+import { requestUserPermission } from '../../../utils/pushnotification_helper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
@@ -77,6 +79,31 @@ const PatientScreen = ({ navigation }) => {
 
   const trimmedUid = userData?.uid.trim();
 
+  const updateFCMToken = async () => {
+
+    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
+
+    try{
+
+      const userRef = firestore().collection('users')
+            .doc(trimmedUid);
+
+      userRef.update({
+        notification_token: fcmtoken
+      });
+
+      console.log('Updated notification token: ', fcmtoken)
+
+    } catch(e){
+      console.error(e);
+    }
+  }
+
+  React.useEffect(()=>{
+    updateFCMToken();
+  },[userData]);
+
+
   React.useEffect(() => {
     setLoading(true);
   
@@ -85,6 +112,7 @@ const PatientScreen = ({ navigation }) => {
       .collection('appointments')
       .where('patient_assigned', '==', trimmedUid)
       .where('date', '>=', dateToday)
+      .where('status', '==', 1)
       .limit(1);
   
     const unsubscribe = appointmentsRef.onSnapshot(async (querySnapshot) => {
@@ -121,7 +149,6 @@ const PatientScreen = ({ navigation }) => {
       }
     });
   
-    // The unsubscribe function will stop listening when the component unmounts or when you explicitly call it
     return () => unsubscribe();
   }, [trimmedUid]);
   

@@ -17,12 +17,13 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
 import Ringtone from '../../../../assets/audio/ptring.mp3';
 
+import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
+import firebase from '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
 
-
 const appId = '8c9007f71b7c429d971501377a0772fe';
-const channelName = 'newcall';
+const channelName = 't2t';
 // const token = '007eJxTYHDgmGkis9NL3H5hkM1dnm+v/33g2fRJ7PMMx/ebZgUe375KgcEi2dLAwDzN3DDJPNnEyDLF0tzQ1MDQ2Nw80cDc3CgtdVFXZWpDICODx2FtFkYGCATx2RnyUsuTE3NyGBgAvgMg3Q==';
 
 const VoiceChat = () =>{
@@ -36,6 +37,7 @@ const VoiceChat = () =>{
     const [remoteUid, setRemoteUid] = useState(0); // Uid of the remote user
     const [message, setMessage] = useState(''); // Message to the user
     const [token, setToken] = useState('');
+    const [userToken, setUserToken] = useState('');
     const [isVideoEnabled, setIsVideoEnabled] = useState(false);
 
 
@@ -55,25 +57,49 @@ const VoiceChat = () =>{
         }
     };
 
-    const retrieveToken = async () =>{
-        try{
-            const userRef = await firestore().collection('users')
-                                       .where('uid', '==', trimmedUid)
-                                       .get();
+    // const retrieveToken = async () =>{
+    //     try{
+    //         const userRef = await firestore().collection('users')
+    //                                    .where('uid', '==', trimmedUid)
+    //                                    .get();
 
-           if (!userRef.empty) {
-            const userData = userRef.docs[0].data();
-            setToken(userData.user_token)
-            } else {
-                console.log('No doctor found with the provided ID.');
-            }
-        }catch(e){
-            console.error('Error fetching token:', e);
-        }
-    };
+    //        if (!userRef.empty) {
+    //         const userData = userRef.docs[0].data();
+    //         setUserToken(userData.user_token)
+    //         console.log(userToken);
+
+    //         const videoTokenFunction = firebase.app.functions('asia-south1').httpsCallable('videoToken');
+            
+    //         const response = await videoTokenFunction({ user_token: userToken, uid: trimmedUid });
+    //         const agoraToken = response.data.token;
+    //         setToken(agoraToken);
+    //         } else {
+    //             console.log('No doctor found with the provided ID.');
+    //         }
+            
+    //     }catch(e){
+    //         console.error('Error fetching token:', e);
+    //     }finally{
+    //         console.log('CALL TOKEN: ', token);
+    //     }
+    // };
 
     useEffect(()=>{
-        retrieveToken();
+        const options = { timeout: 5000 }; // 5000 milliseconds or 5 seconds
+        const functionsInstance = getFunctions(firebaseApp, 'asia-south1');
+        const videoTokenFunction = httpsCallable(functionsInstance, 'videoToken');
+
+        videoTokenFunction({ user_token: userToken, uid: trimmedUid })
+            .then(response => {
+                console.log('Data is: ', String(response.data));
+            })
+            .catch((error) => {
+                const code = error.code;
+                const message = error.message;
+                const details = error.details;
+
+                console.log(code, message, details);
+            });
     },[])
 
     const sound = new Sound(Ringtone, Sound.MAIN_BUNDLE, (error) => {
@@ -242,7 +268,9 @@ const VoiceChat = () =>{
                         </View>
                     </>
                 ) : (
-                    <Text>Waiting for users...</Text>
+                    <TouchableOpacity onPress={leave} style={[styles.button,{backgroundColor: 'red'}]}>
+                        <Icon name="call-outline" color="white" size={40}/>
+                    </TouchableOpacity>
                 )}
             </ScrollView>
         </SafeAreaView>

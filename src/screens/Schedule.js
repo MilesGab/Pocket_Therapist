@@ -51,7 +51,7 @@ const AppointmentCard = ( props ) => {
       alignContent:'center',
       paddingHorizontal:10, 
       paddingVertical:12,
-      borderRadius: 32,
+      borderRadius: 12,
       marginBottom: 16,
       elevation: 4
       }}
@@ -161,8 +161,6 @@ const AddAppointment = (props) => {
 
       } catch (error) {
         console.error('Failed to create appointment: ', error);
-      }finally{
-        props.fetchList();
       }
     };
 
@@ -237,9 +235,9 @@ const Schedule = () => {
     {label: 'Past', value: 'past'}
   ]);
 
-  const fetchAppointments = async () => {
-
+  const fetchAppointments = () => {
     const role = userData?.role;
+    const trimmedUid = userData.uid.trim();
     let whereField, whereValue;
 
     if (role === 1) {
@@ -250,48 +248,49 @@ const Schedule = () => {
       whereValue = trimmedUid;
     }
 
-    try {
-      const appointmentsSnapshot = await firestore()
-        .collection('appointments')
-        .where('status', '==', 1)
-        .where(whereField, '==', whereValue)
-        .get();
+    const unsubscribe = firestore()
+      .collection('appointments')
+      .where('status', '==', 1)
+      .where(whereField, '==', whereValue)
+      .onSnapshot(async (snapshot) => {
+        const appointmentsData = await Promise.all(
+          snapshot.docs.map(async doc => {
+            const appointmentData = doc.data();
+            const doctorId = appointmentData.doctor_assigned;
+            const patientId = appointmentData.patient_assigned;
 
-      const appointmentsData = await Promise.all(
-        appointmentsSnapshot.docs.map(async doc => {
-          const appointmentData = doc.data();
-          const doctorId = appointmentData.doctor_assigned; // Get the doctor ID from appointment data
-          const patientId = appointmentData.patient_assigned; // Get the patient ID from appointment data
+            // Fetch doctor and patient data separately
+            const [doctorSnapshot, patientSnapshot] = await Promise.all([
+              firestore().collection('users').doc(doctorId).get(),
+              firestore().collection('users').doc(patientId).get(),
+            ]);
 
-          // Fetch doctor and patient data separately
-          const [doctorSnapshot, patientSnapshot] = await Promise.all([
-            firestore().collection('users').doc(doctorId).get(),
-            firestore().collection('users').doc(patientId).get(),
-          ]);
+            const doctorData = doctorSnapshot.data();
+            const patientData = patientSnapshot.data();
 
-          const doctorData = doctorSnapshot.data();
-          const patientData = patientSnapshot.data();
+            return {
+              ...appointmentData,
+              doctorName: doctorData.firstName,
+              patientName: patientData.firstName + ' ' + patientData.lastName,
+              patientPic: patientData.profilePictureURL,
+              docPic: doctorData.profilePictureURL
+            };
+          })
+        );
 
-          return {
-            ...appointmentData,
-            doctorName: doctorData.firstName,
-            patientName: patientData.firstName + ' ' + patientData.lastName,
-            patientPic: patientData.profilePictureURL,
-            docPic: doctorData.profilePictureURL
-          };
-        })
-      );
+        setAppointmentList(appointmentsData);
+        setLoading(false);
+      }, (error) => {
+        console.error('Error fetching appointments:', error);
+        setLoading(false);
+      });
 
-      setAppointmentList(appointmentsData);
-    } catch (error) {
-      // console.error('Error fetching appointments:', error);
-    } finally {
-      setLoading(false);
-    }
+    return unsubscribe;
   };
 
   React.useEffect(() => {
-    fetchAppointments();
+    const unsubscribe = fetchAppointments();
+    return () => unsubscribe(); // Unsubscribe on unmount
   }, []);
 
   const filteredAppointments = appointmentList.filter(appointment => {
@@ -321,10 +320,12 @@ const Schedule = () => {
     <View style={styles.container}>
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom: 48}}>
         <Text style={{fontSize: 32, color: 'black', fontWeight:'bold', flex: 1}}>Schedule</Text>
+        {userData?.role == 0 && (
         <TouchableOpacity onPress={()=>{triggerDialog()}}>
           <Icon name="add-circle-outline" style={{fontSize:38, color:'black', marginRight: 12}}/>
         </TouchableOpacity>
-        <AddAppointment visible={dialogOpen} setVisible={setDialogOpen} fetchList={fetchAppointments}/>
+        )}
+        <AddAppointment visible={dialogOpen} setVisible={setDialogOpen} />
       </View>
 
       <View style={{}}>

@@ -223,6 +223,9 @@ export default function PatientMessages() {
               </View>
             </TouchableOpacity>
             <View style={{display:'flex', flexDirection:'row'}}>
+              <TouchableOpacity onPress={()=>{navigation.navigate('TokenTest')}}>
+                  <Icon name="bug" size={24} color={'black'}/>
+                </TouchableOpacity>
               {appointmentState ? (
                 <TouchableOpacity onPress={handleCall}>
                   <Icon name="phone" size={24} color={'black'}/>

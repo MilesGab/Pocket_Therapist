@@ -89,10 +89,11 @@ const Notification = ({ item, fetchApptRequest }) => {
       paddingHorizontal:10, 
       paddingVertical:6,
       borderRadius:16,
-      marginBottom: 16
+      marginBottom: 16,
+      elevation: 2,
       }}
       >
-      <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>
+      <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6, paddingHorizontal: 20}}>
         <View style={{flexDirection:'column', flex:1}}>  
           <Text>Appointment Date</Text>
           <View style={{flexDirection:'row'}}>
@@ -102,15 +103,15 @@ const Notification = ({ item, fetchApptRequest }) => {
         </View>
       </View>
       <Divider/>
-      <View style={{marginTop: 6, paddingVertical:12, flexDirection:'row', width:'100%'}}>
-        <View style={{marginLeft: 10, flexDirection:'column', width:'100%'}}>
+      <View style={{marginTop: 6, paddingVertical:12, paddingHorizontal: 20, flexDirection:'row', width:'100%'}}>
+        <View style={{flexDirection:'column', width:'100%'}}>
           <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>Patient: {doctor_name}</Text>
-          <View style={{display:'flex', flexDirection:'row', justifyContent:'flex-end', alignItems:'center', paddingHorizontal: 20, gap: 12}}>
-            <TouchableOpacity onPress={handleReject} style={{borderWidth: 1, borderColor:'#DC6F6F', paddingVertical:4, paddingHorizontal: 6, borderRadius:4}}>
-              <Text style={{color:'red'}}>Reject</Text>
+          <View style={{display:'flex', flexDirection:'row', justifyContent:'flex-end', alignItems:'center', gap: 12, marginTop: 12}}>
+            <TouchableOpacity onPress={handleReject} style={{backgroundColor:'rgba(227, 85, 75, 0.2)', paddingVertical:8, paddingHorizontal: 16, borderRadius:10, alignContent:'center', alignItems:'center', justifyContent:'center'}}>
+              <Text style={{color:'red', fontWeight:'bold', fontSize: 16}}>Reject</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleApprove} style={{backgroundColor:'#6FA8DC', paddingVertical:4, paddingHorizontal: 6, borderRadius:4}}>
-              <Text style={{color:'white'}}>Approve</Text>
+            <TouchableOpacity onPress={handleApprove} style={{backgroundColor:'rgba(111, 168, 220, 0.4)', paddingVertical:8, paddingHorizontal: 16, borderRadius:10, alignContent:'center', alignItems:'center', justifyContent:'center'}}>
+              <Text style={{color:'#358cdb', fontWeight:'bold', fontSize: 16}}>Approve</Text>
             </TouchableOpacity>
             <RequestDialog visible={isOpen} approveAppointment={approveAppointment} rejectAppointment={rejectAppointment} decision={decision} setVisible={setIsOpen} date={formattedDate} time={formattedTime}/>
           </View>
