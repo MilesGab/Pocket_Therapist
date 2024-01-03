@@ -83,22 +83,40 @@ const DoctorScreen = ({ navigation }) => {
 
   const updateFCMToken = async () => {
 
-    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
-
     try{
 
-      const userRef = firestore().collection('users')
-            .doc(trimmedUid);
-
-      userRef.update({
-        notification_token: fcmtoken
-      });
+      Alert.alert(
+        'Push Notifications',
+        'Do you want to receive push notifications?',
+        [
+          {
+            text: 'No',
+            onPress: () => console.log('User declined notifications'),
+            style: 'cancel',
+          },
+          {
+            text: 'Yes',
+            onPress: async () => {
+              console.log('User accepted notifications');
+              const userRef = firestore().collection('users')
+              .doc(trimmedUid);
+  
+              userRef.update({
+                notification_token: fcmtoken
+              });
+            },
+          },
+        ],
+        { cancelable: false },
+      );
 
       console.log('Updated notification token: ', fcmtoken)
 
     } catch(e){
       console.error(e);
     }
+    
+    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
   }
 
   React.useEffect(()=>{
