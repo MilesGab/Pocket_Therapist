@@ -17,19 +17,15 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Sound from 'react-native-sound';
 import Ringtone from '../../../../assets/audio/ptring.mp3';
 
-import { getFunctions, httpsCallable } from '@react-native-firebase/functions';
 import firebase from '@react-native-firebase/app';
-import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../contexts/UserContext';
 
 const appId = '8c9007f71b7c429d971501377a0772fe';
-const channelName = 't2t';
-// const token = '007eJxTYHDgmGkis9NL3H5hkM1dnm+v/33g2fRJ7PMMx/ebZgUe375KgcEi2dLAwDzN3DDJPNnEyDLF0tzQ1MDQ2Nw80cDc3CgtdVFXZWpDICODx2FtFkYGCATx2RnyUsuTE3NyGBgAvgMg3Q==';
 
 const VoiceChat = () =>{
     const navigation = useNavigation();
     const { userData } = useUserContext();
-    const trimmedUid = userData.uid.trim();
+    const channelName = userData.uid.trim();
     const uid = 0;
     const agoraEngineRef = useRef(IRtcEngine); // Agora engine instance
     const [isJoined, setIsJoined] = useState(false); // Indicates if the local user has joined the channel
@@ -37,7 +33,6 @@ const VoiceChat = () =>{
     const [remoteUid, setRemoteUid] = useState(0); // Uid of the remote user
     const [message, setMessage] = useState(''); // Message to the user
     const [token, setToken] = useState('');
-    const [userToken, setUserToken] = useState('');
     const [isVideoEnabled, setIsVideoEnabled] = useState(false);
 
 
@@ -57,50 +52,30 @@ const VoiceChat = () =>{
         }
     };
 
-    // const retrieveToken = async () =>{
-    //     try{
-    //         const userRef = await firestore().collection('users')
-    //                                    .where('uid', '==', trimmedUid)
-    //                                    .get();
+    const retrieveToken = async () =>{
 
-    //        if (!userRef.empty) {
-    //         const userData = userRef.docs[0].data();
-    //         setUserToken(userData.user_token)
-    //         console.log(userToken);
-
-    //         const videoTokenFunction = firebase.app.functions('asia-south1').httpsCallable('videoToken');
-            
-    //         const response = await videoTokenFunction({ user_token: userToken, uid: trimmedUid });
-    //         const agoraToken = response.data.token;
-    //         setToken(agoraToken);
-    //         } else {
-    //             console.log('No doctor found with the provided ID.');
-    //         }
-            
-    //     }catch(e){
-    //         console.error('Error fetching token:', e);
-    //     }finally{
-    //         console.log('CALL TOKEN: ', token);
-    //     }
-    // };
-
-    useEffect(()=>{
-        const options = { timeout: 5000 }; // 5000 milliseconds or 5 seconds
-        const functionsInstance = getFunctions(firebaseApp, 'asia-south1');
-        const videoTokenFunction = httpsCallable(functionsInstance, 'videoToken');
-
-        videoTokenFunction({ user_token: userToken, uid: trimmedUid })
-            .then(response => {
-                console.log('Data is: ', String(response.data));
+        const role = userData?.role;
+        try{
+            firebase.app().functions('asia-southeast1').httpsCallable('tokenGeneration')({
+                role: role,
+                channelName: channelName,
             })
-            .catch((error) => {
+            .then(response => {
+                setToken(response.data.token);
+            })
+            .catch(error => {
                 const code = error.code;
                 const message = error.message;
                 const details = error.details;
 
-                console.log(code, message, details);
+                console.log('Error Code: ', code, '\n', 'Message: ', message, '\n', 'Details: ', details);
             });
-    },[])
+        }catch(e){
+            console.error('Error fetching token:', e);
+        }finally{
+            console.log('CALL TOKEN: ', token);
+        }
+    };
 
     const sound = new Sound(Ringtone, Sound.MAIN_BUNDLE, (error) => {
         if (error) {
@@ -122,40 +97,6 @@ const VoiceChat = () =>{
     function showMessage(msg) {
         setMessage(msg);
     }
-
-    // useEffect(() => {
-    //     // Initialize Agora engine when the app starts
-    //     setupVoiceSDKEngine();
-    //  });
-     
-    //  const setupVoiceSDKEngine = async () => {
-    //     try {
-    //     // use the helper function to get permissions
-    //     if (Platform.OS === 'android') { await getPermission()};
-    //     agoraEngineRef.current = createAgoraRtcEngine();
-    //     const agoraEngine = agoraEngineRef.current;
-    //     agoraEngine.registerEventHandler({
-    //         onJoinChannelSuccess: () => {
-    //             showMessage('Successfully joined the channel ' + channelName);
-    //             setIsJoined(true);
-    //         },
-    //         onUserJoined: (_connection, Uid) => {
-    //             showMessage('Remote user joined with uid ' + Uid);
-    //             setRemoteUid(Uid);
-    //             setIsDoctorJoined(true);
-    //         },
-    //         onUserOffline: (_connection, Uid) => {
-    //             showMessage('Remote user left the channel. uid: ' + Uid);
-    //             setRemoteUid(0);
-    //         },
-    //     });
-    //     agoraEngine.initialize({
-    //         appId: appId,
-    //     });
-    //     } catch (e) {
-    //         console.log(e);
-    //     }
-    //  };
 
      useEffect(() => {
         // Initialize Agora engine when the app starts
@@ -211,10 +152,11 @@ const VoiceChat = () =>{
 
     useEffect(()=>{
         if(!isJoined){
+            retrieveToken();
             join();
-            console.log('channel joined')
+            console.log('channel joined');
+            console.log('Token: ', token, '\n', 'Channel Name: ', channelName, '\n', 'UID: ', uid);
         }
-        console.log('joined channel: ', token);
     },[token]);
 
     const leave = () => {
