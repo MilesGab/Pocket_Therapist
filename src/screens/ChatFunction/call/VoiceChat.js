@@ -26,6 +26,7 @@ const VoiceChat = () =>{
     const navigation = useNavigation();
     const { userData } = useUserContext();
     const channelName = userData.uid.trim();
+    const patientId = patientData;
     const uid = 0;
     const agoraEngineRef = useRef(IRtcEngine); // Agora engine instance
     const [isJoined, setIsJoined] = useState(false); // Indicates if the local user has joined the channel
@@ -55,6 +56,8 @@ const VoiceChat = () =>{
     const retrieveToken = async () =>{
 
         const role = userData?.role;
+        const channelName = userData?.role === 0 ? userData?.uid.trim() : patientData;
+
         try{
             firebase.app().functions('asia-southeast1').httpsCallable('tokenGeneration')({
                 role: role,

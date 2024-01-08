@@ -121,6 +121,9 @@ const PatientScreen = ({ navigation }) => {
     updateFCMToken();
   },[userData]);
 
+  // React.useEffect(()=>{
+  //   requestUserPermission();
+  // },[])
 
   React.useEffect(() => {
     setLoading(true);
@@ -161,7 +164,6 @@ const PatientScreen = ({ navigation }) => {
   
         setAppointmentList(appointmentsData);
       } catch (error) {
-        console.error('Error fetching appointments:', error);
       } finally {
         setLoading(false);
       }
@@ -188,6 +190,11 @@ const PatientScreen = ({ navigation }) => {
     navigation.navigate('MyExercises', {patientData: userid});
   }
 
+  const capitalizeFirstLetter = (string) =>  {
+    if (!string) return string;
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -197,7 +204,7 @@ const PatientScreen = ({ navigation }) => {
               fontFamily: 'Nunito Sans', 
               fontSize: 28, 
               color: 'black', 
-              fontWeight: 'bold'}}>{userData?.firstName || '---'}</Text>
+              fontWeight: 'bold'}}>{capitalizeFirstLetter(userData?.firstName) || '---'}</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <Image
@@ -217,28 +224,6 @@ const PatientScreen = ({ navigation }) => {
 
         <View style={styles.services}>
           <Text style={styles.servicesText}>Services</Text>
-              {/* <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center', paddingHorizontal: 16}}>
-              <IconButton
-                onPress={() => navigation.navigate('Assessment')}
-                style={{
-                  backgroundColor: '#D1B655',
-                  width: '50%',
-                  height: 80,
-                  borderRadius: 8,
-                }}
-                icon={props => <Icon name="clipboard-outline" color={'#F2F2F2'} size={36} />}
-              />
-              <IconButton
-                onPress={() => handleExercisesPage(trimmedUid)}
-                style={{
-                  backgroundColor: '#D1B655',
-                  width: '50%',
-                  height: 80,
-                  borderRadius: 8,
-                }}
-                icon={props => <Icon name="accessibility-outline" color={'#F2F2F2'} size={36} />}
-              />
-              </View> */}
               <View style={{backgroundColor:'white', padding: 12, borderRadius: 12, elevation: 4}}>
                 <TouchableOpacity onPress={() => navigation.navigate('Assessment')} style={styles.serviceBtn}>
                   <Icon name="clipboard-outline" color={'#4a7fd4'} size={36} style={{right: 12}}/>
@@ -315,7 +300,7 @@ const LatestResults = () =>{
   
       return () => unsubscribe();
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+      console.error('Error fetching results:', error);
       setLoading(false);
     }
   };

@@ -68,7 +68,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 };
 
 function MyTabs() {
-  const { userData, updateUser } = useUserContext();
+  const { userData } = useUserContext();
 
   return (
     <Tab.Navigator
@@ -152,13 +152,13 @@ const HomeStack = () => {
     }, 1000);
   };
 
-if (isLoading) {
-  return (
-    <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color="#0000ff" />
-    </View>
-  );
-}
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
 return (
   <Stack.Navigator>
@@ -169,19 +169,21 @@ return (
         options={{headerShown: false, initialParams: { role: 0 } }}
       />
     ) : (
-      <Stack.Screen
-        name="DoctorHomescreen"
-        component={DoctorScreen} // Use the imported component
-        options={{headerShown: false, initialParams: { role: 1 } }} // role 1 is for doctors
-      />
+      <>
+        <Stack.Screen
+          name="DoctorHomescreen"
+          component={DoctorScreen} // Use the imported component
+          options={{headerShown: false, initialParams: { role: 1 } }} // role 1 is for doctors
+        />
+
+        <Stack.Screen 
+          name="PatientSearch"
+          component={PatientSearch}
+          options={{headerShown: false}}
+        />  
+      </>
+      
     )}
-
-  <Stack.Screen 
-    name="PatientSearch"
-    component={PatientSearch}
-    options={{headerShown: false}}
-    />
-
   </Stack.Navigator>
 );
 };
@@ -279,14 +281,14 @@ const Routes = (props) => {
           initialRouteName={props.user ? 'MyTabs' : 'Login'} 
           screenOptions={{ 
             headerShown: false, 
-            }}>
-            <Stack.Screen name="Login" component={Login}/>
-            <Stack.Screen name="Register" component={Register} />
-            <Stack.Screen name="MyTabs" component={MyTabs}/>
-            <Stack.Screen name="Profile" component={Profile} />
-            <Stack.Screen name="Assessment" component={Assessment} />
-            <Stack.Screen name="MyExercises" component={MyExercises}/>
-            <Stack.Screen name="AssessmentHistory" component={AssessmentHistory}/>
+          }}>
+          <Stack.Screen name="Login" component={Login}/>
+          <Stack.Screen name="Register" component={Register} />
+          <Stack.Screen name="MyTabs" component={MyTabs}/>
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="Assessment" component={Assessment} />
+          <Stack.Screen name="MyExercises" component={MyExercises}/>
+          <Stack.Screen name="AssessmentHistory" component={AssessmentHistory}/>
         </Stack.Navigator>
     )
 }

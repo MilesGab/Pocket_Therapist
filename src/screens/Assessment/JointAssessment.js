@@ -20,7 +20,7 @@ const WristAngleSensor = (props) =>{
     if (countdown > 0) {
       countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
-        if (toDegrees(pitch) > maxAngle) {
+        if (toDegrees(Math.abs(pitch)) > maxAngle) {
           setMaxAngle(toDegrees(Math.abs(pitch)));
         }
       }, 1000);
@@ -58,8 +58,6 @@ const WristAngleSensor = (props) =>{
           </>
         )}
       </View>
-      <Button onPress={()=>setCountdown(10)} title="Start"/>
-
     </View>
   )
 

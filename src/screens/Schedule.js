@@ -271,9 +271,9 @@ const Schedule = () => {
             return {
               ...appointmentData,
               doctorName: doctorData.firstName,
-              patientName: patientData.firstName + ' ' + patientData.lastName,
-              patientPic: patientData.profilePictureURL,
-              docPic: doctorData.profilePictureURL
+              patientName: patientData?.firstName + ' ' + patientData?.lastName,
+              patientPic: patientData?.profilePictureURL,
+              docPic: doctorData?.profilePictureURL
             };
           })
         );

@@ -1,6 +1,5 @@
-import { TextInput } from "@react-native-material/core";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput } from "react-native";
 import { ProgressBar } from "react-native-paper";
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -174,14 +173,13 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                   // defaultValue={selectedPain}
                   containerStyle={{ height: 40 }}
                 />
-                {dropDownValue === 'Others' && (
-                  <TextInput
-                    placeholder="Please specify"
-                    onChangeText={(text) => {
-                      // Handle the user's input here
-                    }}
+                <TextInput
+                  style={styles.input}
+                  placeholder="Please write a short description about your pain"
+                  onChangeText={(text) => {
+                    // Handle the user's input here
+                  }}
                   />
-                )}
               </View>
             )}
 
@@ -373,6 +371,18 @@ textInputs: {
     fontSize: 16,
     borderRadius: 10,
     padding: 12,
+},
+
+input: {
+  height: 100,
+  marginTop: 20,
+  borderWidth: 1,
+  padding: 10,
+  borderRadius: 4,
+  borderColor: '#000',
+  backgroundColor: '#FFFFFF',
+  color: '#000000',
+  fontSize: 16,
 },
 
 ansButton: {

@@ -294,6 +294,10 @@ const styles = StyleSheet.create({
         padding: 20,
     },
 
+    cardText:{
+        color: '#000',
+    },
+
     header:{
         display:'flex',
         flexDirection:'row',
