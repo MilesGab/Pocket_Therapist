@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useUserContext } from '../../../../contexts/UserContext';
 import { requestUserPermission } from '../../../utils/pushnotification_helper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MedDoc from './components/MedDoc';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
@@ -76,6 +77,8 @@ const PatientScreen = ({ navigation }) => {
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);
+  const [hasAppointmentStatus2, setHasAppointmentStatus2] = React.useState(false);
+
 
   const trimmedUid = userData?.uid.trim();
 
@@ -169,6 +172,30 @@ const PatientScreen = ({ navigation }) => {
   
     return () => unsubscribe();
   }, [trimmedUid]);
+
+  React.useEffect(() => {
+    setLoading(true);
+
+    // checks if user has an approved appointment to show 'Request Medical Document' button
+    const appointmentsRef = firestore()
+      .collection('appointments')
+      .where('patient_assigned', '==', trimmedUid)
+      .where('status', '==', 1)
+      .limit(1);
+
+    const unsubscribe = appointmentsRef.onSnapshot(async (querySnapshot) => {
+      try {
+        const hasAppointment = querySnapshot.size > 0;
+        setHasAppointmentStatus2(hasAppointment);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [trimmedUid]);
   
   const renderItem = ({item}) => {
     const backgroundColor = item.id === selectedId ? '#65A89F' : '#257cba';
@@ -186,6 +213,14 @@ const PatientScreen = ({ navigation }) => {
 
   const handleExercisesPage = (userid) => {
     navigation.navigate('MyExercises', {patientData: userid});
+  }
+
+  const handleMedDoc = (userid) => {
+    navigation.navigate('MedDoc', {patientData: userid});
+  }
+
+  const handleUploadDocu = (userid) => {
+    navigation.navigate('UploadDocu', {patientData: userid});
   }
 
   return (
@@ -217,28 +252,6 @@ const PatientScreen = ({ navigation }) => {
 
         <View style={styles.services}>
           <Text style={styles.servicesText}>Services</Text>
-              {/* <View style={{marginTop: 12, display: 'flex', flexDirection: 'row', gap: 12, justifyContent: 'center', paddingHorizontal: 16}}>
-              <IconButton
-                onPress={() => navigation.navigate('Assessment')}
-                style={{
-                  backgroundColor: '#D1B655',
-                  width: '50%',
-                  height: 80,
-                  borderRadius: 8,
-                }}
-                icon={props => <Icon name="clipboard-outline" color={'#F2F2F2'} size={36} />}
-              />
-              <IconButton
-                onPress={() => handleExercisesPage(trimmedUid)}
-                style={{
-                  backgroundColor: '#D1B655',
-                  width: '50%',
-                  height: 80,
-                  borderRadius: 8,
-                }}
-                icon={props => <Icon name="accessibility-outline" color={'#F2F2F2'} size={36} />}
-              />
-              </View> */}
               <View style={{backgroundColor:'white', padding: 12, borderRadius: 12, elevation: 4}}>
                 <TouchableOpacity onPress={() => navigation.navigate('Assessment')} style={styles.serviceBtn}>
                   <Icon name="clipboard-outline" color={'#4a7fd4'} size={36} style={{right: 12}}/>
@@ -251,6 +264,26 @@ const PatientScreen = ({ navigation }) => {
                   <Text style={{fontSize: 16, fontWeight:'bold', color:'black', flex:1}}>View Exercises</Text>
                   <Icon name="chevron-forward-outline" size={20}/>
                 </TouchableOpacity>
+                <Divider style={{marginVertical: 12}}/>
+                {hasAppointmentStatus2 && (
+                <TouchableOpacity onPress={() => handleMedDoc(trimmedUid)} style={styles.serviceBtn}>
+                  <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
+                    Request Medical Document
+                  </Text>
+                  <Icon name="chevron-forward-outline" size={20} />
+                </TouchableOpacity>
+                )}
+                <Divider style={{marginVertical: 12}}/>
+                {hasAppointmentStatus2 && (
+                <TouchableOpacity onPress={() => handleUploadDocu(trimmedUid)} style={styles.serviceBtn}>
+                  <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
+                    Upload Medical Documents
+                  </Text>
+                  <Icon name="chevron-forward-outline" size={20} />
+                </TouchableOpacity>
+                )}
               </View>
         </View>
       

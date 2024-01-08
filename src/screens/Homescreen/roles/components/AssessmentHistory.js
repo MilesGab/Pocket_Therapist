@@ -183,7 +183,9 @@ const AssessmentCard = ( item ) => {
                     </View>
 
                     <View>
-                        <Text style={[styles.cardText, {fontWeight:'bold'}]}>Notes</Text>
+                        <Text style={[styles.cardText, {fontWeight:'bold'}]}>Diagnosis</Text>
+                        <Text style={styles.cardText}>•{item.diagnosis || '---'}</Text>
+                        <Text style={[styles.cardText, {fontWeight:'bold'}]}>Notes/Recommendations</Text>
                         <Text style={styles.cardText}>•{item.notes || '---'}</Text>
                     </View>
 

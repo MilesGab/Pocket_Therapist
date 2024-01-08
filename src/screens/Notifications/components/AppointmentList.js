@@ -5,26 +5,46 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useUserContext } from '../../../../contexts/UserContext';
 import firestore from '@react-native-firebase/firestore';
 
-const AppointmentCard = ({ doctor, date }) => {
-
-  const timestamp = new Date(
-    date.seconds * 1000 + date.nanoseconds / 1000000
-  );
-
+const AppointmentCard = ({ doctor, date, status, message }) => {
+  const timestamp = new Date(date.seconds * 1000 + date.nanoseconds / 1000000);
   const formattedDate = timestamp.toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric' 
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const formattedTime = timestamp.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
   });
   
-    return(
-        <View style={styles.notifCard}>
-            <View style={styles.content}>
-                <Avatar size={60} image={{uri: doctor.profilePictureURL}} color='white' style={{marginRight: 8}}/>
-                <Text style={styles.contentText}>Your appointment for {formattedDate} has been approved by Dr. {doctor?.firstName || '---'} {doctor?.lastName || '---'}</Text>
-            </View>
-        </View>
-    )
-    
-}
+
+  let messages = '';
+
+  switch (status) {
+    case 0:
+      messages = `Your appointment on ${formattedDate} at ${formattedTime} is pending approval.`;
+      break;
+    case 1:
+      messages = `Your appointment on ${formattedDate} at ${formattedTime} has been approved by Dr. ${doctor?.firstName || '---'} ${doctor?.lastName || '---'}.`;
+      break;
+    case 2:
+      messages = `Your appointment on ${formattedDate} at ${formattedTime} has been rejected by Dr. ${doctor?.firstName || '---'} ${doctor?.lastName || '---'}. \n\nReason: ${message || 'No reason provided'}`;
+      break;
+    default:
+      messages = 'Unknown status';
+      break;
+  }
+
+  return (
+    <View style={styles.notifCard}>
+      <View style={styles.content}>
+        <Avatar size={60} image={{ uri: doctor.profilePictureURL }} color="white" style={{ marginRight: 8 }} />
+        <Text style={styles.contentText}>{messages}</Text>
+      </View>
+    </View>
+  );
+};
 
 const AppointmentList = () => {
 
@@ -33,7 +53,7 @@ const AppointmentList = () => {
     const trimmedUid = userData.uid.trim();
 
     const [doctor, setDoctor] = React.useState({});
-    const [appointmentList, setAppointmentList] = React.useState([]);
+    const [appointments, setAppointments] = React.useState([]);
 
     const fetchDoctor = async () => {
         try {
@@ -58,42 +78,42 @@ const AppointmentList = () => {
         fetchDoctor();
     }, []);
 
-    const fetchApprovedAssessments = async () => {
-
+    const fetchAppointments = async () => {
+      try {
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-        try{
-          const assessmentQuerySnapshot = await firestore()
-            .collection('appointments')
-            .where('patient_assigned', '==', trimmedUid)
-            .where('date', '>=', oneWeekAgo)
-            .where('status', '==', 1)
-            .orderBy('date', 'desc')
-            .get()
     
-          const assessments = [];
-          assessmentQuerySnapshot.forEach((doc) => {
-            const assessmentData = doc.data();
-            assessments.push(assessmentData);
+        const appointmentQuerySnapshot = await firestore()
+          .collection('appointments')
+          .where('patient_assigned', '==', trimmedUid)
+          .where('date', '>=', oneWeekAgo)
+          .orderBy('date', 'desc')
+          .get();
+    
+        const appointmentsData = [];
+        appointmentQuerySnapshot.forEach((doc) => {
+          const appointmentData = doc.data();
+          appointmentsData.push({
+            ...appointmentData,
+            id: doc.id, // Adding the document ID for reference if needed
           });
-
-          setAppointmentList(assessments);  
-          console.log(assessments);  
-        } catch (error) {
-          console.error('Failed to fetch approved appointments: ', error);
-        }
+        });
+    
+        setAppointments(appointmentsData);
+      } catch (error) {
+        console.error('Failed to fetch appointments: ', error);
       }
-
-      React.useEffect(()=>{
-        fetchApprovedAssessments();
-      },[])
-
+    };
+  
+    React.useEffect(() => {
+      fetchDoctor();
+      fetchAppointments();
+    }, []);
       return (
         <View>
-          {appointmentList.map((item, index) => (
-            <AppointmentCard key={index} doctor={doctor} date={item.date}/>
-          ))}
+        {appointments.map((item, index) => (
+          <AppointmentCard key={index} doctor={doctor} date={item.date} status={item.status} message = {item.message} />
+        ))}
         </View>
       );
 

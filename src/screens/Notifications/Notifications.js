@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useUserContext } from '../../../contexts/UserContext';
-import { FlatList } from 'react-native-gesture-handler';
+import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import { 
   ActivityIndicator, 
@@ -70,8 +70,11 @@ const Notification = ({ item, fetchApptRequest }) => {
 
     try{
       const appointmentRef = firestore().collection('appointments').doc(appointmentId);
-    
-      appointmentRef.delete();
+
+      appointmentRef.update({
+        status: 2,
+        message : message
+      });
     } catch (error) {
       console.error('Error updating appointment: ', error);
     } finally {
@@ -79,6 +82,8 @@ const Notification = ({ item, fetchApptRequest }) => {
     }
 
   }
+
+  const [message, setMessage]= React.useState ();
 
   return(
     <View style={{display:'flex',
@@ -113,7 +118,17 @@ const Notification = ({ item, fetchApptRequest }) => {
             <TouchableOpacity onPress={handleApprove} style={{backgroundColor:'rgba(111, 168, 220, 0.4)', paddingVertical:8, paddingHorizontal: 16, borderRadius:10, alignContent:'center', alignItems:'center', justifyContent:'center'}}>
               <Text style={{color:'#358cdb', fontWeight:'bold', fontSize: 16}}>Approve</Text>
             </TouchableOpacity>
-            <RequestDialog visible={isOpen} approveAppointment={approveAppointment} rejectAppointment={rejectAppointment} decision={decision} setVisible={setIsOpen} date={formattedDate} time={formattedTime}/>
+            <RequestDialog
+  visible={isOpen}
+  approveAppointment={approveAppointment}
+  decision={decision}
+  setVisible={setIsOpen}
+  date={formattedDate}
+  time={formattedTime}
+  rejectAppointment={() => rejectAppointment(message)}
+  message={message}
+  setMessage={setMessage} // Pass the setMessage function here
+/>
           </View>
         </View>
       </View>
@@ -122,40 +137,58 @@ const Notification = ({ item, fetchApptRequest }) => {
 }
 
 const RequestDialog = (props) => {
+  const { decision, visible, setVisible, date, time, approveAppointment, rejectAppointment, message, setMessage } = props;
 
-  const decision = props.decision;
+  const handleAction = () => {
+    if (decision === 'Approve') {
+      approveAppointment();
+    } else if (decision === 'Reject') {
+      rejectAppointment();
+    }
+    setVisible(false);
+  };
 
-  return(
-    <Dialog visible={props.visible} onDismiss={() => props.setVisible(false)}>
-    <DialogHeader title={decision + ' Appointment'} />
-    <DialogContent>
-      <Text style={{fontSize:20}}>
-        {decision} appointment for {props.date} at {props.time}?
-      </Text>
-    </DialogContent>
-    <DialogActions>
-      <Button
-        title="Cancel"
-        compact
-        variant="text"
-        onPress={() => props.setVisible(false)}
-      />
-      <Button
-        title="Approve"
-        compact
-        variant="text"
-        onPress={() => {
-          if (decision === 'Approve') {
-            props.approveAppointment();
-          } else {
-            props.rejectAppointment();
-          
-        }}}
-      />
-    </DialogActions>
-  </Dialog>
-  )
-}
+  return (
+    <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+      <DialogHeader title={`${decision} Appointment`} />
+      <DialogContent>
+        <Text style={{ fontSize: 20 }}>
+          {decision} appointment for {date} at {time}?
+        </Text>
+        {decision === 'Reject' && (
+          <View>
+            <TextInput
+              placeholder="Enter rejection reason"
+              value={message}
+              onChangeText={setMessage}
+              style={{
+                borderWidth: 1,
+                borderColor: 'gray',
+                borderRadius: 5,
+                padding: 8,
+                marginTop: 10,
+              }}
+            />
+          </View>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          title="Cancel"
+          compact
+          variant="text"
+          onPress={() => setVisible(false)}
+        />
+        <Button
+          title={decision}
+          compact
+          variant="text"
+          onPress={handleAction}
+        />
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 const Assessments = ({ item }) => {
 
@@ -185,6 +218,7 @@ const Notifications = () => {
 
   const [isLoading, setLoading] = React.useState(true);
   const trimmedUid = userData.uid.trim();
+  
 
   const fetchApptRequest = async () => {
     try {
@@ -193,6 +227,32 @@ const Notifications = () => {
         .where('doctor_assigned', '==', trimmedUid)
         .where('status', '==', 0)
         .get();
+
+        const currentTime = new Date();
+
+    await Promise.all(
+      appointmentsSnapshot.docs.map(async doc => {
+        const appointmentData = doc.data();
+        const creationTimestamp = appointmentData.date.toDate(); // Assuming 'createdAt' is the timestamp field when the appointment request was created
+
+        // Calculate the difference in milliseconds between the current time and the creation time
+        const differenceInTime = currentTime.getTime() - creationTimestamp.getTime();
+        const differenceInDays = differenceInTime / (1000 * 3600 * 24); // Convert milliseconds to days
+
+        // If the difference is more than 3 days and the appointment hasn't been approved, delete it
+        if (differenceInDays > 3) {
+
+          const appointmentRef = firestore().collection('appointments').doc(doc.id);
+            
+          appointmentRef.update({
+              status: 2,
+              message: 'Request automatically rejected'
+            });
+
+          console.log('Appointment request automatically rejected:', doc.id);
+        }
+      })
+    );
 
         const appointmentsData = await Promise.all(
           appointmentsSnapshot.docs.map(async doc => {
@@ -272,92 +332,76 @@ const Notifications = () => {
 
   return (
     <Provider>
-    <View style={styles.container}>
-      <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom: 48}}>
-        <Text style={{fontSize: 32, color: 'black', fontWeight:'bold', flex: 1}}>Notifications</Text>
-      </View>
-      <View id="services">
-        {userData.role === 1 ? (
-          <>
-          <Text style={[styles.notifHeader, {color:'black'}]}>Appointment Requests</Text>
-            <View style={{marginBottom: 12}}>
-              {isLoading ? (
-              <ActivityIndicator size="large" color="#CEDDF7" style={{marginTop: 60}}/>
-              ) : 
-              (
-              <FlatList
-              horizontal={false}
-              data={apptReqList}
-              keyExtractor={(item) => item.uid}
-              renderItem={({ item }) => (
-                <Notification
-                  item={item}
-                  fetchApptRequest={fetchApptRequest}
-                  />
-              )}
-              ListEmptyComponent={() => (
-                <View>
-                  <Text>No appointments available</Text>
-                </View>
-              )}
-              showsVerticalScrollIndicator={false}
-              />
-              )}
-            </View>
-          <Text style={[styles.notifHeader, {color:'black'}]}>Recent Assessments</Text>
-            <View style={{marginBottom: 12}}>
-              {isLoading ? (
-                <ActivityIndicator size="large" color="#CEDDF7" style={{marginTop: 60}}/>
-                ) : 
-                (
-                <FlatList
-                horizontal={false}
-                data={assessmentList}
-                keyExtractor={(item) => item.uid}
-                renderItem={({ item }) => (
-                  <Assessments
-                    item={item}
-                  />
+      <ScrollView style={styles.container}>
+        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
+          <Text style={{ fontSize: 32, color: 'black', fontWeight: 'bold', flex: 1 }}>Notifications</Text>
+        </View>
+        <View id="services">
+          {userData.role === 1 ? (
+            <>
+              <Text style={[styles.notifHeader, { color: 'black' }]}>Appointment Requests</Text>
+              <View style={{ marginBottom: 12 }}>
+                {isLoading ? (
+                  <ActivityIndicator size="large" color="#CEDDF7" style={{ marginTop: 60 }} />
+                ) : (
+                  apptReqList.map((item, index) => (
+                    <Notification
+                      key={index}
+                      item={item}
+                      fetchApptRequest={fetchApptRequest}
+                    />
+                  ))
                 )}
-                ListEmptyComponent={() => (
+                {apptReqList.length === 0 && (
+                  <View>
+                    <Text>No appointments available</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.notifHeader, { color: 'black' }]}>Recent Assessments</Text>
+              <View style={{ marginBottom: 12 }}>
+                {isLoading ? (
+                  <ActivityIndicator size="large" color="#CEDDF7" style={{ marginTop: 60 }} />
+                ) : (
+                  assessmentList.map((item, index) => (
+                    <Assessments key={index} item={item} />
+                  ))
+                )}
+                {assessmentList.length === 0 && (
                   <View>
                     <Text>No new assessments</Text>
                   </View>
                 )}
-                showsVerticalScrollIndicator={false}
-                />
-              )}
-            </View>
-            
-          </>
-        ) : (
-          <>
-            <Text style={[styles.notifHeader, {color:'black'}]}>Approved Appointments</Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={[styles.notifHeader, { color: 'black' }]}>Appointments</Text>
               <View>
                 <AppointmentList />
               </View>
-            <Text style={[styles.notifHeader, {color:'black'}]}>Asessments</Text>
+              <Text style={[styles.notifHeader, { color: 'black' }]}>Assessments</Text>
               <View>
                 <AssessmentList />
               </View>
-          </>
-        )}
-      </View>
-    </View>
+            </>
+          )}
+        </View>
+      </ScrollView>
     </Provider>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    height: '100%',
+    maxHeight: '100%',
     padding: 20,
   },
 
   notifHeader: {
     fontSize: 20,
     fontWeight:'bold',
-    marginBottom: 12
+    marginBottom: 10
   }
 });
 
