@@ -18,7 +18,7 @@ const AssessmentCard = ({ doctor, date }) => {
     return(
         <View style={styles.notifCard}>
             <View style={styles.content}>
-                <Avatar size={60} image={{uri: doctor.profilePictureURL}} color='white' style={{marginRight: 8}}/>
+            <Icon style={{fontSize:50, color:'#002147'}} name="checkmark-circle"/>
                 <Text style={styles.contentText}>Your assessment last {formattedDate} has been reviewed by Dr. {doctor?.firstName || '---'} {doctor?.lastName || '---'}</Text>
             </View>
         </View>
@@ -64,6 +64,7 @@ const AssessmentList = () => {
           .collection('assessments')
           .where('patient', '==', trimmedUid)
           .where('status', '==', 'reviewed')
+          .limit(5)
           .onSnapshot(snapshot => {
             const assessments = [];
             snapshot.forEach(doc => {
@@ -107,9 +108,9 @@ const AssessmentList = () => {
 
 const styles = StyleSheet.create({
     notifCard: {
-        backgroundColor: 'white',
+        backgroundColor: "#ace5ee",
         borderRadius: 12,
-        padding: 12,
+        padding: 18,
         marginBottom:12,
         height:'auto'
     },
@@ -118,11 +119,14 @@ const styles = StyleSheet.create({
         width:'100%',
         display:'flex',
         flexDirection:'row',
-        alignItems:'center'
+        alignItems:'top'
     },
     
     contentText: {
         width: '80%',
+        fontStyle: 'normal',
+        fontSize: 16,
+        marginHorizontal: 12,
         color:'black'
     }
 })

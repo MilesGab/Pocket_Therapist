@@ -82,8 +82,20 @@ const DoctorScreen = ({ navigation }) => {
 
 
   const updateFCMToken = async () => {
+    try {
 
-    try{
+      const currentFCMToken = await AsyncStorage.getItem('fcmtoken');
+      const userRef = firestore().collection('users').doc(trimmedUid);
+      const userSnapshot = await userRef.get();
+  
+      if (userSnapshot.exists) {
+        const storedFCMToken = userSnapshot.data().notification_token;
+  
+        if (storedFCMToken && storedFCMToken === currentFCMToken) {
+          console.log('FCM token is already stored:', currentFCMToken);
+          return;
+        }
+      }
 
       Alert.alert(
         'Push Notifications',
@@ -98,26 +110,18 @@ const DoctorScreen = ({ navigation }) => {
             text: 'Yes',
             onPress: async () => {
               console.log('User accepted notifications');
-              const userRef = firestore().collection('users')
-              .doc(trimmedUid);
-  
-              userRef.update({
-                notification_token: fcmtoken
-              });
+              await userRef.update({ notification_token: currentFCMToken });
+              await AsyncStorage.setItem('fcmtoken', currentFCMToken);
             },
           },
         ],
         { cancelable: false },
       );
-
-      console.log('Updated notification token: ', fcmtoken)
-
-    } catch(e){
-      console.error(e);
+  
+    } catch (error) {
+      console.error('Error updating FCM token:', error);
     }
-    
-    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
-  }
+  };
 
   React.useEffect(()=>{
     updateFCMToken();
@@ -255,57 +259,61 @@ const DoctorScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.services}>
-              <View style={{display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'space-evenly'}}>
+            <View style={{display: 'flex', flexDirection: 'column', gap: 12, justifyContent: 'space-evenly'}}>
               <Text style={{color:'black', fontSize: 28, fontWeight:'bold'}}>Summary</Text>
-              {/* 1st button */}
-              <Box style={{width:'100%'}}>
+              <View style={{display:'flex', flexDirection:'column', gap: 12}}>
+                <Box style={{width:'100%'}}>
+                  <Box 
+                      style={{
+                      display:'flex',
+                      backgroundColor: 'white',
+                      width: '100%',
+                      height: 120,
+                      borderRadius: 12,
+                      elevation: 4}}>
+                          <View style={{display:'flex', flexDirection:'row', gap: 4, paddingHorizontal:12, paddingTop:12, alignItems:'center'}}>
+                              <Icon name="body-outline" color={'#d15479'} size={24}/>
+                              <Text style={{color: '#696969', flex:1, fontWeight:'bold', fontSize:18}}>Patients</Text>
+                              <TouchableOpacity onPress={()=>navigation.navigate('Messages')}>
+                                <Icon name="chevron-forward-outline" color={'#696969'} size={18}/>
+                              </TouchableOpacity>
+                          </View>
+                          {loading ? (
+                        <ActivityIndicator color={'gray'} size="large"/>
+                        ): (
+                          <>
+                          <Divider bold={true} style={{marginHorizontal: 12, marginTop: 4, backgroundColor:'#696969'}}/> 
+                          <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                          </>
+                          )}
+                  </Box>
+                </Box>
+                {/* 2nd button */}
+                <Box style={{width:'100%'}}>
                 <Box 
-                    style={{
-                    display:'flex',
-                    backgroundColor: 'white',
-                    width: '100%',
-                    height: 120,
-                    borderRadius: 12,
-                    elevation: 4}}>
-                        <View style={{display:'flex', flexDirection:'row', gap: 4, paddingHorizontal:12, paddingTop:12, alignItems:'center'}}>
-                            <Icon name="body-outline" color={'#d15479'} size={24}/>
-                            <Text style={{color: '#696969', flex:1, fontWeight:'bold', fontSize:18}}>Patients</Text>
-                        </View>
-                        {loading ? (
-                      <ActivityIndicator color={'gray'} size="large"/>
-                      ): (
+                      style={{
+                      display:'flex',
+                      backgroundColor: 'white',
+                      width: '100%',
+                      height: 120,
+                      borderRadius: 12,
+                      elevation: 4}}>
+                          <View style={{display:'flex', flexDirection:'row', gap: 4, paddingHorizontal:12, paddingTop:12, alignContent:'center', alignItems:'center'}}>
+                              <Icon name="calendar-outline" color={'#478acc'} size={24}/>
+                              <Text style={{ color: '#696969', flex:1, fontWeight:'bold', fontSize:18}}>Appointments</Text>
+                          </View>
+                      {loading ? (
+                        <ActivityIndicator color={'gray'} size="large"/>
+                        ): (
                         <>
-                        <Divider bold={true} style={{marginHorizontal: 12, marginTop: 4, backgroundColor:'#696969'}}/> 
-                        <Text style={{marginTop:8, color: 'black', paddingHorizontal: 12, fontSize:50}}>{patientCount || '0'}</Text>
+                          <Divider bold={true} style={{marginHorizontal: 12, marginTop: 12, backgroundColor:'#696969'}}/> 
+                          <Text style={{color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
                         </>
                         )}
+                  </Box>
                 </Box>
-              </Box>
-              {/* 2nd button */}
-              <Box style={{width:'100%'}}>
-              <Box 
-                    style={{
-                    display:'flex',
-                    backgroundColor: 'white',
-                    width: '100%',
-                    height: 120,
-                    borderRadius: 12,
-                    elevation: 4}}>
-                        <View style={{display:'flex', flexDirection:'row', gap: 4, paddingHorizontal:12, paddingTop:12, alignContent:'center', alignItems:'center'}}>
-                            <Icon name="calendar-outline" color={'#478acc'} size={24}/>
-                            <Text style={{ color: '#696969', flex:1, fontWeight:'bold', fontSize:18}}>Appointments</Text>
-                        </View>
-                    {loading ? (
-                      <ActivityIndicator color={'gray'} size="large"/>
-                      ): (
-                      <>
-                        <Divider bold={true} style={{marginHorizontal: 12, marginTop: 12, backgroundColor:'#696969'}}/> 
-                        <Text style={{color: 'black', paddingHorizontal: 12, fontSize:50}}>{appointmentsCount}</Text>
-                      </>
-                      )}
-                </Box>
-              </Box>
               </View>
+            </View>
         </View>
 
         <View style={{display:'flex', justifyContent:'center', textAlign:'center'}}>

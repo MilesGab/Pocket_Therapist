@@ -19,7 +19,7 @@ import AssessmentList from './components/AssessmentList';
 
 const Notification = ({ item, fetchApptRequest }) => {
   const { userData, updateUser } = useUserContext();
-  const doctor_name = item.patientName;
+  const patient_name = item.patientName;
   const date = item.date;
   const appointmentId = item.uid;
 
@@ -87,7 +87,7 @@ const Notification = ({ item, fetchApptRequest }) => {
 
   return(
     <View style={{display:'flex',
-      backgroundColor:'white', 
+      backgroundColor:'#faf0be', 
       width:'100%', 
       justifyContent:'center', 
       alignContent:'center',
@@ -119,16 +119,16 @@ const Notification = ({ item, fetchApptRequest }) => {
               <Text style={{color:'#358cdb', fontWeight:'bold', fontSize: 16}}>Approve</Text>
             </TouchableOpacity>
             <RequestDialog
-  visible={isOpen}
-  approveAppointment={approveAppointment}
-  decision={decision}
-  setVisible={setIsOpen}
-  date={formattedDate}
-  time={formattedTime}
-  rejectAppointment={() => rejectAppointment(message)}
-  message={message}
-  setMessage={setMessage} // Pass the setMessage function here
-/>
+              visible={isOpen}
+              approveAppointment={approveAppointment}
+              decision={decision}
+              setVisible={setIsOpen}
+              date={formattedDate}
+              time={formattedTime}
+              rejectAppointment={() => rejectAppointment(message)}
+              message={message}
+              setMessage={setMessage} // Pass the setMessage function here
+            />
           </View>
         </View>
       </View>
@@ -331,8 +331,9 @@ const Notifications = () => {
   },[]);
 
   return (
+    <ScrollView>
     <Provider>
-      <ScrollView style={styles.container}>
+      <View style={styles.container}>
         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
           <Text style={{ fontSize: 32, color: 'black', fontWeight: 'bold', flex: 1 }}>Notifications</Text>
         </View>
@@ -387,8 +388,9 @@ const Notifications = () => {
             </>
           )}
         </View>
-      </ScrollView>
+      </View>
     </Provider>
+    </ScrollView>
   );
 };
 

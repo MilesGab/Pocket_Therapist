@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Dialog, DialogContent, DialogHeader, Provider, TextInput } from '@react-native-material/core';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -67,8 +67,10 @@ const VASScoreDisplay = () => {
 }
 
 const NoteDialog = (props) => {
-    const [diagnosis, setDiagnosis] = React.useState('');
-    const [notes, setNotes] = React.useState('');
+    const [initialDiagnosis, setInitialDiagnosis] = useState('');
+    const [initialNotes, setInitialNotes] = useState('');
+    const [diagnosis, setDiagnosis] = useState('');
+    const [notes, setNotes] = useState('');
     const assessmentId = props?.assessmentId;
 
     const handleDiagnosisChange = (text) => {
@@ -87,16 +89,44 @@ const NoteDialog = (props) => {
                 diagnosis: diagnosis,
                 notes: notes
             });
-        } catch (error) {
-            console.error('Failed to save assessment notes: ', error);
-        } finally {
+
             console.log('SAVED!');
             props?.setVisible(false);
+        } catch (error) {
+            console.error('Failed to save assessment notes: ', error);
         }
     }
 
+    const handleCancel = () => {
+        // Reset state to initial values
+        setDiagnosis(initialDiagnosis);
+        setNotes(initialNotes);
+        props?.setVisible(false);
+    }
+
+    useEffect(() => {
+        const fetchAssessmentData = async () => {
+            try {
+                const assessmentsRef = firestore().collection('assessments').doc(assessmentId);
+                const snapshot = await assessmentsRef.get();
+
+                if (snapshot.exists) {
+                    const data = snapshot.data();
+                    setInitialDiagnosis(data.diagnosis || ''); // Populate initial diagnosis
+                    setInitialNotes(data.notes || ''); // Populate initial notes
+                    setDiagnosis(data.diagnosis || ''); // Populate diagnosis
+                    setNotes(data.notes || ''); // Populate notes
+                }
+            } catch (error) {
+                console.error('Error fetching assessment data: ', error);
+            }
+        };
+
+        fetchAssessmentData();
+    }, [assessmentId]);
+
     return (
-        <Dialog visible={props?.visible} onDismiss={() => props?.setVisible(false)}>
+        <Dialog visible={props?.visible} onDismiss={handleCancel}>
             <DialogHeader title="Review Assessment" />
             <DialogContent>
                 <View style={{ gap: 12 }}>
@@ -105,9 +135,7 @@ const NoteDialog = (props) => {
                         <TextInput
                             value={diagnosis}
                             onChangeText={handleDiagnosisChange}
-                        style={{
-                        }}
-                        multiline={true}
+                            multiline={true}
                         />
                     </View>
                     <View>
@@ -115,16 +143,18 @@ const NoteDialog = (props) => {
                         <TextInput
                             value={notes}
                             onChangeText={handleNotesChange}
+                            multiline={true}
                         />
                     </View>
-                    <View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Button onPress={handleSave} color={'lightgray'} title={'Save'} />
+                        <Button onPress={handleCancel} color={'lightgray'} title={'Cancel'} />
                     </View>
                 </View>
             </DialogContent>
         </Dialog>
-    )
-}
+    );
+};
 
 const AssessmentPage = ({ route }) => {
 

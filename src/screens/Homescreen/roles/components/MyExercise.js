@@ -38,9 +38,13 @@ const MyExercises = ({ route }) => {
       fetchVideoDetails();
     }, []);
 
+    const handleVideo = (item) => {
+      navigation.navigate('ExercisePlayer', {videodata: item});
+    }
+
     const renderVideo = ({ item }) => {
       return (
-          <TouchableOpacity style={styles.videoContainer}>
+          <TouchableOpacity onPress={()=>handleVideo(item)} style={styles.videoContainer}>
             <View style={{display:'flex', flexDirection:'row',gap: 12}}>
               <Image source={item?.thumbnail ? { uri: item?.thumbnail } : require('../../../../../assets/images/default.png')}
               color='#CEDDF7'

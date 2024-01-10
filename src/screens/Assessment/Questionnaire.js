@@ -1,25 +1,32 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Image, PermissionsAndroid, TouchableHighlight} from "react-native";
 import { ProgressBar } from "react-native-paper";
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Slider from "@react-native-community/slider";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
+import { ScrollView } from "react-native-gesture-handler";
+import firestore from '@react-native-firebase/firestore';
+
+import storage from '@react-native-firebase/storage';
+import auth from '@react-native-firebase/auth';
+import { useUserContext } from '../../../../contexts/UserContext';
 
 
 const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   const navigation = useNavigation();
-
-  // State for tracking the current question, answers, and selected image
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [painAnswers, setPainAnswers] = useState(Array(questions.length).fill(''));
-  const [selectedImage, setSelectedImage] = useState(null);
   const [sliderValue, setSliderValue] = useState(0);
-
   const [isPainAssessment, setIsPainAssessment] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [dropDownValue, setDropDownValue] = useState('');
+  const [imageLibrary, setImageLibrary] = useState(null)
+  const [imageCamera, setImageCamera] = useState(null);
+  const [downloadURL, setDownloadURL] = useState(null);
+  const [tempURI, setTempURI] = useState(null);
+
   const [dropDownItems, setDropDownItems] = useState([
     { value: 'Sharp', label: 'Sharp: Sudden, intense, and localized pain sensation.' },
     { value: 'Dull', label: 'Dull: Aching or throbbing pain that is not sharp or intense.' },
@@ -33,15 +40,14 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     { value: 'Sore', label: 'Sore: Tenderness or discomfort in the wrist, often associated with overuse or strain.' },
     { value: 'Others', label: 'Others'}
   ]);
-
   const [painDuration, setPainDuration] = useState('');
 
   const painDurationItems = [
-    {value:'few_days', label: 'Few Days'},
-    {value:'few_weeks', label: 'Few Weeks'},
-    {value:'few_months', label: 'Few Months'},
-    {value:'several_months', label: 'Several Months'},
-    {value:'years', label: 'Years'},
+    {value:'Few Days', label: 'Few Days'},
+    {value:'Few Weeks', label: 'Few Weeks'},
+    {value:'Few Months', label: 'Few Months'},
+    {value:'Several Months', label: 'Several Months'},
+    {value:'Years', label: 'Years'},
   ];
 
   const [currentPainQuestion, setCurrentPainQuestion] = useState(0);
@@ -74,44 +80,64 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     }
   };
 
-  const handleImageLibraryPicker = () => {
-    const options = {
-      title: 'Select Image',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else {
-        setSelectedImage(response);
-      }
+  const pickImage = async () => {
+    let result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 1, //adjust values after testing in real device
+      maxWidth: 1920,
+      maxHeight: 1800,
     });
+
+    if (!result.didCancel){
+      setImageLibrary(result.assets[0].uri);
+      console.log('image selected from library');
+    }
   };
 
-  const handleCameraPicker = () => {
-    const options = {
-      title: 'Take a Picture',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
+  const captureImage = async () => {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED){
+      let result = await launchCamera({
+        mediaType: 'photo',
+        quality: 0.5,//adjust values after testing in real device
+        maxWidth: 1000,
+        maxHeight: 1000,
+      });
+      setImageCamera(result.assets[0].uri);
+      console.log('image captured from camera');
+    }
+  };
 
-    launchCamera(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image capture');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
+  const uploadUserAssessmentPics = async () => {
+    try{
+        let imageURL = imageCamera || imageLibrary; 
+
+      if (imageURL) {
+        const filename = imageURL.substring(imageURL.lastIndexOf('/') + 1);
+        const assessmentsRef = storage().ref(`userAssessment/${filename}`);
+        const response = await fetch(imageURL);
+        const blob = await response.blob();
+        await assessmentsRef.put(blob);
+
+        const downloadURL = await assessmentsRef.getDownloadURL();
+        setDownloadURL(downloadURL);
+        
+        console.log('Image on hold for upload');
+
       } else {
-        setSelectedImage(response);
+        alert('There is an error while saving, please try again');
       }
-    });
+    }catch (error){
+      console.log('Error uploading image')
+    }
+  };
+  
+  const unselectImage = () => {
+    setImageCamera(null);
+    setImageLibrary(null);
+    console.log('image removed');
   };
 
   const progress = isPainAssessment
@@ -119,12 +145,13 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     : ((currentQuestion + 1) / questions.length) * 100;
 
   const handleSensorPage = () => {
-    updatePainData([sliderValue, dropDownValue, painDuration]);
+    updatePainData([sliderValue, dropDownValue, painDuration, downloadURL]);
     updatePhysicalData(painAnswers);
     navigation.navigate('JointAssessment');
   }
 
   return (
+    <ScrollView>
     <View style={styles.container}>
       <Text style={styles.title}>Assessment</Text>
       <Text style={isPainAssessment ? styles.titlePortion : styles.titlePortion}>
@@ -132,7 +159,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
       </Text>
 
       <View style={styles.top}>
-        <ProgressBar progress={progress / 100} color="#f9bc27" />
+        <ProgressBar progress={progress / 100} color="#65A89F" />
 
         {isPainAssessment ? (
           <View>
@@ -146,9 +173,9 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                   minimumValue={0}
                   maximumValue={10}
                   step={1}
-                  minimumTrackTintColor="blue"
+                  minimumTrackTintColor='#65A89F'
                   maximumTrackTintColor="lightgray"
-                  thumbTintColor="blue"
+                  thumbTintColor='#65A89F'
                   value={sliderValue}
                   onValueChange={(value) => setSliderValue(value)}
                 />
@@ -192,9 +219,9 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                   <TouchableOpacity 
                     onPress={() => {setPainDuration(pain.value)}}
                     style={{
-                      backgroundColor: painDuration === pain.value ? 'white' : '#4843fa',
+                      backgroundColor: painDuration === pain.value ? 'white' : '#65A89F',
                       borderWidth: painDuration === pain.value ? 1 : 0,
-                      borderColor: '#4843fa',
+                      borderColor: '#65A89F',
                       padding: 12,
                       paddingHorizontal: 16,
                       borderRadius: 16,
@@ -206,7 +233,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                       fontFamily: 'Nunito Sans',
                       fontSize: 16,
                       fontWeight: '300',
-                      color: painDuration === pain.value ? '#4843fa' : 'white'
+                      color: painDuration === pain.value ? '#65A89F' : 'white'
                     }}>{pain.label}</Text>
                   </TouchableOpacity>
                 ))}
@@ -223,39 +250,71 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
           {isPainAssessment ? null : (
             <React.Fragment>
               <TouchableOpacity onPress={() => handleNextQuestion('YES')} style={styles.ansButton}>
-                <Text style={styles.ansButtonText}>YES</Text>
+                <Text style={styles.ansButtonText}>Yes</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleNextQuestion('NO')} style={styles.ansButton}>
-                <Text style={styles.ansButtonText}>NO</Text>
+                <Text style={styles.ansButtonText}>No</Text>
               </TouchableOpacity>
             </React.Fragment>
           )}
         </View>
       ) : (
         !isPainAssessment && (
-        <View>
-          <TouchableOpacity
-            onPress={handleImageLibraryPicker}
-            style={styles.imagePicker}
-          >
-            <Icon name="image-outline" size={30} color="white" />
-            <Text style={styles.imagePickerText}>Select from Gallery</Text>
-          </TouchableOpacity>
+          <View>
+          {imageLibrary && <Image source={{ uri: imageLibrary }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
+          {imageCamera && <Image source={{ uri: imageCamera }} style={{ width: 200, height: 200, alignSelf: 'center' }} />}
+          
+          {imageLibrary &&
+            <TouchableHighlight 
+              onPress={unselectImage} 
+              underlayColor={'white'}
+              style={styles.unselectBtn}>
+                <Text>Remove photo</Text>
+            </TouchableHighlight>}
 
-          <TouchableOpacity
-            onPress={handleCameraPicker}
-            style={styles.cameraPicker}
-          >
-            <Icon name="camera-outline" size={30} color="white" />
-            <Text style={styles.cameraPickerText}>Take a Picture</Text>
-          </TouchableOpacity>
+          {imageCamera && 
+            <TouchableHighlight 
+              onPress={unselectImage}
+              underlayColor={'white'}
+              style={styles.unselectBtn}>
+                <Text>Remove photo</Text>
+            </TouchableHighlight>}
+        
+          {imageCamera || imageLibrary ? (
+            <TouchableOpacity
+              style={[styles.imagePicker, styles.disabledPicker]}
+            >
+              <Icon name="image-outline" size={30} color="white" />
+              <Text style={styles.imagePickerText}>Image Selected</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={pickImage}
+              style={styles.imagePicker}
+            >
+              <Icon name="image-outline" size={30} color="white" />
+              <Text style={styles.imagePickerText}>Select from Gallery</Text>
+            </TouchableOpacity>
+          )}
+        
+          {imageCamera || imageLibrary ? (
+            <TouchableOpacity
+              style={[styles.imagePicker, styles.disabledPicker]}
+            >
+              <Icon name="camera-outline" size={30} color="white" />
+              <Text style={styles.cameraPickerText}>Image Selected</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={captureImage}
+              style={styles.imagePicker}
+            >
+              <Icon name="camera-outline" size={30} color="white" />
+              <Text style={styles.cameraPickerText}>Take a Picture</Text>
+            </TouchableOpacity>
+          )}
         </View>
         )
-      )}
-
-      {/* Display the selected image */}
-      {selectedImage && (
-        <Image source={{ uri: selectedImage.uri }} style={styles.selectedImage} />
       )}
 
       <View style={styles.bottom}>
@@ -267,15 +326,15 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
             : handlePreviousQuestion}
           style={styles.button}
         >
-          <Text style={styles.buttonText}>BACK</Text>
+          <Text style={styles.buttonText}>Back</Text>
         </TouchableOpacity>
 
         {!isPainAssessment && currentQuestion === 4 ? (
           <>
           <TouchableOpacity
-              onPress={() => setIsPainAssessment(true)}
+              onPress={() =>{uploadUserAssessmentPics(); setIsPainAssessment(true)}}
               style={{
-                borderColor: '#4843fa',
+                borderColor: '#65A89F',
                 borderWidth: 1,
                 backgroundColor: 'white',
                 padding: 12,
@@ -299,7 +358,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                 : ()=>handleNextQuestion('')}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>NEXT</Text>
+              <Text style={styles.buttonText}>Next</Text>
             </TouchableOpacity>
           </>
         )}
@@ -314,6 +373,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         </Text>
       </TouchableOpacity>
     </View>
+    </ScrollView>
   );
 }
 
@@ -331,13 +391,21 @@ const painAssessmentQuestions = [
   'Question 3: How long have you been experiencing pain on your wrist?',
 ];
 
-
 const styles = StyleSheet.create({
 container: {
     padding: 40,
     paddingHorizontal: 20,
     height: '100%',
     backgroundColor: 'white'
+},
+
+unselectBtn:{
+  alignSelf:'center',
+  marginTop: 10
+},
+
+disabledPicker: {
+  opacity: 0.5,
 },
 
 title: {
@@ -387,7 +455,7 @@ input: {
 },
 
 ansButton: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 16,
     borderRadius: 16,
@@ -413,7 +481,7 @@ bottom: {
 },
 
 button: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 26,
     borderRadius: 10,
@@ -429,33 +497,33 @@ buttonText: {
 },
 
 cameraPicker: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 16,
-    borderRadius: 10, // Use a large value to make it oval-shaped
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 15,
   },
   cameraPickerText: {
     color: 'white',
-    marginLeft: 10, // Adjust the spacing between the icon and label
+    marginLeft: 10,
   },
 
   imagePicker: {
-    backgroundColor: '#4843fa',
+    backgroundColor: '#65A89F',
     padding: 12,
     paddingHorizontal: 16,
-    borderRadius: 10, // Use a large value to make it oval-shaped
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 15,
   },
   imagePickerText: {
     color: 'white',
-    marginLeft: 10, // Adjust the spacing between the icon and label
+    marginLeft: 10,
   },
 
   slider: {
-    width: 358, // Adjust the width of the slider
+    width: 358,
     marginLeft: 3,
   },
 

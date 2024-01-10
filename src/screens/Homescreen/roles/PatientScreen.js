@@ -10,7 +10,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useUserContext } from '../../../../contexts/UserContext';
 import { requestUserPermission } from '../../../utils/pushnotification_helper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MedDoc from './components/MedDoc';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
@@ -82,47 +81,51 @@ const PatientScreen = ({ navigation }) => {
 
   const trimmedUid = userData?.uid.trim();
 
-  // const updateFCMToken = async () => {
+  const updateFCMToken = async () => {
+    try {
 
-  //   try{
-
-  //     Alert.alert(
-  //       'Push Notifications',
-  //       'Do you want to receive push notifications?',
-  //       [
-  //         {
-  //           text: 'No',
-  //           onPress: () => console.log('User declined notifications'),
-  //           style: 'cancel',
-  //         },
-  //         {
-  //           text: 'Yes',
-  //           onPress: async () => {
-  //             console.log('User accepted notifications');
-  //             const userRef = firestore().collection('users')
-  //             .doc(trimmedUid);
+      const currentFCMToken = await AsyncStorage.getItem('fcmtoken');
+      const userRef = firestore().collection('users').doc(trimmedUid);
+      const userSnapshot = await userRef.get();
   
-  //             userRef.update({
-  //               notification_token: fcmtoken
-  //             });
-  //           },
-  //         },
-  //       ],
-  //       { cancelable: false },
-  //     );
+      if (userSnapshot.exists) {
+        const storedFCMToken = userSnapshot.data().notification_token;
+  
+        if (storedFCMToken && storedFCMToken === currentFCMToken) {
+          console.log('FCM token is already stored:', currentFCMToken);
+          return;
+        }
+      }
 
-  //     console.log('Updated notification token: ', fcmtoken)
+      Alert.alert(
+        'Push Notifications',
+        'Do you want to receive push notifications?',
+        [
+          {
+            text: 'No',
+            onPress: () => console.log('User declined notifications'),
+            style: 'cancel',
+          },
+          {
+            text: 'Yes',
+            onPress: async () => {
+              console.log('User accepted notifications');
+              await userRef.update({ notification_token: currentFCMToken });
+              await AsyncStorage.setItem('fcmtoken', currentFCMToken);
+            },
+          },
+        ],
+        { cancelable: false },
+      );
+  
+    } catch (error) {
+      console.error('Error updating FCM token:', error);
+    }
+  };
 
-  //   } catch(e){
-  //     console.error(e);
-  //   }
-    
-  //   let fcmtoken = await AsyncStorage.getItem('fcmtoken');
-  // }
-
-  // React.useEffect(()=>{
-  //   updateFCMToken();
-  // },[userData]);
+  React.useEffect(()=>{
+    updateFCMToken();
+  },[userData]);
 
   // React.useEffect(()=>{
   //   requestUserPermission();
@@ -232,6 +235,7 @@ const PatientScreen = ({ navigation }) => {
   }
 
   return (
+    <ScrollView>
       <View style={styles.container}>
         <ScrollView>
           <View style={styles.header}>
@@ -241,7 +245,7 @@ const PatientScreen = ({ navigation }) => {
                 fontFamily: 'Nunito Sans', 
                 fontSize: 28, 
                 color: 'black', 
-                fontWeight: 'bold'}}>{capitalizeFirstLetter(userData?.firstName) || '---'}</Text>
+                fontWeight: 'bold'}}>{userData?.firstName || '---'}</Text>
             </View>
             <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
             <Image
@@ -258,7 +262,6 @@ const PatientScreen = ({ navigation }) => {
           
           <Text style={styles.servicesText}>Summary</Text>
           <LatestResults/>
-
           <View style={styles.services}>
             <Text style={styles.servicesText}>Services</Text>
                 <View style={{backgroundColor:'white', padding: 12, borderRadius: 12, elevation: 4}}>
@@ -321,6 +324,7 @@ const PatientScreen = ({ navigation }) => {
           </View>
         </ScrollView>
       </View>
+    </ScrollView>
   );
 };
 
@@ -380,7 +384,7 @@ const LatestResults = () =>{
 
   return(
     <View style={styles.stats}>
-      <Box w={'100%'} h={'auto'} style={{ backgroundColor: "white", borderRadius: 16, elevation: 4}}>
+      <Box w={'auto'} h={'auto'} style={{ backgroundColor: "white", borderRadius: 16, elevation: 4}}>
           <Box style={{padding: 16, display: 'flex', flexDirection: 'row'}}>
             <Box style={{flex: 1}}>
               <Box style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom: 20}}>
@@ -444,14 +448,16 @@ const styles = StyleSheet.create({
   container: {
     height:'100%',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 32
+    padding: 16,
+    paddingTop: 32,
+    width: 'auto'
   },
 
   header: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingBottom: 16
   },
 
   headerText: {

@@ -266,8 +266,8 @@ const AssessmentHistory = () => {
                     <ActivityIndicator size={'large'} color='gray'/>
                 ) : (
                     <>
-                    <WristTable romData={romData}/>
-                    <PainTable vasData={vasData}/>
+                    {/* <WristTable romData={romData}/>
+                    <PainTable vasData={vasData}/> */}
                     <Text style={styles.tableText}>Last {assessmentList.length} Assessments</Text>
                 
                     <FlatList

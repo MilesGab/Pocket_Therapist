@@ -45,24 +45,24 @@ const AppointmentCard = ( props ) => {
 
   return(
     <View style={{display:'flex',
-      backgroundColor:'rgba(101, 168, 159, 1)', 
+      backgroundColor:'rgba(255,255,255,1)', 
       width:'100%', 
       justifyContent:'center', 
       alignContent:'center',
       paddingHorizontal:10, 
       paddingVertical:12,
-      borderRadius: 12,
+      borderRadius: 6,
       marginBottom: 16,
       elevation: 4
       }}
       >
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>
-        <View style={{flexDirection:'column', flex:1, paddingVertical: 2, paddingHorizontal: 2}}>  
-          <Text style={{color:'white'}}>Appointment Date</Text>
-          <Text style={{fontWeight:'bold', color:'white', fontSize:16}}>{formattedDate} {formattedTime}</Text>
+        <View style={{flexDirection:'row', paddingVertical: 2, paddingHorizontal: 2}}>  
+          <Text style={{fontWeight:'bold', color:'#696969', fontSize:16, flex: 1}}>{props?.name === 'Consultation' ? 'Consulted With' : 'Assessed By'}</Text>
+          <Text style={{color:'#696969', fontSize:14}}>{formattedDate} {formattedTime}</Text>
         </View>
       </View>
-      <Divider color='white'/>
+      <Divider color='#696969'/>
       <View style={{marginTop: 6, paddingVertical:12, flexDirection:'row'}}>
         <Avatar
           image={{
@@ -70,8 +70,8 @@ const AppointmentCard = ( props ) => {
           }}
         />
         <View style={{marginLeft: 10, flexDirection:'column'}}>
-          <Text style={{fontWeight:'bold', color:'white', fontSize:16}}>{nameToDisplay}</Text>
-          <Text style={{color:'white', fontSize:16}}>{props?.name}</Text>
+          <Text style={{fontWeight:'bold', color:'#696969', fontSize:16}}>{nameToDisplay}</Text>
+          <Text style={{color:'#696969', fontSize:16}}>{props?.name}</Text>
         </View>
       </View>
     </View>
@@ -271,7 +271,7 @@ const Schedule = () => {
 
             return {
               ...appointmentData,
-              doctorName: doctorData.firstName,
+              doctorName: doctorData?.firstName,
               patientName: patientData?.firstName + ' ' + patientData?.lastName,
               patientPic: patientData?.profilePictureURL,
               docPic: doctorData?.profilePictureURL
@@ -346,7 +346,7 @@ const Schedule = () => {
 
       <View style={{
       flex: 1,
-      borderRadius: 10,
+      borderRadius: 6,
       overflow: 'hidden',
       justifyContent: 'center',
       alignContent: 'center',

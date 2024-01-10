@@ -120,7 +120,7 @@ const EditSection = (props) => {
   const [firstName, setFirstName] = React.useState(userFirstName);
   const [lastName, setLastName] = React.useState(userLastName);
   const [dropDownValue, setDropDownValue] = React.useState(userData?.sex);
-  const [date, setDate] = React.useState(userData?.dateOfBirth);
+  const [date, setDate] = React.useState(new Date());
   const [emailAddress, setEmailAddress] = React.useState(userEmail);
   const [contactNumber, setContactNumber] = React.useState(userContact);
   const [image, setProfilePicture] = React.useState(userPic);
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingTop: StatusBar.currentHeight,
-    height: 950
+    height: 880
   },
 
   whiteSheet: {
@@ -426,6 +426,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 22,
     color: 'black',
+  },
+
+  avtrpos:{
+    paddingTop: 20,
   },
 
   divider:{
