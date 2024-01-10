@@ -113,7 +113,8 @@ const styles = {
     decisionButtons: {
         display:'flex',
         flexDirection:'row',
-        gap: 8
+        gap: 8,
+        width: '50%'
     },
 
     physicalResults: {

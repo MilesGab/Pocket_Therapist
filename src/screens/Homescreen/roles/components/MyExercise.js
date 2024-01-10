@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, Image } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
@@ -41,15 +41,27 @@ const MyExercises = ({ route }) => {
     const renderVideo = ({ item }) => {
       return (
           <TouchableOpacity style={styles.videoContainer}>
-            <Text style={styles.videoTitle}>{item.video_name}</Text>
-            <Text style={{color:'black'}}>{item.video_description}</Text>
-            <Video
+            <View style={{display:'flex', flexDirection:'row',gap: 12}}>
+              <Image source={item?.thumbnail ? { uri: item?.thumbnail } : require('../../../../../assets/images/default.png')}
+              color='#CEDDF7'
+              style={{
+              width: 100,
+              height: 100,
+              borderRadius: 4
+              }}
+              />
+              <View>
+                <Text style={styles.videoTitle}>{item.video_name}</Text>
+              </View>
+            </View>
+            
+            {/* <Video
               source={{ uri: item.video_path }}
               style={styles.videoPlayer}
               controls={true}
               resizeMode="contain"
               paused={paused}
-            />
+            /> */}
           </TouchableOpacity>
       );
     };
@@ -110,7 +122,7 @@ const styles = StyleSheet.create({
       videoContainer: {
         marginBottom: 20,
         backgroundColor: '#f8f8f8',
-        borderRadius: 20,
+        borderRadius: 12,
         padding: 10,
         elevation: 4
       },

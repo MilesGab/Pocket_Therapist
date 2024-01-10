@@ -174,8 +174,11 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                   containerStyle={{ height: 40 }}
                 />
                 <TextInput
+                  multiline
+                  numberOfLines={4}
                   style={styles.input}
                   placeholder="Please write a short description about your pain"
+                  placeholderTextColor="#696969"
                   onChangeText={(text) => {
                     // Handle the user's input here
                   }}
@@ -283,7 +286,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                 marginBottom: 30
             }}
             >
-              <Text style={[styles.buttonText, {color:'#4843fa'}]}>PROCEED TO PAIN ASSESSMENT</Text>
+              <Text style={[styles.buttonText, {color:'#4843fa'}]}>NEXT</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -374,15 +377,13 @@ textInputs: {
 },
 
 input: {
-  height: 100,
   marginTop: 20,
   borderWidth: 1,
-  padding: 10,
   borderRadius: 4,
   borderColor: '#000',
   backgroundColor: '#FFFFFF',
   color: '#000000',
-  fontSize: 16,
+  fontSize: 12,
 },
 
 ansButton: {

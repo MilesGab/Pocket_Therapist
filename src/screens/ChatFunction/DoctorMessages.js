@@ -160,19 +160,19 @@ const DoctorMessages = ({navigation}) => {
                               <TouchableOpacity onPress={()=>handleMessage(item.id)}>
                                 <View style={styles.menuContent}>
                                   <Icon name="chatbox-ellipses-outline" size={20} color="gray" />
-                                  <Text>View Messages</Text>
+                                  <Text style={{color: 'gray'}}>View Messages</Text>
                                 </View>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={()=>handleAssessments(item.id)} >
                                 <View style={styles.menuContent}>
                                   <Icon name="pulse-outline" size={20} color="gray" />
-                                  <Text>View Assessments</Text>
+                                  <Text style={{color: 'gray'}}>View Assessments</Text>
                                 </View>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={()=>handleExercises(item.id)} >
                                 <View style={styles.menuContent}>
                                   <Icon name="accessibility-outline" size={20} color="gray" />
-                                  <Text>View Exercises</Text>
+                                  <Text style={{color: 'gray'}}>View Exercises</Text>
                                 </View>
                               </TouchableOpacity>
                             </View>

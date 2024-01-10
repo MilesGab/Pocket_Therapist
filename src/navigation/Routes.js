@@ -27,6 +27,8 @@ import Goniometer from '../screens/Homescreen/roles/components/Goniometer.js';
 import { ActivityIndicator } from '@react-native-material/core';
 import AssessmentHistory from '../screens/Homescreen/roles/components/AssessmentHistory.js';
 import TokenTest from '../screens/ChatFunction/call/TokenTest.js';
+import MedDoc from '../screens/Homescreen/roles/components/MedDoc.js';
+import UploadDocu from '../screens/Homescreen/roles/components/UploadDocu.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -143,7 +145,6 @@ const HomeStack = () => {
 
   useEffect(() => {
     checkUserRole();
-    console.log(userData);
   }, [userData]);
 
   const checkUserRole = async () => {
@@ -163,26 +164,34 @@ const HomeStack = () => {
 return (
   <Stack.Navigator>
     {userData?.role === 0 ? (
+      <>
       <Stack.Screen
         name="PatientHomescreen"
         component={PatientScreen}
         options={{headerShown: false, initialParams: { role: 0 } }}
       />
+      
+      <Stack.Screen 
+      name="UploadDocu"
+      component={UploadDocu}
+      options={{headerShown: false}}
+      />
+      </>
+
+      
     ) : (
       <>
         <Stack.Screen
           name="DoctorHomescreen"
-          component={DoctorScreen} // Use the imported component
+          component={DoctorScreen}
           options={{headerShown: false, initialParams: { role: 1 } }} // role 1 is for doctors
         />
-
         <Stack.Screen 
           name="PatientSearch"
           component={PatientSearch}
           options={{headerShown: false}}
         />  
-      </>
-      
+      </>  
     )}
   </Stack.Navigator>
 );
@@ -202,8 +211,8 @@ return (
     ) : (
       <Stack.Screen
         name="DoctorMessaging"
-        component={DoctorMessages} // Use the imported component
-        options={{headerShown: false, initialParams: { role: 1 } }} // role 1 is for doctors
+        component={DoctorMessages} 
+        options={{headerShown: false, initialParams: { role: 1 } }} 
       />
     )}
     <Stack.Screen 
@@ -247,6 +256,17 @@ return (
     component={AssessmentPage}
     options={{headerShown: false}}
     />
+
+    <Stack.Screen 
+    name="MedDoc"
+    component={MedDoc}
+    options={{headerShown: false}}
+    />
+    <Stack.Screen 
+    name="UploadDocu"
+    component={UploadDocu}
+    options={{headerShown: false}}
+    />
   </Stack.Navigator>
 );
 };
@@ -276,19 +296,23 @@ const styles = StyleSheet.create({
 });
 
 const Routes = (props) => {
+
+  const { user } = props;
+  const isLoggedIn = user !== null;
+
     return(
         <Stack.Navigator 
-          initialRouteName={props.user ? 'MyTabs' : 'Login'} 
+          initialRouteName={isLoggedIn ? 'MyTabs' : 'Login'} 
           screenOptions={{ 
             headerShown: false, 
-          }}>
-          <Stack.Screen name="Login" component={Login}/>
-          <Stack.Screen name="Register" component={Register} />
-          <Stack.Screen name="MyTabs" component={MyTabs}/>
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="Assessment" component={Assessment} />
-          <Stack.Screen name="MyExercises" component={MyExercises}/>
-          <Stack.Screen name="AssessmentHistory" component={AssessmentHistory}/>
+            }}>
+            <Stack.Screen name="Login" component={Login}/>
+            <Stack.Screen name="Register" component={Register} />
+            <Stack.Screen name="MyTabs" component={MyTabs}/>
+            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="Assessment" component={Assessment} />
+            <Stack.Screen name="MyExercises" component={MyExercises}/>
+            <Stack.Screen name="AssessmentHistory" component={AssessmentHistory}/>
         </Stack.Navigator>
     )
 }

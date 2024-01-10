@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useUserContext } from '../../../../contexts/UserContext';
 import { requestUserPermission } from '../../../utils/pushnotification_helper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MedDoc from './components/MedDoc';
 
 const Item = ({ item, onPress, backgroundColor, textColor }) => {
   
@@ -76,50 +77,52 @@ const PatientScreen = ({ navigation }) => {
   const [selectedId, setSelectedId] = React.useState();
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);
+  const [hasAppointmentStatus2, setHasAppointmentStatus2] = React.useState(false);
+
 
   const trimmedUid = userData?.uid.trim();
 
-  const updateFCMToken = async () => {
+  // const updateFCMToken = async () => {
 
-    try{
+  //   try{
 
-      Alert.alert(
-        'Push Notifications',
-        'Do you want to receive push notifications?',
-        [
-          {
-            text: 'No',
-            onPress: () => console.log('User declined notifications'),
-            style: 'cancel',
-          },
-          {
-            text: 'Yes',
-            onPress: async () => {
-              console.log('User accepted notifications');
-              const userRef = firestore().collection('users')
-              .doc(trimmedUid);
+  //     Alert.alert(
+  //       'Push Notifications',
+  //       'Do you want to receive push notifications?',
+  //       [
+  //         {
+  //           text: 'No',
+  //           onPress: () => console.log('User declined notifications'),
+  //           style: 'cancel',
+  //         },
+  //         {
+  //           text: 'Yes',
+  //           onPress: async () => {
+  //             console.log('User accepted notifications');
+  //             const userRef = firestore().collection('users')
+  //             .doc(trimmedUid);
   
-              userRef.update({
-                notification_token: fcmtoken
-              });
-            },
-          },
-        ],
-        { cancelable: false },
-      );
+  //             userRef.update({
+  //               notification_token: fcmtoken
+  //             });
+  //           },
+  //         },
+  //       ],
+  //       { cancelable: false },
+  //     );
 
-      console.log('Updated notification token: ', fcmtoken)
+  //     console.log('Updated notification token: ', fcmtoken)
 
-    } catch(e){
-      console.error(e);
-    }
+  //   } catch(e){
+  //     console.error(e);
+  //   }
     
-    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
-  }
+  //   let fcmtoken = await AsyncStorage.getItem('fcmtoken');
+  // }
 
-  React.useEffect(()=>{
-    updateFCMToken();
-  },[userData]);
+  // React.useEffect(()=>{
+  //   updateFCMToken();
+  // },[userData]);
 
   // React.useEffect(()=>{
   //   requestUserPermission();
@@ -164,11 +167,36 @@ const PatientScreen = ({ navigation }) => {
   
         setAppointmentList(appointmentsData);
       } catch (error) {
+        console.error('Error fetching appointments:', error);
       } finally {
         setLoading(false);
       }
     });
   
+    return () => unsubscribe();
+  }, [trimmedUid]);
+
+  React.useEffect(() => {
+    setLoading(true);
+
+    // checks if user has an approved appointment to show 'Request Medical Document' button
+    const appointmentsRef = firestore()
+      .collection('appointments')
+      .where('patient_assigned', '==', trimmedUid)
+      .where('status', '==', 1)
+      .limit(1);
+
+    const unsubscribe = appointmentsRef.onSnapshot(async (querySnapshot) => {
+      try {
+        const hasAppointment = querySnapshot.size > 0;
+        setHasAppointmentStatus2(hasAppointment);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      } finally {
+        setLoading(false);
+      }
+    });
+
     return () => unsubscribe();
   }, [trimmedUid]);
   
@@ -190,78 +218,108 @@ const PatientScreen = ({ navigation }) => {
     navigation.navigate('MyExercises', {patientData: userid});
   }
 
-  const capitalizeFirstLetter = (string) =>  {
-    if (!string) return string;
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  const handleMedDoc = (userid) => {
+    navigation.navigate('MedDoc', {patientData: userid});
+  }
+
+  const handleUploadDocu = (userid) => {
+    navigation.navigate('UploadDocu', {patientData: userid});
+  }
+  
+  const capitalizeFirstLetter = (string) =>{
+    const newString = string.charAt(0).toUpperCase();
+    return newString;
   }
 
   return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerText}>👋 Hello!</Text>
-            <Text style={{
-              fontFamily: 'Nunito Sans', 
-              fontSize: 28, 
-              color: 'black', 
-              fontWeight: 'bold'}}>{capitalizeFirstLetter(userData?.firstName) || '---'}</Text>
-          </View>
-          <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <Image
-              source={userData?.profilePictureURL ? { uri: userData?.profilePictureURL } : require('../../../../assets/images/default.png')}
-              color='#CEDDF7'
-              style={{
-              width: 80,
-              height: 80,
-              borderRadius: 75,
-              }}
-          />
-          </TouchableOpacity>
-        </View>
-        
-        <Text style={styles.servicesText}>Summary</Text>
-        <LatestResults/>
-
-        <View style={styles.services}>
-          <Text style={styles.servicesText}>Services</Text>
-              <View style={{backgroundColor:'white', padding: 12, borderRadius: 12, elevation: 4}}>
-                <TouchableOpacity onPress={() => navigation.navigate('Assessment')} style={styles.serviceBtn}>
-                  <Icon name="clipboard-outline" color={'#4a7fd4'} size={36} style={{right: 12}}/>
-                  <Text style={{fontSize: 16, fontWeight:'bold', color:'black', flex:1}}>Take Assessment</Text>
-                  <Icon name="chevron-forward-outline" size={20}/>
-                </TouchableOpacity>
-                <Divider style={{marginVertical: 12}}/>
-                  <TouchableOpacity onPress={() => handleExercisesPage(trimmedUid)} style={styles.serviceBtn}>
-                  <Icon name="accessibility-outline" color={'#d19245'} size={36} style={{right: 12}}/>
-                  <Text style={{fontSize: 16, fontWeight:'bold', color:'black', flex:1}}>View Exercises</Text>
-                  <Icon name="chevron-forward-outline" size={20}/>
-                </TouchableOpacity>
-              </View>
-        </View>
-      
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Upcoming Appointment</Text>
-          {isLoading ? (
-            <ActivityIndicator size="large"/>
-          ) : (
-            <View style={{justifyContent:'center', alignContent:'center', alignItems:'center'}}>
-              <FlatList
-                horizontal={true}
-                data={appointmentList}
-                renderItem={renderItem}
-                keyExtractor={item => item.uid}
-                extraData={selectedId}
-                showsHorizontalScrollIndicator={false}
-                ListEmptyComponent={() => (
-                  <View style={{marginTop: 12, padding: 20}}>
-                    <Text style={{ textAlign: 'center' }}>No upcoming appointments</Text>
-                  </View>
-                )}
-              />
+        <ScrollView>
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.headerText}>👋 Hello!</Text>
+              <Text style={{
+                fontFamily: 'Nunito Sans', 
+                fontSize: 28, 
+                color: 'black', 
+                fontWeight: 'bold'}}>{capitalizeFirstLetter(userData?.firstName) || '---'}</Text>
             </View>
-          )}
-            
-        </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+            <Image
+                source={userData?.profilePictureURL ? { uri: userData?.profilePictureURL } : require('../../../../assets/images/default.png')}
+                color='#CEDDF7'
+                style={{
+                width: 80,
+                height: 80,
+                borderRadius: 75,
+                }}
+            />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.servicesText}>Summary</Text>
+          <LatestResults/>
+
+          <View style={styles.services}>
+            <Text style={styles.servicesText}>Services</Text>
+                <View style={{backgroundColor:'white', padding: 12, borderRadius: 12, elevation: 4}}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Assessment')} style={styles.serviceBtn}>
+                    <Icon name="clipboard-outline" color={'#4a7fd4'} size={36} style={{right: 12}}/>
+                    <Text style={{fontSize: 16, fontWeight:'bold', color:'black', flex:1}}>Take Assessment</Text>
+                    <Icon name="chevron-forward-outline" size={20}/>
+                  </TouchableOpacity>
+                  <Divider style={{marginVertical: 12}}/>
+                    <TouchableOpacity onPress={() => handleExercisesPage(trimmedUid)} style={styles.serviceBtn}>
+                    <Icon name="accessibility-outline" color={'#d19245'} size={36} style={{right: 12}}/>
+                    <Text style={{fontSize: 16, fontWeight:'bold', color:'black', flex:1}}>View Exercises</Text>
+                    <Icon name="chevron-forward-outline" size={20}/>
+                  </TouchableOpacity>
+                  <Divider style={{marginVertical: 12}}/>
+                  {hasAppointmentStatus2 && (
+                  <TouchableOpacity onPress={() => handleMedDoc(trimmedUid)} style={styles.serviceBtn}>
+                    <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
+                      Request Medical Document
+                    </Text>
+                    <Icon name="chevron-forward-outline" size={20} />
+                  </TouchableOpacity>
+                  )}
+                  <Divider style={{marginVertical: 12}}/>
+                  {hasAppointmentStatus2 && (
+                  <TouchableOpacity onPress={() => handleUploadDocu(trimmedUid)} style={styles.serviceBtn}>
+                    <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
+                      Upload Medical Documents
+                    </Text>
+                    <Icon name="chevron-forward-outline" size={20} />
+                  </TouchableOpacity>
+                  )}
+                </View>
+          </View>
+        
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Upcoming Appointment</Text>
+            {isLoading ? (
+              <ActivityIndicator size="large"/>
+            ) : (
+              <View style={{justifyContent:'center', alignContent:'center', alignItems:'center'}}>
+                <FlatList
+                  horizontal={true}
+                  data={appointmentList}
+                  renderItem={renderItem}
+                  keyExtractor={item => item.uid}
+                  extraData={selectedId}
+                  showsHorizontalScrollIndicator={false}
+                  ListEmptyComponent={() => (
+                    <View style={{marginTop: 12, padding: 20}}>
+                      <Text style={{ textAlign: 'center' }}>No upcoming appointments</Text>
+                    </View>
+                  )}
+                />
+              </View>
+            )}
+              
+          </View>
+        </ScrollView>
       </View>
   );
 };
@@ -386,7 +444,7 @@ const styles = StyleSheet.create({
   container: {
     height:'100%',
     justifyContent: 'space-between',
-    padding: 20,
+    paddingHorizontal: 20,
     paddingTop: 32
   },
 
@@ -426,8 +484,8 @@ const styles = StyleSheet.create({
     },
 
   stats: {
-    height: '35%',
-    marginBottom: 2
+    height: 'auto',
+    marginBottom: 26
   },
 
   footer: {

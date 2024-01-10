@@ -105,10 +105,13 @@ const NoteDialog = (props) => {
                         <TextInput
                             value={diagnosis}
                             onChangeText={handleDiagnosisChange}
+                        style={{
+                        }}
+                        multiline={true}
                         />
                     </View>
                     <View>
-                        <Text>Notes</Text>
+                        <Text>Notes/Recommendations</Text>
                         <TextInput
                             value={notes}
                             onChangeText={handleNotesChange}

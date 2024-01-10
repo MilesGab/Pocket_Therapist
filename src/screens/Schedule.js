@@ -149,6 +149,7 @@ const AddAppointment = (props) => {
 
       try {
         const appointmentRef = await firestore().collection('appointments').add({
+          createdAt: firestore.FieldValue.serverTimestamp(),
           date,
           doctor_assigned: userData?.doctor,
           name: value,
