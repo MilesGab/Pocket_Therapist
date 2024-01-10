@@ -5,43 +5,146 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import DocumentPicker from 'react-native-document-picker'
+import DocumentPicker from 'react-native-document-picker';
 import firestore from '@react-native-firebase/firestore';
-import { useUserContext } from '../../../../../contexts/UserContext';
+import auth from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage';
 
 const UploadDocu = ({ navigation, trimmedUid }) => {
-  const { userData } = useUserContext();
   const [showModal1, setShowModal1] = useState(false);
+  const [imgUploadSuccess, setImgUploadSuccess] = useState(false);
+  const [imgUploadFail, setImgUploadFail] = useState(false);
+  const [docuUploadSuccess, setDocuUploadSuccess] = useState(false);
+  const [docuUploadFail, setDocuUploadFail] = useState(false);
 
-  const handleUploadDocument = async () => {
+  const handleImgUpload = async () => {
     try {
       const res = await DocumentPicker.pickSingle({
-        type: DocumentPicker.types.allFiles,
+        type: DocumentPicker.types.images,
       });
-
-      if (userData?.firstName && userData?.lastName) {
-
-
-        const documentTitle = `Document`;
-
-        const docRef = firestore().collection('medDocuRequest').doc(documentTitle);
-
-        await docRef.set({
-          documentUrl: res.uri, // You may want to store the URL or other relevant data
-          // Add other fields as needed for the document
-        });
-
-        console.log('Document saved successfully');
-        setShowModal1(false);
+  
+      const currentUser = auth().currentUser;
+  
+      if (currentUser) {
+        const userDocRef = firestore().collection('users').doc(currentUser.uid);
+        const userDoc = await userDocRef.get();
+  
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const fileName = `${userData.firstName}_${userData.lastName}_IMAGE_RESULT`;
+  
+          const storageRef = storage().ref(`patientUpload/patientUploadImg/${fileName}`);
+          const uploadTask = storageRef.putFile(res.uri);
+  
+          uploadTask.on('state_changed',
+            (snapshot) => {},
+            async (error) => {
+              console.error('Error uploading image:', error);
+            },
+            async () => {
+              try {
+                const downloadURL = await storageRef.getDownloadURL();
+  
+                await userDocRef.update({
+                  uploadedImgAt: firestore.FieldValue.serverTimestamp(),
+                  uploadedImgURL: downloadURL,
+                });
+                console.log('Image uploaded successfully');
+                setShowModal1(false);
+                setImgUploadSuccess(true); 
+                setTimeout(() => {
+                  setImgUploadSuccess(false);
+                }, 5000); 
+              } catch (error) {
+                console.error('Error getting download URL:', error);
+                setShowModal1(false);
+                setImgUploadFail(true); 
+                setTimeout(() => {
+                  setImgUploadFail(false);
+                }, 5000); 
+              }
+            }
+          );
+        } else {
+          console.error('User data not found');
+        }
       } else {
-        console.error('User data incomplete');
+        console.error('User data not found');
       }
     } catch (error) {
       console.error('Error uploading document:', error);
     }
   };
+  
+
+  const handleDocuUpload = async () => {
+    try {
+      const res = await DocumentPicker.pickSingle({
+        type: [
+          Platform.OS === 'android'
+            ? 'com.android.providers.media.MediaDocumentsProvider/*'
+            : DocumentPicker.types.allFiles,
+        ],
+        openAction: Platform.OS === 'android' ? 'openDocument' : undefined,
+      });
+  
+      const currentUser = auth().currentUser;
+  
+      if (currentUser) {
+        const userDocRef = firestore().collection('users').doc(currentUser.uid);
+        const userDoc = await userDocRef.get();
+  
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const fileName = `${userData.firstName}_${userData.lastName}_DOCU_RESULT`;
+  
+          const storageRef = storage().ref(`patientUpload/patientUploadDocu/${fileName}`);
+          const uploadTask = storageRef.putFile(res.uri);
+  
+          uploadTask.on(
+            'state_changed',
+            null,
+            (error) => {
+              console.error('Error uploading document:', error);
+            },
+            async () => {
+              try {
+                const downloadURL = await storageRef.getDownloadURL();
+  
+                await userDocRef.update({
+                  uploadedDocuAt: firestore.FieldValue.serverTimestamp(),
+                  uploadedDocuURL: downloadURL,
+                });
+  
+                console.log('Document uploaded successfully');
+                setShowModal1(false);
+                setDocuUploadSuccess(true);
+                setTimeout(() => {
+                  setDocuUploadSuccess(false);
+                }, 5000); 
+              } catch (error) {
+                console.error('Error getting download URL:', error);
+                setShowModal1(false);
+                setDocuUploadFail(true); 
+                setTimeout(() => {
+                  setDocuUploadFail(false);
+                }, 5000); 
+              }
+            }
+          );
+        } else {
+          console.error('User data not found');
+        }
+      } else {
+        console.error('User data not found');
+      }
+    } catch {
+    }
+  };
+  
 
   return (
     <View style={{ backgroundColor: 'white', padding: 12, borderRadius: 12, elevation: 4 }}>
@@ -60,8 +163,11 @@ const UploadDocu = ({ navigation, trimmedUid }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Submit Medical Document</Text>
-            <TouchableOpacity style={styles.requestButton} onPress={handleUploadDocument}>
-              <Text style={styles.requestButtonText}>Submit</Text>
+            <TouchableOpacity style={styles.requestButton} onPress={handleImgUpload}>
+              <Text style={styles.requestButtonText}>Upload Image of Result</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.requestButton} onPress={handleDocuUpload}>
+              <Text style={styles.requestButtonText}>Upload Document of Result</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={() => setShowModal1(false)}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -69,6 +175,18 @@ const UploadDocu = ({ navigation, trimmedUid }) => {
           </View>
         </View>
       </Modal>
+      {imgUploadSuccess && (
+          <Text style={styles.uploadSuccessText}>Image Successfully Uploaded</Text>
+      )}
+      {imgUploadFail && (
+          <Text style={styles.uploadFailText}>Image Upload Failed. Please try again.</Text>
+      )}
+      {docuUploadSuccess && (
+          <Text style={styles.uploadSuccessText}>Document Successfully Uploaded</Text>
+      )}
+      {docuUploadFail && (
+          <Text style={styles.uploadFailText}>Document Upload Failed. Please try again.</Text>
+      )}
     </View>
   );
 };
@@ -83,6 +201,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
     marginTop: 40,
+  },
+  uploadSuccessText: {
+    color: 'green',
+    textAlign: 'center',
+    marginTop: 10,
+    fontWeight: 'bold',
+  },
+  uploadFailText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 10,
+    fontWeight: 'bold',
   },
   serviceBtn: {
     display: 'flex',

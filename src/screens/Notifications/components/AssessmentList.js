@@ -64,6 +64,7 @@ const AssessmentList = () => {
           .collection('assessments')
           .where('patient', '==', trimmedUid)
           .where('status', '==', 'reviewed')
+          .limit(5)
           .onSnapshot(snapshot => {
             const assessments = [];
             snapshot.forEach(doc => {

@@ -82,8 +82,20 @@ const DoctorScreen = ({ navigation }) => {
 
 
   const updateFCMToken = async () => {
+    try {
 
-    try{
+      const currentFCMToken = await AsyncStorage.getItem('fcmtoken');
+      const userRef = firestore().collection('users').doc(trimmedUid);
+      const userSnapshot = await userRef.get();
+  
+      if (userSnapshot.exists) {
+        const storedFCMToken = userSnapshot.data().notification_token;
+  
+        if (storedFCMToken && storedFCMToken === currentFCMToken) {
+          console.log('FCM token is already stored:', currentFCMToken);
+          return;
+        }
+      }
 
       Alert.alert(
         'Push Notifications',
@@ -98,26 +110,18 @@ const DoctorScreen = ({ navigation }) => {
             text: 'Yes',
             onPress: async () => {
               console.log('User accepted notifications');
-              const userRef = firestore().collection('users')
-              .doc(trimmedUid);
-  
-              userRef.update({
-                notification_token: fcmtoken
-              });
+              await userRef.update({ notification_token: currentFCMToken });
+              await AsyncStorage.setItem('fcmtoken', currentFCMToken);
             },
           },
         ],
         { cancelable: false },
       );
-
-      console.log('Updated notification token: ', fcmtoken)
-
-    } catch(e){
-      console.error(e);
+  
+    } catch (error) {
+      console.error('Error updating FCM token:', error);
     }
-    
-    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
-  }
+  };
 
   React.useEffect(()=>{
     updateFCMToken();

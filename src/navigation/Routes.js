@@ -29,6 +29,7 @@ import AssessmentHistory from '../screens/Homescreen/roles/components/Assessment
 import TokenTest from '../screens/ChatFunction/call/TokenTest.js';
 import MedDoc from '../screens/Homescreen/roles/components/MedDoc.js';
 import UploadDocu from '../screens/Homescreen/roles/components/UploadDocu.js';
+import ViewUploaded from '../screens/Homescreen/roles/components/ViewUploaded.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -247,7 +248,6 @@ return (
     component={AssessmentPage}
     options={{headerShown: false}}
     />
-
     <Stack.Screen 
     name="MedDoc"
     component={MedDoc}
@@ -256,6 +256,12 @@ return (
     <Stack.Screen 
     name="UploadDocu"
     component={UploadDocu}
+    options={{headerShown: false}}
+    />
+
+    <Stack.Screen 
+    name="ViewUploaded"
+    component={ViewUploaded}
     options={{headerShown: false}}
     />
   </Stack.Navigator>
@@ -306,6 +312,7 @@ const Routes = (props) => {
             <Stack.Screen name="AssessmentHistory" component={AssessmentHistory}/>
             <Stack.Screen name="MedDoc" component={MedDoc}/>
             <Stack.Screen name="UploadDocu" component={UploadDocu}/>
+            <Stack.Screen name="ViewUploaded" component={ViewUploaded}/>
         </Stack.Navigator>
     )
 }

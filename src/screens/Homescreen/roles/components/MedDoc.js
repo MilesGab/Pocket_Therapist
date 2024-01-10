@@ -5,7 +5,8 @@ import { Divider } from 'react-native-paper';
 import firestore from '@react-native-firebase/firestore';
 import { useUserContext } from '../../../../../contexts/UserContext';
 
-const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
+
+const MedDoc = () => {
   const { userData } = useUserContext();
   const [showModal1, setShowModal1] = useState(false);
   const [showModal2, setShowModal2] = useState(false);
@@ -18,6 +19,13 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
   const [reqMPEmail, setMPReqemail] = useState('');
   const [reqMPNote, setMPReqnote] = useState('');
 
+  const [uploadSuccessMC, setUploadSuccessMC] = useState(false);
+  const [uploadFailMC, setUploadFailMC] = useState(false);
+  const [uploadSuccessLR, setUploadSuccessLR] = useState(false);
+  const [uploadFailLR, setUploadFailLR] = useState(false);
+  const [uploadSuccessMP, setUploadSuccessMP] = useState(false);
+  const [uploadFailMP, setUploadFailMP] = useState(false);
+
   const MChandleRequest = async () => {
     try {
 
@@ -25,27 +33,34 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
         const firstName = userData.firstName;
         const lastName = userData.lastName;
         const suffix = '_REQUEST_MC';
-        
-        const currentDate = new Date();
-        const formattedDate = currentDate.toLocaleDateString('en-US');
       
         const documentTitle = `${firstName}_${lastName}${suffix}`;
       
         const docRef = firestore().collection('medDocuRequest').doc(documentTitle);
       
         await docRef.set({
-          createdAt: formattedDate,
+          createdAt: firestore.FieldValue.serverTimestamp(),
           email: reqMCEmail,
           note: reqMCNote,
-
         });
   
         console.log('Document saved successfully');
         setMCReqemail('');
         setMCReqnote('');
         setShowModal1(false);
+        setUploadSuccessMC(true);
+        setTimeout(() => {
+          setUploadSuccessMC(false);
+        }, 5000);
       } else {
         console.error('User data incomplete');
+        setMCReqemail('');
+        setMCReqnote('');
+        setShowModal1(false);
+        setUploadFailMC(true); 
+        setTimeout(() => {
+          setUploadFailMC(false);
+        }, 5000); 
       }
     } catch (error) {
       console.error('Error saving document:', error);
@@ -59,16 +74,13 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
         const firstName = userData.firstName;
         const lastName = userData.lastName;
         const suffix = '_REQUEST_LR';
-        
-        const currentDate = new Date();
-        const formattedDate = currentDate.toLocaleDateString('en-US');
       
         const documentTitle = `${firstName}_${lastName}${suffix}`;
       
         const docRef = firestore().collection('medDocuRequest').doc(documentTitle);
       
         await docRef.set({
-          createdAt: formattedDate,
+          createdAt: firestore.FieldValue.serverTimestamp(),
           email: reqLREmail,
           note: reqLRNote,
 
@@ -78,8 +90,19 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
         setLRReqemail('');
         setLRReqnote('');
         setShowModal2(false);
+        setUploadSuccessLR(true);
+        setTimeout(() => {
+          setUploadSuccessLR(false);
+        }, 5000);
       } else {
         console.error('User data incomplete');
+        setLRReqemail('');
+        setLRReqnote('');
+        setShowModal2(false);
+        setUploadFailLR(true);
+        setTimeout(() => {
+          setUploadFailLR(false);
+        }, 5000);
       }
     } catch (error) {
       console.error('Error saving document:', error);
@@ -93,16 +116,13 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
         const firstName = userData.firstName;
         const lastName = userData.lastName;
         const suffix = '_REQUEST_MP';
-        
-        const currentDate = new Date();
-        const formattedDate = currentDate.toLocaleDateString('en-US');
       
         const documentTitle = `${firstName}_${lastName}${suffix}`;
       
         const docRef = firestore().collection('medDocuRequest').doc(documentTitle);
       
         await docRef.set({
-          createdAt: formattedDate,
+          createdAt: firestore.FieldValue.serverTimestamp(),
           email: reqMPEmail,
           note: reqMPNote,
 
@@ -112,8 +132,20 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
         setMPReqemail('');
         setMPReqnote('');
         setShowModal3(false);
+        setUploadSuccessMP(true);
+        setTimeout(() => {
+          setUploadSuccessMP(false);
+        }, 5000);
       } else {
         console.error('User data incomplete');
+        setMPReqemail('');
+        setMPReqnote('');
+        setShowModal3(false);
+        setUploadFailMP(true);
+        setTimeout(() => {
+          setUploadFailMP(false);
+        }, 5000);
+        
       }
     } catch (error) {
       console.error('Error saving document:', error);
@@ -131,7 +163,18 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
           </Text>
           <Icon name="chevron-forward-outline" size={20} />
         </TouchableOpacity>
-        <Divider style={{ marginVertical: 12 }} />
+      {uploadSuccessMC && (
+        <View>
+        <Text style={styles.uploadSuccessText}>Medical Certificate Requested</Text>
+        </View>
+        )}
+      {uploadFailMC && (
+        <View>
+        <Text style={styles.uploadFailText}>Request Failed. Please try again</Text>
+        </View>
+      )}
+      <Divider style={{ marginVertical: 12 }} />
+
         <TouchableOpacity onPress={() => setShowModal2(true)} style={styles.serviceBtn}>
           <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
           <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
@@ -139,6 +182,16 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
           </Text>
           <Icon name="chevron-forward-outline" size={20} />
         </TouchableOpacity>
+      {uploadSuccessLR && (
+        <View>
+        <Text style={styles.uploadSuccessText}>Laboratory Request Requested</Text>
+        </View>
+      )}
+      {uploadFailLR && (
+        <View>
+        <Text style={styles.uploadFailText}>Request Failed. Please try again</Text>
+        </View>
+      )}
         <Divider style={{ marginVertical: 12 }} />
         <TouchableOpacity onPress={() => setShowModal3(true)} style={styles.serviceBtn}>
           <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
@@ -147,6 +200,16 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
           </Text>
           <Icon name="chevron-forward-outline" size={20} />
         </TouchableOpacity>
+      {uploadSuccessMP && (
+        <View>
+        <Text style={styles.uploadSuccessText}>Medical Prescription Requested</Text>
+        </View>
+      )}
+      {uploadFailMP && (
+        <View>
+        <Text style={styles.uploadFailText}>Request Failed. Please try again</Text>
+        </View>
+      )}
         <Divider style={{ marginVertical: 12 }} />
       </View>
 
@@ -162,7 +225,6 @@ const MedDoc = ({ navigation, handleExercisesPage, trimmedUid }) => {
               onChangeText={(text) => setMCReqemail(text)}
               value={reqMCEmail}
             />
-      
             <TextInput
               style={styles.input}
               placeholder="Note to doctor"
@@ -246,6 +308,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
     marginTop: 40,
+  },
+  uploadSuccessText: {
+    color: 'green',
+    textAlign: 'center',
+    marginTop: 10,
+    fontWeight: 'bold',
+  },
+  uploadFailText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 10,
+    fontWeight: 'bold',
   },
   serviceBtn: {
     display: 'flex',

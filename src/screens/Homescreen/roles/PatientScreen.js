@@ -83,8 +83,20 @@ const PatientScreen = ({ navigation }) => {
   const trimmedUid = userData?.uid.trim();
 
   const updateFCMToken = async () => {
+    try {
 
-    try{
+      const currentFCMToken = await AsyncStorage.getItem('fcmtoken');
+      const userRef = firestore().collection('users').doc(trimmedUid);
+      const userSnapshot = await userRef.get();
+  
+      if (userSnapshot.exists) {
+        const storedFCMToken = userSnapshot.data().notification_token;
+  
+        if (storedFCMToken && storedFCMToken === currentFCMToken) {
+          console.log('FCM token is already stored:', currentFCMToken);
+          return;
+        }
+      }
 
       Alert.alert(
         'Push Notifications',
@@ -99,26 +111,18 @@ const PatientScreen = ({ navigation }) => {
             text: 'Yes',
             onPress: async () => {
               console.log('User accepted notifications');
-              const userRef = firestore().collection('users')
-              .doc(trimmedUid);
-  
-              userRef.update({
-                notification_token: fcmtoken
-              });
+              await userRef.update({ notification_token: currentFCMToken });
+              await AsyncStorage.setItem('fcmtoken', currentFCMToken);
             },
           },
         ],
         { cancelable: false },
       );
-
-      console.log('Updated notification token: ', fcmtoken)
-
-    } catch(e){
-      console.error(e);
+  
+    } catch (error) {
+      console.error('Error updating FCM token:', error);
     }
-    
-    let fcmtoken = await AsyncStorage.getItem('fcmtoken');
-  }
+  };
 
   React.useEffect(()=>{
     updateFCMToken();
@@ -224,6 +228,7 @@ const PatientScreen = ({ navigation }) => {
   }
 
   return (
+    <ScrollView>
       <View style={styles.container}>
         <View style={styles.header}>
           <View>
@@ -249,7 +254,6 @@ const PatientScreen = ({ navigation }) => {
         
         <Text style={styles.servicesText}>Summary</Text>
         <LatestResults/>
-
         <View style={styles.services}>
           <Text style={styles.servicesText}>Services</Text>
               <View style={{backgroundColor:'white', padding: 12, borderRadius: 12, elevation: 4}}>
@@ -311,6 +315,7 @@ const PatientScreen = ({ navigation }) => {
             
         </View>
       </View>
+    </ScrollView>
   );
 };
 
@@ -370,7 +375,7 @@ const LatestResults = () =>{
 
   return(
     <View style={styles.stats}>
-      <Box w={'100%'} h={'auto'} style={{ backgroundColor: "white", borderRadius: 16, elevation: 4}}>
+      <Box w={'auto'} h={'auto'} style={{ backgroundColor: "white", borderRadius: 16, elevation: 4}}>
           <Box style={{padding: 16, display: 'flex', flexDirection: 'row'}}>
             <Box style={{flex: 1}}>
               <Box style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom: 20}}>
@@ -434,14 +439,16 @@ const styles = StyleSheet.create({
   container: {
     height:'100%',
     justifyContent: 'space-between',
-    padding: 20,
-    paddingTop: 32
+    padding: 16,
+    paddingTop: 32,
+    width: 'auto'
   },
 
   header: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingBottom: 16
   },
 
   headerText: {

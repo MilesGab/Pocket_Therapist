@@ -331,8 +331,9 @@ const Notifications = () => {
   },[]);
 
   return (
+    <ScrollView>
     <Provider>
-      <ScrollView style={styles.container}>
+      <View style={styles.container}>
         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
           <Text style={{ fontSize: 32, color: 'black', fontWeight: 'bold', flex: 1 }}>Notifications</Text>
         </View>
@@ -387,8 +388,9 @@ const Notifications = () => {
             </>
           )}
         </View>
-      </ScrollView>
+      </View>
     </Provider>
+    </ScrollView>
   );
 };
 

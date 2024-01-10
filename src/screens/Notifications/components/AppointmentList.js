@@ -17,18 +17,22 @@ const AppointmentCard = ({ doctor, date, status, message }) => {
     minute: 'numeric',
     hour12: true,
   });
-  
+
+  let cardBackgroundColor = '#FFFFFF'; // Default background color
 
   let messages = '';
 
   switch (status) {
     case 0:
+      cardBackgroundColor = '#FFE5CC'; // Pale orange color
       messages = `Your appointment on ${formattedDate} at ${formattedTime} is pending approval.`;
       break;
     case 1:
+      cardBackgroundColor = '#C8E6C9'; // Light green color
       messages = `Your appointment on ${formattedDate} at ${formattedTime} has been approved by Dr. ${doctor?.firstName || '---'} ${doctor?.lastName || '---'}.`;
       break;
     case 2:
+      cardBackgroundColor = '#FFEBEE'; // Light red color
       messages = `Your appointment on ${formattedDate} at ${formattedTime} has been rejected by Dr. ${doctor?.firstName || '---'} ${doctor?.lastName || '---'}. \n\nReason: ${message || 'No reason provided'}`;
       break;
     default:
@@ -37,7 +41,7 @@ const AppointmentCard = ({ doctor, date, status, message }) => {
   }
 
   return (
-    <View style={styles.notifCard}>
+    <View style={[styles.notifCard, { backgroundColor: cardBackgroundColor }]}>
       <View style={styles.content}>
         <Avatar size={60} image={{ uri: doctor.profilePictureURL }} color="white" style={{ marginRight: 8 }} />
         <Text style={styles.contentText}>{messages}</Text>
@@ -88,6 +92,7 @@ const AppointmentList = () => {
           .where('patient_assigned', '==', trimmedUid)
           .where('date', '>=', oneWeekAgo)
           .orderBy('date', 'desc')
+          .limit(5)
           .get();
     
         const appointmentsData = [];
