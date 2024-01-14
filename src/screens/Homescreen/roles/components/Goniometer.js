@@ -18,7 +18,7 @@ const Goniometer = (props) =>{
       <View style={styles.circle}>
         <View>
           <Text style={{textAlign: 'center', color:'black'}}>
-            Wrist: {toDegrees(Math.abs(pitch).toFixed(1))}°
+            Wrist: {toDegrees(Math.abs(pitch))}°
           </Text>
         </View>
       </View>
