@@ -1,16 +1,19 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Button, Image } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import Video from 'react-native-video';
 import { ActivityIndicator, Avatar } from "@react-native-material/core";
+import { useNavigation } from '@react-navigation/native';
 
 const ExerciseList = () => {
   const [videos, setVideos] = React.useState([]);
   const [isLoading, setLoading] = React.useState(true);
   const [paused, setPaused] = React.useState(true);
   const [selectedVideos, setSelectedVideos] = React.useState({});
+
+  const navigation = useNavigation();
 
   React.useEffect(() => {
     const fetchVideoDetails = async () => {
@@ -31,7 +34,6 @@ const ExerciseList = () => {
 
     fetchVideoDetails();
 
-    // Cleanup function to stop video playback when component unmounts
     return () => {
       setPaused(true);
     };
@@ -44,18 +46,33 @@ const ExerciseList = () => {
     }));
   };
 
+  const handleVideo = (item) => {
+    navigation.navigate('ExercisePlayer', {videodata: item});
+  }
+
   const renderVideo = ({ item }) => {
     return (
-      <TouchableOpacity style={styles.videoContainer}>
-        <Text style={styles.videoTitle}>{item.video_name}</Text>
-        <Text style={{color:'black'}}>{item.video_description}</Text>
-        <Video
+      <TouchableOpacity onPress={()=>handleVideo(item)} style={styles.videoContainer}>
+      <View style={{display:'flex', flexDirection:'row',gap: 12}}>
+              <Image source={item?.thumbnail ? { uri: item?.thumbnail } : require('../../../../../assets/images/default.png')}
+              color='#CEDDF7'
+              style={{
+              width: 100,
+              height: 100,
+              borderRadius: 16
+              }}
+              />
+              <View>
+                <Text style={styles.videoTitle}>{item.video_name}</Text>
+              </View>
+            </View>
+        {/* <Video
           source={{ uri: item.video_path }}
           style={styles.videoPlayer}
           controls={true}
           resizeMode="contain"
           paused={paused}
-        />
+        /> */}
       </TouchableOpacity>
     );
   };
@@ -69,6 +86,7 @@ const ExerciseList = () => {
         <ActivityIndicator size="large" color='#CEDDF7' style={styles.loading} />
       ) : (
         <FlatList
+          scrollEnabled={true}
           style={styles.vidlist}
           data={videos}
           keyExtractor={(item) => item.video_id.toString()}
@@ -81,7 +99,7 @@ const ExerciseList = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+
   },
 
   vidlist: {

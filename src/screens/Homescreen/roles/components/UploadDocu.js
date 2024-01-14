@@ -12,13 +12,45 @@ import DocumentPicker from 'react-native-document-picker';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import storage from '@react-native-firebase/storage';
+import { useUserContext } from '../../../../../contexts/UserContext';
 
-const UploadDocu = ({ navigation, trimmedUid }) => {
+const UploadDocu = () => {
+
+  const { userData } = useUserContext();
+
   const [showModal1, setShowModal1] = useState(false);
   const [imgUploadSuccess, setImgUploadSuccess] = useState(false);
   const [imgUploadFail, setImgUploadFail] = useState(false);
   const [docuUploadSuccess, setDocuUploadSuccess] = useState(false);
   const [docuUploadFail, setDocuUploadFail] = useState(false);
+  const [list, setList] = useState(false);
+  const trimmedUid = userData?.uid.trim();
+
+  const fetchTickets = async () =>{
+    try{
+
+      const ticketRef = firestore().collection("tickets").where("patient", '==', trimmedUid);
+      const querySnapshot = await ticketRef.get();
+  
+      const documents = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
+      if (documents.length > 0) {
+        setList(documents);
+      } else {
+        console.log('No matching documents found');
+      }
+
+    } catch (e){
+      console.error('Error fetching tickets: ', e);
+    }
+  };
+
+  React.useEffect(()=>{
+    fetchTickets();
+  },[]);
 
   const handleImgUpload = async () => {
     try {
@@ -150,13 +182,16 @@ const UploadDocu = ({ navigation, trimmedUid }) => {
     <View style={{padding: 12}}>
       <Text style={styles.servicesText}>Upload Medical Document</Text>
       <View style={{ backgroundColor: 'white', padding: 12, borderRadius: 12, elevation: 4 }}>
-        <TouchableOpacity onPress={() => setShowModal1(true)} style={styles.serviceBtn}>
-          <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
-            Laboratory Result
-          </Text>
-          <Icon name="chevron-forward-outline" size={20} />
-        </TouchableOpacity>
+        {list.map((ticket)=>(
+          <TouchableOpacity key={ticket.id} onPress={() => setShowModal1(true)} style={styles.serviceBtn}>
+            <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
+              {ticket.name.length > 2 ? ticket.name : ticket.name.join(', ').replace(/, (?=[^,]*$)/, ' and ')}
+            </Text>
+            <Icon name="chevron-forward-outline" size={20} />
+          </TouchableOpacity>
+        ))}
+
       </View>
 
       <Modal visible={showModal1} animationType="slide" transparent>

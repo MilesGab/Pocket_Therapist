@@ -27,10 +27,6 @@ export function UserProvider({ children }) {
     loadUserData();
   }, []);
 
-  React.useEffect(()=>{
-    console.log('REFRESH!');
-  },[])
-
   const updateUser = async (newUserData) => {
     const updatedUserData = { ...userData, ...newUserData };
     setUserData(updatedUserData);

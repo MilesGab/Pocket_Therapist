@@ -87,7 +87,7 @@ const Notification = ({ item, fetchApptRequest }) => {
 
   return(
     <View style={{display:'flex',
-      backgroundColor:'#faf0be', 
+      backgroundColor:'#fff', 
       width:'100%', 
       justifyContent:'center', 
       alignContent:'center',
@@ -110,7 +110,7 @@ const Notification = ({ item, fetchApptRequest }) => {
       <Divider/>
       <View style={{marginTop: 6, paddingVertical:12, paddingHorizontal: 20, flexDirection:'row', width:'100%'}}>
         <View style={{flexDirection:'column', width:'100%'}}>
-          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>Patient: {doctor_name}</Text>
+          <Text style={{fontWeight:'bold', color:'black', fontSize:16}}>Patient: {patient_name}</Text>
           <View style={{display:'flex', flexDirection:'row', justifyContent:'flex-end', alignItems:'center', gap: 12, marginTop: 12}}>
             <TouchableOpacity onPress={handleReject} style={{backgroundColor:'rgba(227, 85, 75, 0.2)', paddingVertical:8, paddingHorizontal: 16, borderRadius:10, alignContent:'center', alignItems:'center', justifyContent:'center'}}>
               <Text style={{color:'red', fontWeight:'bold', fontSize: 16}}>Reject</Text>

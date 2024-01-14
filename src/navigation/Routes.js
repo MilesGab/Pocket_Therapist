@@ -28,8 +28,9 @@ import AssessmentHistory from '../screens/Homescreen/roles/components/Assessment
 import TokenTest from '../screens/ChatFunction/call/TokenTest.js';
 import MedDoc from '../screens/Homescreen/roles/components/MedDoc.js';
 import UploadDocu from '../screens/Homescreen/roles/components/UploadDocu.js';
-import ViewUploaded from '../screens/Homescreen/roles/components/ViewUploaded.js';
+import ViewUploaded from '../screens/Tickets/ViewUploaded.js';
 import ExercisePlayer from '../screens/ExercisePlayer/ExercisePlayer.js';
+import Tickets from '../screens/Tickets/Tickets.js';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -211,8 +212,14 @@ const HomeStack = () => {
             options={{ headerShown: false }}
           />
           <Stack.Screen 
+            name="Tickets"
+            component={Tickets}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen 
             name="ViewUploaded" 
             component={ViewUploaded}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
           name="Messages"
