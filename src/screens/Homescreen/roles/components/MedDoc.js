@@ -36,12 +36,14 @@ const MedDoc = () => {
       
         const documentTitle = `${firstName}_${lastName}${suffix}`;
       
-        const docRef = firestore().collection('medDocuRequest').doc(documentTitle);
+        const docRef = firestore().collection('medDocuRequest');
       
-        await docRef.set({
+        await docRef.add({
           createdAt: firestore.FieldValue.serverTimestamp(),
           email: reqMCEmail,
           note: reqMCNote,
+          type: 'medical_certificate',
+          patient: userData.uid
         });
   
         console.log('Document saved successfully');
@@ -77,13 +79,14 @@ const MedDoc = () => {
       
         const documentTitle = `${firstName}_${lastName}${suffix}`;
       
-        const docRef = firestore().collection('medDocuRequest').doc(documentTitle);
+        const docRef = firestore().collection('medDocuRequest');
       
-        await docRef.set({
+        await docRef.add({
           createdAt: firestore.FieldValue.serverTimestamp(),
           email: reqLREmail,
           note: reqLRNote,
-
+          type: 'laboratory_request',
+          patient: userData.uid
         });
   
         console.log('Document saved successfully');
@@ -117,15 +120,14 @@ const MedDoc = () => {
         const lastName = userData.lastName;
         const suffix = '_REQUEST_MP';
       
-        const documentTitle = `${firstName}_${lastName}${suffix}`;
+        const docRef = firestore().collection('medDocuRequest');
       
-        const docRef = firestore().collection('medDocuRequest').doc(documentTitle);
-      
-        await docRef.set({
+        await docRef.add({
           createdAt: firestore.FieldValue.serverTimestamp(),
           email: reqMPEmail,
           note: reqMPNote,
-
+          type: 'medical_prescription',
+          patient: userData.uid
         });
   
         console.log('Document saved successfully');

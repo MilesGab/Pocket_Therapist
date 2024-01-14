@@ -38,7 +38,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }) => {
               <Avatar label={item.firstName} size={55} 
                 image={
                   <Image
-                  source={item?.profilePictureURL ? { uri: item.profilePictureURL } : require('../../../../assets/images/default.png')}
+                  source={item?.doctorPhoto ? { uri: item.doctorPhoto } : require('../../../../assets/images/default.png')}
                   style={{
                     top: 0,
                     left: 0,
@@ -182,7 +182,6 @@ const PatientScreen = ({ navigation }) => {
   React.useEffect(() => {
     setLoading(true);
 
-    // checks if user has an approved appointment to show 'Request Medical Document' button
     const appointmentsRef = firestore()
       .collection('appointments')
       .where('patient_assigned', '==', trimmedUid)
@@ -277,9 +276,10 @@ const PatientScreen = ({ navigation }) => {
                     <Icon name="chevron-forward-outline" size={20}/>
                   </TouchableOpacity>
                   <Divider style={{marginVertical: 12}}/>
+
                   {hasAppointmentStatus2 && (
                   <TouchableOpacity onPress={() => handleMedDoc(trimmedUid)} style={styles.serviceBtn}>
-                    <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+                    <Icon name="document-text-outline" color={'#2F8D46'} size={36} style={{ right: 12 }} />
                     <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
                       Request Medical Document
                     </Text>
@@ -287,9 +287,10 @@ const PatientScreen = ({ navigation }) => {
                   </TouchableOpacity>
                   )}
                   <Divider style={{marginVertical: 12}}/>
+
                   {hasAppointmentStatus2 && (
                   <TouchableOpacity onPress={() => handleUploadDocu(trimmedUid)} style={styles.serviceBtn}>
-                    <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+                    <Icon name="cloud-upload-outline" color={'#6E69B5'} size={36} style={{ right: 12 }} />
                     <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
                       Upload Medical Documents
                     </Text>

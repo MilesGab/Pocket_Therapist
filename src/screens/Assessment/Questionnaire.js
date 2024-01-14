@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Image, PermissionsAndroid, TouchableHighlight} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Image, PermissionsAndroid, TouchableHighlight, TextInput} from "react-native";
 import { ProgressBar } from "react-native-paper";
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
