@@ -76,7 +76,7 @@ const JointAssessment = () => {
       <View style={styles.content}>
         {isReady ? (<WristAngleSensor setAngleData={setAngleData}/>) : ( 
           <>
-            <Image style={styles.instructionImage} source={Instructions}/>
+            {/* <Image style={styles.instructionImage} source={Instructions}/> */}
             <Text style={styles.instructions}>Please hold your phone in a 90° angle and press start whenever ready</Text>
             <Button onPress={()=>{setIsReady(true)}} title="Ready" backgroundColor='#65A89F' />
           </>

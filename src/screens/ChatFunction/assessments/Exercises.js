@@ -72,14 +72,13 @@ const Exercises = ({ route }) => {
         }
         <TouchableOpacity style={styles.videoContainer}>
           <Text style={styles.videoTitle}>{item.video_name}</Text>
-          <Text style={{color: 'gray'}}>{item.video_description}</Text>
-          <Video
+          {/* <Video
             source={{ uri: item.video_path }}
             style={styles.videoPlayer}
             controls={true}
             resizeMode="contain"
             paused={paused}
-          />
+          /> */}
         </TouchableOpacity>
       </View>
     );

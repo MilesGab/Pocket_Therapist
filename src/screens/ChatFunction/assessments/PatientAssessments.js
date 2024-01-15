@@ -108,6 +108,7 @@ const PatientAssessment = ({ route }) => {
             const unsubscribe = firestore()
               .collection("assessments")
               .where("patient", "==", trimmedUid)
+              .orderBy('date', 'desc')
               .onSnapshot((querySnapshot) => {
                 const assessments = [];
                 querySnapshot.forEach((doc) => {

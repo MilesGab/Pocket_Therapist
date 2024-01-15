@@ -1,12 +1,13 @@
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {PermissionsAndroid} from 'react-native';
 
 export async function requestUserPermission() {
-
+  PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
   const authStatus = await messaging().requestPermission();
   const enabled =
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (enabled){
         console.log('Authorization:', authStatus);
@@ -15,7 +16,7 @@ export async function requestUserPermission() {
 }
 
 async function GetFCMToken() {
-  
+  console.log('GET TOKEN')
   let fcmtoken = await AsyncStorage.getItem('fcmtoken');
   console.log(fcmtoken, 'old token');
 

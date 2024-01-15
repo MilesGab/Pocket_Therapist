@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Image, PermissionsAndroid, TouchableHighlight, TextInput} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Image, PermissionsAndroid, TouchableHighlight, TextInput, Alert} from "react-native";
 import { ProgressBar } from "react-native-paper";
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -22,6 +22,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   const [isPainAssessment, setIsPainAssessment] = useState(false);
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [dropDownValue, setDropDownValue] = useState('');
+  const [painDescription, setPainDescription] = useState('');
   const [imageLibrary, setImageLibrary] = useState(null)
   const [imageCamera, setImageCamera] = useState(null);
   const [downloadURL, setDownloadURL] = useState(null);
@@ -52,25 +53,41 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
 
   const [currentPainQuestion, setCurrentPainQuestion] = useState(0);
 
-  const handleNextQuestion = (answers) => {
+  const handleNextQuestion = (answer) => {
+    const updatedAnswers = [...painAnswers];
+    updatedAnswers[currentQuestion] = answer;
+    setPainAnswers(updatedAnswers);
+
+    if (answer === '') {
+      Alert.alert('Please provide an answer to proceed');
+      return;
+    }
+
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
-      
-      const updatedAnswers = [...painAnswers];
-      updatedAnswers[currentQuestion] = answers;
-      setPainAnswers(updatedAnswers);
+    }
+  };
+
+  const handleNextPainQuestion = () => {
+    if (currentPainQuestion === 0 && sliderValue === 0) {
+      Alert.alert('Please rate your pain to proceed');
+      return;
+    } else if (currentPainQuestion === 1 && dropDownValue === '') {
+      Alert.alert('Please select a pain type to proceed');
+      return;
+    } else if (currentPainQuestion === 2 && painDuration === '') {
+      Alert.alert('Please select the duration of your pain to proceed');
+      return;
+    }
+
+    if (currentPainQuestion < painAssessmentQuestions.length - 1) {
+      setCurrentPainQuestion(currentPainQuestion + 1);
     }
   };
 
   const handlePreviousQuestion = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
-    }
-  };
-
-  const handleNextPainQuestion = () => {
-    if (currentPainQuestion < painAssessmentQuestions.length - 1) {
-      setCurrentPainQuestion(currentPainQuestion + 1);
     }
   };
 
@@ -127,7 +144,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
         console.log('Image on hold for upload');
 
       } else {
-        alert('There is an error while saving, please try again');
+        Alert.alert('There is an error while saving, please try again');
       }
     }catch (error){
       console.log('Error uploading image')
@@ -145,7 +162,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
     : ((currentQuestion + 1) / questions.length) * 100;
 
   const handleSensorPage = () => {
-    updatePainData([sliderValue, dropDownValue, painDuration, downloadURL]);
+    updatePainData([sliderValue, dropDownValue, painDuration, downloadURL, painDescription]);
     updatePhysicalData(painAnswers);
     navigation.navigate('JointAssessment');
   }
@@ -207,7 +224,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
                   placeholder="Please write a short description about your pain"
                   placeholderTextColor="#696969"
                   onChangeText={(text) => {
-                    // Handle the user's input here
+                    setPainDescription(text)
                   }}
                   />
               </View>
@@ -363,15 +380,6 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
           </>
         )}
       </View>
-
-      <TouchableOpacity
-        onPress={() => setIsPainAssessment(!isPainAssessment)}
-        style={styles.toggleButton}
-      >
-        <Text style={styles.toggleButtonText}>
-          {isPainAssessment ? "Switch to Physical Inspection" : "Switch to Pain Assessment"}
-        </Text>
-      </TouchableOpacity>
     </View>
     </ScrollView>
   );

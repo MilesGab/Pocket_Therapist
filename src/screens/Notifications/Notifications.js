@@ -340,25 +340,6 @@ const Notifications = () => {
         <View id="services">
           {userData.role === 1 ? (
             <>
-              <Text style={[styles.notifHeader, { color: 'black' }]}>Appointment Requests</Text>
-              <View style={{ marginBottom: 12 }}>
-                {isLoading ? (
-                  <ActivityIndicator size="large" color="#CEDDF7" style={{ marginTop: 60 }} />
-                ) : (
-                  apptReqList.map((item, index) => (
-                    <Notification
-                      key={index}
-                      item={item}
-                      fetchApptRequest={fetchApptRequest}
-                    />
-                  ))
-                )}
-                {apptReqList.length === 0 && (
-                  <View>
-                    <Text>No appointments available</Text>
-                  </View>
-                )}
-              </View>
               <Text style={[styles.notifHeader, { color: 'black' }]}>Recent Assessments</Text>
               <View style={{ marginBottom: 12 }}>
                 {isLoading ? (

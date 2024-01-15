@@ -102,10 +102,6 @@ const VoiceChat = () => {
     }, []);
 
     useEffect(() => {
-        console.log('WOW: ',token);
-    },[isJoined]);
-
-    useEffect(() => {
         return () => {
             if (agoraEngineRef.current) {
                 agoraEngineRef.current.leaveChannel();

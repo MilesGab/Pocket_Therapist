@@ -4,12 +4,14 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useUserContext } from "../../contexts/UserContext";
 
 export default function Login({ navigation }) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isVisible, setVisible] = useState(false);
   const { userLogin, updateUser } = useUserContext();
 
   const onHandleLogin = () => {
@@ -71,6 +73,7 @@ export default function Login({ navigation }) {
             bottomOffset={50}
           />
           <Text style={styles.title}>Log In</Text>
+        <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Enter email"
@@ -82,26 +85,38 @@ export default function Login({ navigation }) {
           value={email}
           onChangeText={(text) => setEmail(text)}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter password"
-          placeholderTextColor="gray"
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry={true}
-          textContentType="password"
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
+        </View>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter password"
+            placeholderTextColor="gray"
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry={!isVisible}
+            textContentType="password"
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+          />
+          <TouchableOpacity
+            style={styles.toggleIcon}
+            onPress={() => setVisible(!isVisible)}>
+            <Icon
+              name={isVisible ? "eye-off" : "eye"}
+              size={24}
+              color="gray"
+            />
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.button} onPress={onHandleLogin}>
           <Text style={{fontWeight: 'bold', color: '#fff', fontSize: 18}}> Log In</Text>
         </TouchableOpacity>
-        <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
+        {/* <View style={{marginTop: 20, flexDirection: 'row', alignItems: 'center', alignSelf: 'center'}}>
           <Text style={{color: 'gray', fontWeight: '600', fontSize: 14}}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate("Register")}>
             <Text style={{color: '#65A89F', fontWeight: '600', fontSize: 14}}> Sign Up</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
         </SafeAreaView>
         <StatusBar barStyle="light-content" />
       </View>
@@ -126,14 +141,26 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: 'gray',
+    backgroundColor: "#F6F7FB",
+    marginBottom: 12
+  },
+
   input: {
     backgroundColor: "#F6F7FB",
     height: 58,
-    marginBottom: 20,
     fontSize: 16,
     borderRadius: 10,
     padding: 12,
-    color:'black'
+    color:'black',
+    flex:1
+  },
+
+  toggleIcon: {
+    padding: 10,
   },
 
   whiteSheet: {

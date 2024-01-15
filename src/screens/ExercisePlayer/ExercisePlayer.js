@@ -80,7 +80,6 @@ const ExercisePlayer = ({ route }) => {
             </View>
 
             <Text style={styles.videoTitle}>{videodata.video_name || '---'}</Text>
-            <Text style={styles.videoDescription}>{videodata.video_description || '---'}</Text>
         </View>
     );
 };

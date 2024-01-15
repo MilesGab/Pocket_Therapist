@@ -280,11 +280,8 @@ const DoctorScreen = ({ navigation }) => {
               color: 'black',
               }}>Dr. {userData?.firstName || '---'} {userData?.lastName || '---'}</Text>
           </View>
-          <TouchableOpacity onPress={handleSearch} style={{marginRight: 12}}>
-            <Icon name="person-add-outline" color={'black'} size={26} />
-          </TouchableOpacity>
           <TouchableOpacity onPress={handleSecretary}>
-            <Icon name="folder-open-outline" color={'black'} size={26} />
+            <Icon name="person-add-outline" color={'black'} size={26} />
           </TouchableOpacity>
         </View>
 

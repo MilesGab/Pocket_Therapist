@@ -3,9 +3,6 @@ import { View, Text, StyleSheet, Image, Dimensions, ScrollView, TouchableOpacity
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { Box } from "@react-native-material/core";
-import { Divider } from 'react-native-paper';
-
 
 const ViewUploaded = ({ route }) => {
   const { fileData } = route.params;

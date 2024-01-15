@@ -151,10 +151,10 @@ const DoctorMessages = ({navigation}) => {
                                         <Text style={styles.messagePreview}>{item.messageText} · </Text>
                                         <Text style={styles.timeReceived}>{item.messageTime}</Text>
                                       </View>
-                                      <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
+                                      {/* <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
                                         <Icon name="pulse-outline" size={18} color="gray"/>
                                         <Text style={[styles.messagePreview, {fontSize: 14}]}>New assessment available!</Text>
-                                      </View>
+                                      </View> */}
                                     </View>
                                   </View>
                               </View>

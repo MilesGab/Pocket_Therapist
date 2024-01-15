@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Button, Dialog, DialogContent, DialogHeader, Provider, TextInput } from '@react-native-material/core';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal } from 'react-native';
 
 import Slider from "@react-native-community/slider";
 import { ScrollView } from 'react-native-gesture-handler';
 import { useRoute } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
+import ImageViewer from 'react-native-image-zoom-viewer';
 
 
 const PhysicalQuestions = [
@@ -18,7 +19,6 @@ const PhysicalQuestions = [
 const PainQuestions = [
     'Describe the pain based on the choices provided',
     'How long have you been experiencing pain on your wrist?',
-    'Maximum range of motion: '
 ];
 
 const PhysicalDataResults = ({ question, answer }) => {
@@ -161,6 +161,15 @@ const AssessmentPage = ({ route }) => {
     const { patientData } = route.params;
     const [patientInfo, setPatientInfo] = React.useState([]);
     const [visible, setVisible] = React.useState(false);
+    const [isImageViewerVisible, setImageViewerVisible] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+    const imagesForViewer = patientData.painData[3] ? [{ url: patientData.painData[3] }] : [];
+  
+    const openImageViewer = (index) => {
+      setCurrentImageIndex(index);
+      setImageViewerVisible(true);
+    };  
 
     const trimmedUid = patientData?.patient.trim();
     const assessmentId = patientData?.uid;
@@ -228,6 +237,20 @@ const AssessmentPage = ({ route }) => {
                                 }
                             />
                             ))}
+                            <PhysicalDataResults
+                                question={'Pain Description'}
+                                answer={patientData.painData[4]}
+                            />
+                            <View style={{backgroundColor:'#477674', padding: 12, borderRadius: 12, marginBottom: 12}}>
+                                <Text style={{color:'white', fontSize: 18}}>Image of Affected Area</Text>
+                                <TouchableOpacity onPress={() => openImageViewer(0)} style={{ flexDirection: 'row', justifyContent:'center'}}>
+                                    <Image source={{uri: patientData.painData[3]}} style={{width: 150, height: 150}}/>
+                                </TouchableOpacity>
+                            </View>
+                            <PhysicalDataResults
+                                question={'Maximum Range of Motion'}
+                                answer={patientData.maxAngle}
+                            />
                         </View>
                         <TouchableOpacity onPress={()=>{setVisible(true)}} style={{backgroundColor: 'white', justifyContent:'center', alignContent:'center', alignItems:'center', padding: 12, borderRadius: 12}}>
                             <Text style={{color:'black'}}>Notes and diagnosis</Text>
@@ -235,6 +258,20 @@ const AssessmentPage = ({ route }) => {
                         <NoteDialog visible={visible} setVisible={setVisible} assessmentId={assessmentId}/>
                 </View>
             </View>
+            <Modal 
+                visible={isImageViewerVisible} 
+                transparent={true}
+                onRequestClose={() => {
+                setImageViewerVisible(false)
+                }}
+            >
+                <ImageViewer 
+                imageUrls={imagesForViewer}
+                index={currentImageIndex}
+                onSwipeDown={() => setImageViewerVisible(false)}
+                enableSwipeDown={true}
+                />
+            </Modal>
         </ScrollView>
         </Provider>
     )
