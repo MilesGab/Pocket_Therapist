@@ -77,6 +77,7 @@ const DoctorScreen = ({ navigation }) => {
   const [appointmentList, setAppointmentList] = React.useState([]);
   const [appointmentsCount, setAppointmentsCount] = React.useState(0); 
   const [patientCount, setPatientCount] = React.useState(0);
+  const [secretary, setSecretary] = React.useState([]);
 
   const [loading, setLoading] = React.useState(true);
 
@@ -208,12 +209,38 @@ const DoctorScreen = ({ navigation }) => {
   };
   
   React.useEffect(() => {
+    const fetchSecretary = async () => {
+        try {
+            const querySnapshot = await firestore().collection("users")
+                .where("role", "==", 2)
+                .where("doctor", "==", trimmedUid)
+                .get();
+
+            const fetchedSecretaries = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            setSecretary(fetchedSecretaries);
+        } catch (error) {
+            console.error('Failed fetching secretary: ', error);
+        }
+    }
+
+    fetchSecretary();
+}, [trimmedUid]); 
+
+  React.useEffect(() => {
     const unsubscribe = fetchAppointments();
     return () => unsubscribe();
   }, [userData]);
 
   const handleSearch = () =>{
     navigation.navigate('PatientSearch');
+  }
+
+  const handleSecretary = () =>{
+    navigation.navigate('DoctorChatScreen', {patientData: secretary[0].uid});
   }
 
   const renderItem = ({item}) => {
@@ -253,8 +280,11 @@ const DoctorScreen = ({ navigation }) => {
               color: 'black',
               }}>Dr. {userData?.firstName || '---'} {userData?.lastName || '---'}</Text>
           </View>
-          <TouchableOpacity onPress={handleSearch}>
+          <TouchableOpacity onPress={handleSearch} style={{marginRight: 12}}>
             <Icon name="person-add-outline" color={'black'} size={26} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSecretary}>
+            <Icon name="folder-open-outline" color={'black'} size={26} />
           </TouchableOpacity>
         </View>
 

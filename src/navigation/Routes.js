@@ -228,6 +228,18 @@ const HomeStack = () => {
             headerShown: false
           }}
         />
+        <Stack.Screen 
+          name= "DoctorChatScreen" 
+          component={DoctorChatScreen} 
+          options={({route}) => ({
+            headerTitle: `Messages`,
+              headerStyle: {
+                backgroundColor:'#DCEDF9',
+                height: 80
+              },
+            })
+          } 
+        />
         </>
       ) : (
         <>

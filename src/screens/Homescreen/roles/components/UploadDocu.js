@@ -13,6 +13,7 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import storage from '@react-native-firebase/storage';
 import { useUserContext } from '../../../../../contexts/UserContext';
+import { Divider } from '@react-native-material/core';
 
 const UploadDocu = () => {
 
@@ -23,8 +24,19 @@ const UploadDocu = () => {
   const [imgUploadFail, setImgUploadFail] = useState(false);
   const [docuUploadSuccess, setDocuUploadSuccess] = useState(false);
   const [docuUploadFail, setDocuUploadFail] = useState(false);
-  const [list, setList] = useState(false);
+  const [list, setList] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(null);
   const trimmedUid = userData?.uid.trim();
+
+  const handleModelOpen = (item) => {
+    setSelectedTicket(item);
+    setShowModal1(true);
+  }
+
+  const handleModalClose = () => {
+    setSelectedTicket(null);
+    setShowModal1(false);
+  }
 
   const fetchTickets = async () =>{
     try{
@@ -52,7 +64,7 @@ const UploadDocu = () => {
     fetchTickets();
   },[]);
 
-  const handleImgUpload = async () => {
+  const handleImgUpload = async (docId) => {
     try {
       const res = await DocumentPicker.pickSingle({
         type: DocumentPicker.types.images,
@@ -112,7 +124,7 @@ const UploadDocu = () => {
   };
   
 
-  const handleDocuUpload = async () => {
+  const handleDocuUpload = async (docId) => {
     try {
       const res = await DocumentPicker.pickSingle({
         type: [
@@ -128,7 +140,8 @@ const UploadDocu = () => {
       if (currentUser) {
         const userDocRef = firestore().collection('users').doc(currentUser.uid);
         const userDoc = await userDocRef.get();
-  
+        const uploadRef = firestore().collection('uploadedDocuments');
+
         if (userDoc.exists) {
           const userData = userDoc.data();
           const fileName = `${userData.firstName}_${userData.lastName}_DOCU_RESULT`;
@@ -146,7 +159,7 @@ const UploadDocu = () => {
               try {
                 const downloadURL = await storageRef.getDownloadURL();
   
-                await userDocRef.update({
+                await uploadRef.add({
                   uploadedDocuAt: firestore.FieldValue.serverTimestamp(),
                   uploadedDocuURL: downloadURL,
                 });
@@ -182,29 +195,39 @@ const UploadDocu = () => {
     <View style={{padding: 12}}>
       <Text style={styles.servicesText}>Upload Medical Document</Text>
       <View style={{ backgroundColor: 'white', padding: 12, borderRadius: 12, elevation: 4 }}>
-        {list.map((ticket)=>(
-          <TouchableOpacity key={ticket.id} onPress={() => setShowModal1(true)} style={styles.serviceBtn}>
-            <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
-              {ticket.name.length > 2 ? ticket.name : ticket.name.join(', ').replace(/, (?=[^,]*$)/, ' and ')}
-            </Text>
-            <Icon name="chevron-forward-outline" size={20} />
-          </TouchableOpacity>
-        ))}
+        {list.length > 0 ? (
+          <>
+            {list.map((ticket)=>(
+              <React.Fragment key={ticket.id}>
+                <TouchableOpacity onPress={() => handleModelOpen(ticket)} style={styles.serviceBtn}>
+                  <Icon name="document-text-outline" color={'#d19245'} size={36} style={{ right: 12 }} />
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
+                    {ticket.name.length > 2 ? ticket.name : ticket.name.join(', ').replace(/, (?=[^,]*$)/, ' and ')}
+                  </Text>
+                  <Icon name="chevron-forward-outline" size={20} />
+                </TouchableOpacity>
+                <Divider/>
+              </React.Fragment>
+            ))}
+          </>
+        ) : (
+          <Text>Loading...</Text>
+        )}
+
 
       </View>
 
       <Modal visible={showModal1} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Submit Medical Document</Text>
-            <TouchableOpacity style={styles.requestButton} onPress={handleImgUpload}>
-              <Text style={styles.requestButtonText}>Upload Image of Result</Text>
+            <Text style={styles.modalTitle}>{selectedTicket?.name.length > 2 ? selectedTicket?.name : selectedTicket?.name.join(', ').replace(/, (?=[^,]*$)/, ' and ')}</Text>
+            <TouchableOpacity style={styles.requestButton} onPress={()=>handleImgUpload()}>
+              <Text style={styles.requestButtonText}>Upload Image</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.requestButton} onPress={handleDocuUpload}>
-              <Text style={styles.requestButtonText}>Upload Document of Result</Text>
+            <TouchableOpacity style={styles.requestButton} onPress={()=>handleDocuUpload(selectedTicket?.id)}>
+              <Text style={styles.requestButtonText}>Upload Document</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setShowModal1(false)}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleModalClose}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -255,6 +278,8 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 12,
+    marginTop: 12,
+    marginBottom: 20
   },
   modalContainer: {
     flex: 1,
