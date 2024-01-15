@@ -1,176 +1,123 @@
-import React, {useRef, useState, useEffect} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
-
-import {PermissionsAndroid, Platform} from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import {
-ClientRoleType,
-createAgoraRtcEngine,
-IRtcEngine,
-RtcSurfaceView,
-ChannelProfileType,
+    ClientRoleType,
+    createAgoraRtcEngine,
+    IRtcEngine,
+    RtcSurfaceView,
+    ChannelProfileType,
 } from 'react-native-agora';
-
 import { useNavigation } from '@react-navigation/native';
-import { Avatar } from '@react-native-material/core';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-import Sound from 'react-native-sound';
-import Ringtone from '../../../../assets/audio/ptring.mp3';
-
 import firebase from '@react-native-firebase/app';
 import { useUserContext } from '../../../../contexts/UserContext';
 
 const appId = '8c9007f71b7c429d971501377a0772fe';
+const channelName = 'ptchannel';
 
-const VoiceChat = () =>{
+const VoiceChat = () => {
     const navigation = useNavigation();
     const { userData } = useUserContext();
-    const channelName = userData.uid.trim();
-    // const patientId = patientData;
-    const uid = 0;
-    const agoraEngineRef = useRef(IRtcEngine); // Agora engine instance
-    const [isJoined, setIsJoined] = useState(false); // Indicates if the local user has joined the channel
-    const [isDoctorJoined, setIsDoctorJoined] = useState(false);
-    const [remoteUid, setRemoteUid] = useState(0); // Uid of the remote user
-    const [message, setMessage] = useState(''); // Message to the user
+    const role = userData?.role === 0 ? 0 : 1;
+    const agoraEngineRef = useRef(IRtcEngine);
+    const [isJoined, setIsJoined] = useState(false);
+    const [remoteUid, setRemoteUid] = useState(0);
+    const [message, setMessage] = useState('');
     const [token, setToken] = useState('');
-    const [isVideoEnabled, setIsVideoEnabled] = useState(false);
-
+    const [isVideoEnabled, setIsVideoEnabled] = useState(true);
 
     const toggleVideo = () => {
         if (isJoined) {
-            try {
-                if (isVideoEnabled) {
-                    agoraEngineRef.current?.muteLocalVideoStream(true);
-                } else {
-                    agoraEngineRef.current?.muteLocalVideoStream(false);
-                }
-                setIsVideoEnabled(!isVideoEnabled);
-                showMessage(`Video ${isVideoEnabled ? 'disabled' : 'enabled'}`);
-            } catch (e) {
-                console.log(e);
-            }
+            agoraEngineRef.current?.muteLocalVideoStream(isVideoEnabled);
+            setIsVideoEnabled(!isVideoEnabled);
+            showMessage(`Video ${isVideoEnabled ? 'disabled' : 'enabled'}`);
         }
     };
 
-    const retrieveToken = async () =>{
+    const showMessage = (msg) => {
+        setMessage(msg);
+    };
 
-        const role = userData?.role;
-        // const channelName = userData?.role === 0 ? userData?.uid.trim() : patientData;
+    const setupVideoSDKEngine = async () => {
+        try {
+            if (Platform.OS === 'android') {
+                await PermissionsAndroid.requestMultiple([
+                    PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                ]);
+            }
+            agoraEngineRef.current = createAgoraRtcEngine();
+            agoraEngineRef.current.initialize({
+                appId: appId,
+                channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
+            });
+            agoraEngineRef.current.enableVideo();
+            agoraEngineRef.current.registerEventHandler({
+                onJoinChannelSuccess: () => {
+                    setIsJoined(true);
+                    showMessage('Successfully joined the channel ' + channelName);
+                },
+                onUserJoined: (_connection, Uid) => {
+                    setRemoteUid(Uid);
+                    showMessage('Remote user joined with uid ' + Uid);
+                },
+                onUserOffline: (_connection, Uid) => {
+                    setRemoteUid(0);
+                    showMessage('Remote user left the channel. uid: ' + Uid);
+                },
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    };
 
-        try{
-            firebase.app().functions('asia-southeast1').httpsCallable('tokenGeneration')({
+    const retrieveToken = async () => {
+        try {
+            const response = await firebase.app().functions('asia-southeast1').httpsCallable('tokenGeneration')({
                 role: role,
                 channelName: channelName,
-            })
-            .then(response => {
-                setToken(response.data.token);
-            })
-            .catch(error => {
-                const code = error.code;
-                const message = error.message;
-                const details = error.details;
-
-                console.log('Error Code: ', code, '\n', 'Message: ', message, '\n', 'Details: ', details);
             });
-        }catch(e){
-            console.error('Error fetching token:', e);
-        }finally{
-            console.log('CALL TOKEN: ', token);
+            setToken(response.data.token);
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        } finally {
+            join();
         }
     };
 
-    const sound = new Sound(Ringtone, Sound.MAIN_BUNDLE, (error) => {
-        if (error) {
-          console.log('Error loading sound: ', error);
-        }
-    });
-
-
-
-    const getPermission = async () => {
-        if (Platform.OS === 'android') {
-            await PermissionsAndroid.requestMultiple([
-                PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-            ]);
-        }
-    };
-
-    function showMessage(msg) {
-        setMessage(msg);
-    }
-
-     useEffect(() => {
-        // Initialize Agora engine when the app starts
-        setupVideoSDKEngine();
-     });
-     
-     const setupVideoSDKEngine = async () => {
-        try {
-        // use the helper function to get permissions
-        if (Platform.OS === 'android') { await getPermission()};
-        agoraEngineRef.current = createAgoraRtcEngine();
-        const agoraEngine = agoraEngineRef.current;
-        agoraEngine.registerEventHandler({
-            onJoinChannelSuccess: () => {
-                showMessage('Successfully joined the channel ' + channelName);
-                setIsJoined(true);
-            },
-            onUserJoined: (_connection, Uid) => {
-                showMessage('Remote user joined with uid ' + Uid);
-                setRemoteUid(Uid);
-            },
-            onUserOffline: (_connection, Uid) => {
-                showMessage('Remote user left the channel. uid: ' + Uid);
-                setRemoteUid(0);
-            },
-        });
-        agoraEngine.initialize({
-            appId: appId,
-            channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
-        });
-        agoraEngine.enableVideo();
-        } catch (e) {
-            console.log(e);
-        }
-     };
-
-     const join = async () => {
-        if (isJoined) {
-            return;
-        }
-        try {
-            agoraEngineRef.current?.setChannelProfile(
-                ChannelProfileType.ChannelProfileCommunication,
-            );
+    const join = async () => {
+        if (!isJoined && token) {
+            agoraEngineRef.current?.setChannelProfile(ChannelProfileType.ChannelProfileCommunication);
             agoraEngineRef.current?.startPreview();
-            agoraEngineRef.current?.joinChannel(token, channelName, uid, {
+            agoraEngineRef.current?.joinChannel(token, channelName, role, {
                 clientRoleType: ClientRoleType.ClientRoleBroadcaster,
             });
-        } catch (e) {
-            console.log(e);
         }
     };
 
-    useEffect(()=>{
-        if(!isJoined){
-            retrieveToken();
-            join();
-            console.log('channel joined');
-            console.log('Token: ', token, '\n', 'Channel Name: ', channelName, '\n', 'UID: ', uid);
-        }
-    },[]);
+    useEffect(() => {
+        setupVideoSDKEngine();
+        retrieveToken();
+    }, []);
 
-    useEffect(()=>{
-        console.log("Token Set: ", token);
-    },[token]);
+    useEffect(() => {
+        console.log('WOW: ',token);
+    },[isJoined]);
+
+    useEffect(() => {
+        return () => {
+            if (agoraEngineRef.current) {
+                agoraEngineRef.current.leaveChannel();
+            }
+        };
+    }, []);
 
     const leave = () => {
         try {
             agoraEngineRef.current?.leaveChannel();
-            setRemoteUid(0);
             setIsJoined(false);
+            setRemoteUid(0);
             showMessage('You left the channel');
             navigation.goBack();
         } catch (e) {
@@ -185,46 +132,43 @@ const VoiceChat = () =>{
                 contentContainerStyle={styles.scrollContainer}>
                 {isJoined ? (
                     <>
-                    </>
-                ) : (
-                    <Text>Connecting..</Text>
-                )}
-                {isJoined && remoteUid !== 0 ? (
-                    <>
-                        <RtcSurfaceView
-                            canvas={{uid: remoteUid}}
-                            style={styles.videoView}
-                        />
-                        {isVideoEnabled ? (
+                        {remoteUid !== 0 && (
                             <RtcSurfaceView
-                            canvas={{uid: 0}}
-                            style={{position: 'absolute', top: 0, left: 0, zIndex: 1, width: '40%', height: 200, left: 20,top:20}}
-                        />
-                        ) : (
-                            null
+                                canvas={{ uid: remoteUid }}
+                                style={styles.videoView}
+                            />
+                        )}
+                        {isVideoEnabled && (
+                            <RtcSurfaceView
+                                canvas={{ uid: 0 }}
+                                style={{position: 'absolute', top: 0, left: 0, zIndex: 1, width: '40%', height: 200, left: 20,top:20}}
+                            />
                         )}
                         <View style={styles.btnContainer}>
                             <TouchableOpacity onPress={toggleVideo} style={styles.button}>
-                                {isVideoEnabled ? ( 
-                                    <Icon name="videocam-outline" color="white" size={40}/>
-                                ) : ( 
-                                    <Icon name="videocam-off-outline" color="white" size={40}/>
-                                )}
+                                <Icon name={isVideoEnabled ? "videocam-outline" : "videocam-off-outline"} color="white" size={40} />
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={leave} style={[styles.button,{backgroundColor: 'red'}]}>
-                                <Icon name="call-outline" color="white" size={40}/>
+                            <TouchableOpacity onPress={leave} style={[styles.button, { backgroundColor: 'red' }]}>
+                                <Icon name="call-outline" color="white" size={40} />
                             </TouchableOpacity>
                         </View>
                     </>
                 ) : (
-                    <TouchableOpacity onPress={leave} style={[styles.button,{backgroundColor: 'red'}]}>
-                        <Icon name="call-outline" color="white" size={40}/>
-                    </TouchableOpacity>
+                    <View>
+                        <Text>{message}</Text>
+                        <TouchableOpacity onPress={leave} style={[styles.button, { backgroundColor: 'red' }]}>
+                            <Icon name="call-outline" color="white" size={40} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={join} style={[styles.button, { backgroundColor: 'green' }]}>
+                            <Icon name="call-outline" color="white" size={40} />
+                        </TouchableOpacity>
+                    </View>
                 )}
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
+
 
 const styles = StyleSheet.create({
     button: {

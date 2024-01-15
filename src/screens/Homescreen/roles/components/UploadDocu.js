@@ -79,9 +79,13 @@ const UploadDocu = () => {
         if (userDoc.exists) {
           const userData = userDoc.data();
           const fileName = `${userData.firstName}_${userData.lastName}_IMAGE_RESULT`;
-  
-          const storageRef = storage().ref(`patientUpload/patientUploadImg/${fileName}`);
+          const date = new Date();
+
+
+          const storageRef = storage().ref(`patientUpload/patientUploadImg/${fileName}_${date}`);
           const uploadTask = storageRef.putFile(res.uri);
+          const uploadRef = firestore().collection('uploadedDocuments');
+
   
           uploadTask.on('state_changed',
             (snapshot) => {},
@@ -92,10 +96,15 @@ const UploadDocu = () => {
               try {
                 const downloadURL = await storageRef.getDownloadURL();
   
-                await userDocRef.update({
-                  uploadedImgAt: firestore.FieldValue.serverTimestamp(),
-                  uploadedImgURL: downloadURL,
+                await uploadRef.add({
+                  createdAt: firestore.FieldValue.serverTimestamp(),
+                  file_name: fileName,
+                  file_path: downloadURL,
+                  patient: currentUser.uid,
+                  ticket: docId,
+                  type: 'img'
                 });
+
                 console.log('Image uploaded successfully');
                 setShowModal1(false);
                 setImgUploadSuccess(true); 
@@ -127,12 +136,7 @@ const UploadDocu = () => {
   const handleDocuUpload = async (docId) => {
     try {
       const res = await DocumentPicker.pickSingle({
-        type: [
-          Platform.OS === 'android'
-            ? 'com.android.providers.media.MediaDocumentsProvider/*'
-            : DocumentPicker.types.allFiles,
-        ],
-        openAction: Platform.OS === 'android' ? 'openDocument' : undefined,
+        type: DocumentPicker.types.allFiles,
       });
   
       const currentUser = auth().currentUser;
@@ -140,14 +144,16 @@ const UploadDocu = () => {
       if (currentUser) {
         const userDocRef = firestore().collection('users').doc(currentUser.uid);
         const userDoc = await userDocRef.get();
-        const uploadRef = firestore().collection('uploadedDocuments');
-
+  
         if (userDoc.exists) {
           const userData = userDoc.data();
           const fileName = `${userData.firstName}_${userData.lastName}_DOCU_RESULT`;
+          const date = new Date();
   
-          const storageRef = storage().ref(`patientUpload/patientUploadDocu/${fileName}`);
+          const storageRef = storage().ref(`patientUpload/patientUploadDocu/${fileName}_${date}`);
           const uploadTask = storageRef.putFile(res.uri);
+
+          const uploadRef = firestore().collection('uploadedDocuments');
   
           uploadTask.on(
             'state_changed',
@@ -160,8 +166,12 @@ const UploadDocu = () => {
                 const downloadURL = await storageRef.getDownloadURL();
   
                 await uploadRef.add({
-                  uploadedDocuAt: firestore.FieldValue.serverTimestamp(),
-                  uploadedDocuURL: downloadURL,
+                  createdAt: firestore.FieldValue.serverTimestamp(),
+                  file_name: fileName,
+                  file_path: downloadURL,
+                  patient: currentUser.uid,
+                  ticket: docId,
+                  type: 'doc'
                 });
   
                 console.log('Document uploaded successfully');
@@ -221,7 +231,7 @@ const UploadDocu = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{selectedTicket?.name.length > 2 ? selectedTicket?.name : selectedTicket?.name.join(', ').replace(/, (?=[^,]*$)/, ' and ')}</Text>
-            <TouchableOpacity style={styles.requestButton} onPress={()=>handleImgUpload()}>
+            <TouchableOpacity style={styles.requestButton} onPress={()=>handleImgUpload(selectedTicket?.id)}>
               <Text style={styles.requestButtonText}>Upload Image</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.requestButton} onPress={()=>handleDocuUpload(selectedTicket?.id)}>

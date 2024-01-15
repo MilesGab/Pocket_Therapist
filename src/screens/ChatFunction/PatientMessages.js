@@ -24,8 +24,7 @@ export default function PatientMessages() {
   const senderData = {
     _id: trimmedUid,
     name: userData.firstName,
-    avatar:
-    userData?.profilePictureURL,
+    avatar: userData?.profilePictureURL,
   };
 
   const fetchDoctor = async () => {
@@ -55,79 +54,87 @@ export default function PatientMessages() {
     try {  
       const chatRef = firestore().collection('messages');
       chatRef.where('sendTo', 'in', [trimmedUid, doctorId])
-             .where('user._id', 'in', [doctorId, trimmedUid])
-             .orderBy('createdAt', 'desc')
+             .where('user._id', 'in', [trimmedUid, doctorId])
+             .orderBy('createdAt', 'asc')
              .onSnapshot((snapshot) => {
-               snapshot.docChanges().forEach((change) => {
-                 if (change.type === 'added') {
-                   const messageData = change.doc.data();
-                   const newMessage = {
-                     _id: change.doc.id,
-                     user: messageData.user,
-                     text: messageData.text,
-                     createdAt: messageData?.createdAt?.toDate() || new Date(),
-                   };
-                   setMessages((prevMessages) => {
+              if (!snapshot) {
+                return;
+              }
+              snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                  const messageData = change.doc.data();
+                  // Check if the user object is defined
+                  if (!messageData.user || !messageData.user._id) {
+                    console.error('User data is missing in the message');
+                    return;
+                  }
+                  const newMessage = {
+                    _id: change.doc.id,
+                    user: messageData.user,
+                    text: messageData.text,
+                    createdAt: messageData.createdAt?.toDate() || new Date(),
+                  };
+                  setMessages((prevMessages) => {
                     if (prevMessages.some((message) => message._id === newMessage._id)) {
                       return prevMessages;
                     }
-                    return [...prevMessages, newMessage];
+                    return GiftedChat.append(prevMessages, [newMessage]);
                   });
-                 }
-               });
+                }
+              });
              });
+  
     } catch (error) {
       console.error('Error retrieving messages from Firestore:', error);
-      throw error;
     }
   };
+  
 
   useEffect(() => {
     retrieveMessagesFromFirestore();
   }, []);
 
-  const fetchApprovedAssessments = async () => {
+  const fetchApprovedAssessments = () => {
+    const now = new Date();
+    const thirtyMinutesLater = new Date(now.getTime() + 30 * 60000);
 
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate());
+    const unsubscribe = firestore()
+      .collection('appointments')
+      .where('patient_assigned', '==', trimmedUid)
+      .where('date', '>=', now)
+      .where('date', '<=', thirtyMinutesLater)
+      .where('status', '==', 1)
+      .orderBy('date', 'desc')
+      .onSnapshot(
+        (snapshot) => {
+          const assessments = [];
+          snapshot.forEach((doc) => {
+            assessments.push(doc.data());
+          });
 
-    try{
-      const assessmentQuerySnapshot = await firestore()
-        .collection('appointments')
-        .where('patient_assigned', '==', trimmedUid)
-        .where('date', '>=', oneWeekAgo)
-        .where('status', '==', 1)
-        .orderBy('date', 'desc')
-        .get()
+          if (assessments.length > 0) {
+            setAppointmentState(true);
+            setAppointmentList(assessments);
+          } else {
+            setAppointmentState(false);
+          }
 
-      const assessments = [];
-      assessmentQuerySnapshot.forEach((doc) => {
-        const assessmentData = doc.data();
-        assessments.push(assessmentData);
-      });
-      
-      if(assessments.length > 0){
-        setAppointmentState(true);
-        setAppointmentList(assessments);
-      } else{
-        setAppointmentState(true);
-      }
-      
-      console.log(assessments);  
-    } catch (error) {
-      console.error('Failed to fetch approved appointments: ', error);
-    }
-  }
+          console.log(assessments);
+        },
+        (error) => {
+          console.error('Failed to fetch approved appointments: ', error);
+        }
+      );
 
-  useEffect(()=>{
-    fetchApprovedAssessments();
-  },[])
+    return unsubscribe;
+  };
+
+  React.useEffect(() => {
+    const unsubscribe = fetchApprovedAssessments();
+    return () => unsubscribe();
+  }, []);
 
   const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
-    );
-
     sendMessagesToFirestore(messages);
     retrieveMessagesFromFirestore();
   }, []);
@@ -155,7 +162,8 @@ export default function PatientMessages() {
       <InputToolbar
         {...props}
         containerStyle={styles.inputToolbar}
-      />
+        textInputStyle={{ color: 'black' }}
+        />
     );
   };
 
@@ -223,9 +231,6 @@ export default function PatientMessages() {
               </View>
             </TouchableOpacity>
             <View style={{display:'flex', flexDirection:'row'}}>
-              <TouchableOpacity onPress={()=>{navigation.navigate('TokenTest')}}>
-                  <Icon name="bug" size={24} color={'black'}/>
-                </TouchableOpacity>
               {appointmentState ? (
                 <TouchableOpacity onPress={handleCall}>
                   <Icon name="phone" size={24} color={'black'}/>
@@ -320,8 +325,8 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 20,
-    height: 'auto'
-
+    height: 'auto',
+    color: 'black'
   },
 
   sendIcon: {

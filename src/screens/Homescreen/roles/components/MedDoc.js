@@ -223,12 +223,14 @@ const MedDoc = () => {
             <TextInput
               style={styles.input}
               placeholder="Email address"
+              placeholderTextColor={'#696969'}
               onChangeText={(text) => setMCReqemail(text)}
               value={reqMCEmail}
             />
             <TextInput
               style={styles.input}
               placeholder="Note to doctor"
+              placeholderTextColor={'#696969'}
               onChangeText={(text) => setMCReqnote(text)}
               value={reqMCNote}
             />
@@ -250,12 +252,14 @@ const MedDoc = () => {
             <TextInput
               style={styles.input}
               placeholder="Email address"
+              placeholderTextColor={'#696969'}
               onChangeText={(text) => setLRReqemail(text)}
               value={reqLREmail}
             />
             <TextInput
               style={styles.input}
               placeholder="Note to doctor"
+              placeholderTextColor={'#696969'}
               onChangeText={(text) => setLRReqnote(text)}
               value={reqLRNote}
             />
@@ -277,6 +281,7 @@ const MedDoc = () => {
             <TextInput
               style={styles.input}
               placeholder="Email address"
+              placeholderTextColor={'#696969'}
               onChangeText={(text) => setMPReqemail(text)}
               value={reqMPEmail}
             />
@@ -284,6 +289,7 @@ const MedDoc = () => {
             <TextInput
               style={styles.input}
               placeholder="Note to doctor"
+              placeholderTextColor={'#696969'}
               onChangeText={(text) => setMPReqnote(text)}
               value={reqMPNote}
             />

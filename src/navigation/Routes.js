@@ -279,12 +279,6 @@ return (
       })
     } 
     />
-    
-    <Stack.Screen 
-    name="VoiceChat"
-    component={VoiceChat}
-    options={{headerShown: false}}
-    />
 
     <Stack.Screen 
     name="TokenTest"
@@ -348,6 +342,11 @@ const Routes = (props) => {
             <Stack.Screen name="MyExercises" component={MyExercises}/>
             <Stack.Screen name="ExercisePlayer" component={ExercisePlayer}/>
             <Stack.Screen name="AssessmentHistory" component={AssessmentHistory}/>
+            <Stack.Screen 
+              name="VoiceChat"
+              component={VoiceChat}
+              options={{headerShown: false}}
+            />
         </Stack.Navigator>
     )
 }
