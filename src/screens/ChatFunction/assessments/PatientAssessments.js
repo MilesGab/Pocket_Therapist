@@ -99,7 +99,6 @@ const PatientAssessment = ({ route }) => {
             setPatientInfo(queryData);
         }
         catch (error) {
-            console.error('Error fetching patient results: ', error);
         }
     };
 
@@ -122,7 +121,6 @@ const PatientAssessment = ({ route }) => {
             // Return the unsubscribe function to stop listening to changes when needed
             return unsubscribe;
           } catch (error) {
-            console.error('Error subscribing to assessments: ', error);
             setLoading(false);
           }
     }

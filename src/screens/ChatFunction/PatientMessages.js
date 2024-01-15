@@ -42,7 +42,6 @@ export default function PatientMessages() {
         console.log('No doctor found with the provided ID.');
       }
     } catch (error) {
-      console.error('Error fetching doctor: ', error);
     }
   };
 
@@ -65,7 +64,6 @@ export default function PatientMessages() {
                   const messageData = change.doc.data();
                   // Check if the user object is defined
                   if (!messageData.user || !messageData.user._id) {
-                    console.error('User data is missing in the message');
                     return;
                   }
                   const newMessage = {
@@ -85,7 +83,6 @@ export default function PatientMessages() {
              });
   
     } catch (error) {
-      console.error('Error retrieving messages from Firestore:', error);
     }
   };
   
@@ -122,7 +119,6 @@ export default function PatientMessages() {
           console.log(assessments);
         },
         (error) => {
-          console.error('Failed to fetch approved appointments: ', error);
         }
       );
 
@@ -152,7 +148,6 @@ export default function PatientMessages() {
           });
       }
     } catch (error) {
-      console.error('Error sending messages to Firestore:', error);
     }
   };
 
@@ -218,6 +213,8 @@ export default function PatientMessages() {
                       left: 0,
                       right: 0,
                       bottom: 0,
+                      width: 55,
+                      height: 55,
                       borderRadius: 28,
                     }}
                   />

@@ -80,9 +80,8 @@ const VoiceChat = () => {
             });
             setToken(response.data.token);
         } catch (error) {
-            console.error('Error fetching token:', error);
         } finally {
-            join();
+            // join();
         }
     };
 
@@ -150,14 +149,18 @@ const VoiceChat = () => {
                         </View>
                     </>
                 ) : (
-                    <View>
-                        <Text>{message}</Text>
+                    <View style={{bottom: 0, height: 700, display:'flex',flexDirection:'column', justifyContent: 'flex-end',alignItems:'center'}}>
+                        <Text>
+                            Are you ready to join the call?
+                        </Text>
+                        <View style={{display:'flex', flexDirection:'row'}}>
                         <TouchableOpacity onPress={leave} style={[styles.button, { backgroundColor: 'red' }]}>
                             <Icon name="call-outline" color="white" size={40} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={join} style={[styles.button, { backgroundColor: 'green' }]}>
                             <Icon name="call-outline" color="white" size={40} />
                         </TouchableOpacity>
+                        </View>
                     </View>
                 )}
             </ScrollView>

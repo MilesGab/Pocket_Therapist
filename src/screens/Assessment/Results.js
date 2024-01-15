@@ -42,7 +42,6 @@ const Results = ({ painData, phyiscalData }) => {
           await appointmentRef.update({ uid: generatedUID });
   
         } catch (error) {
-          console.error('Failed to create appointment: ', error);
         }
       };
   

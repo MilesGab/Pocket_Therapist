@@ -40,7 +40,6 @@ const ViewUploaded = ({ route }) => {
         console.log('No matching documents found');
       }
     } catch (error) {
-      console.error('Failed to fetch file information: ', error);
     }
   };
   

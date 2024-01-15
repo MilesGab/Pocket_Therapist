@@ -93,7 +93,6 @@ const NoteDialog = (props) => {
             console.log('SAVED!');
             props?.setVisible(false);
         } catch (error) {
-            console.error('Failed to save assessment notes: ', error);
         }
     }
 
@@ -118,7 +117,6 @@ const NoteDialog = (props) => {
                     setNotes(data.notes || ''); // Populate notes
                 }
             } catch (error) {
-                console.error('Error fetching assessment data: ', error);
             }
         };
 
@@ -192,7 +190,6 @@ const AssessmentPage = ({ route }) => {
             setPatientInfo(queryData);
         }
         catch (error) {
-            console.error('Error fetching patient results: ', error);
         }
     };
 

@@ -59,7 +59,6 @@ const DoctorMessages = ({navigation}) => {
         
             setPatientList(patientData);
       } catch(error){
-        console.error('Error fetching patients: ', error);
       } finally {
         setLoading(false);
       }

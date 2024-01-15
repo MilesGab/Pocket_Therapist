@@ -35,7 +35,6 @@ export default function Register({ navigation }) {
       console.log('User account created & signed up!');
       navigation.navigate('Login');
     } catch (error) {
-      console.error('Error creating account:', error);
     }
   };
   

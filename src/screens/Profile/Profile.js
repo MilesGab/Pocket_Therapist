@@ -125,6 +125,10 @@ const EditSection = (props) => {
   const [contactNumber, setContactNumber] = React.useState(userContact);
   const [image, setProfilePicture] = React.useState(userPic);
 
+  React.useEffect(()=>{
+    console.log(date);
+  },[])
+
   const handleCancel = () => {
     props.handleEditMode();
   }
@@ -138,7 +142,6 @@ const EditSection = (props) => {
         console.log('User data updated successfully');
       })
       .catch((error) => {
-        console.error('Error updating user data:', error);
       })
       .finally(()=>{
         updateUser(newData);
@@ -178,7 +181,7 @@ const EditSection = (props) => {
   };
   
   const showDatepicker = () => {
-    showMode('date');
+    showMode('date'); 
   };
 
   const timestamp = new Date(
@@ -272,15 +275,15 @@ const EditSection = (props) => {
         </View>
       </View>
 
-      <View style={styles.row}>
+      {/* <View style={styles.row}>
         <Text style={styles.infoTxt}>Date of Birth</Text>
       </View>
       <View style={[styles.rowTxt, {display:'flex', flexDirection:'row', alignItems:'center', width:'100%', backgroundColor:'rgba(0,0,0,0.1)', padding:8, borderRadius:6}]}>
-        <Text style={[styles.userInfoTxt,{fontSize: 18, fontWeight:'normal', flex:1, color:'black'}]}>{userData.birthday || formattedDate}</Text>
+        <Text style={[styles.userInfoTxt,{fontSize: 18, fontWeight:'normal', flex:1, color:'black'}]}>{formattedDate}</Text>
         <TouchableOpacity onPress={showDatepicker}>
           <Icon name="calendar" color={'black'} style={{fontSize:18}}/>
         </TouchableOpacity>
-      </View>
+      </View> */}
       <View style={styles.row}>
         <Text style={styles.infoTxt}>Sex</Text>
       </View>
@@ -354,7 +357,6 @@ const Profile = () => {
       console.log('Deleted fcmtoken')
 
     } catch(e){
-      console.error(e);
     }
   }
 
@@ -368,7 +370,6 @@ const Profile = () => {
         navigation.navigate('Login');
       })
       .catch(error => {
-        console.error('Error logging out:', error);
       });
   };
   

@@ -39,7 +39,6 @@ export default function DoctorChatScreen({ route }) {
         console.log('No doctor found with the provided ID.');
       }
     } catch (error) {
-      console.error('Error fetching doctor: ', error);
     }
   };
 
@@ -77,8 +76,6 @@ export default function DoctorChatScreen({ route }) {
              });
 
     } catch (error) {
-      console.error('Error retrieving messages from Firestore:', error);
-      throw error;
     }
   };
 
@@ -104,7 +101,6 @@ export default function DoctorChatScreen({ route }) {
           });
       }
     } catch (error) {
-      console.error('Error sending messages to Firestore:', error);
     }
   };
 

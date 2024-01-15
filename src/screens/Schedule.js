@@ -161,7 +161,6 @@ const AddAppointment = (props) => {
         await appointmentRef.update({ uid: generatedUID });
 
       } catch (error) {
-        console.error('Failed to create appointment: ', error);
       }
     };
 
@@ -282,7 +281,6 @@ const Schedule = () => {
         setAppointmentList(appointmentsData);
         setLoading(false);
       }, (error) => {
-        console.error('Error fetching appointments:', error);
         setLoading(false);
       });
 

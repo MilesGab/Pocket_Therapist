@@ -17,7 +17,6 @@ export function UserProvider({ children }) {
           setUserData(parsedUserData);        
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
         Toast.show('Error loading user data');
       } finally {
         setLoading(false);
@@ -33,7 +32,6 @@ export function UserProvider({ children }) {
     try {
       await AsyncStorage.setItem('userData', JSON.stringify(newUserData));
     } catch (error) {
-      console.error('Error saving user data:', error);
       Toast.show('Error saving user data');
     } finally {
       console.log('Success in changing! New data: ', updatedUserData);
@@ -45,7 +43,6 @@ export function UserProvider({ children }) {
       await AsyncStorage.removeItem('userData');
       setUserData(null);
     } catch (error) {
-      console.error('Error logging out:', error);
       Toast.show('Error during logout');
     }
   };

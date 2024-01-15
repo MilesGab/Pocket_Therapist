@@ -37,7 +37,6 @@ export default function Login({ navigation }) {
           } else if (error.code === 'auth/invalid-email') {
             console.log('Invalid email format.');
           } else {
-            console.error(error);
           }
         });
     } else {

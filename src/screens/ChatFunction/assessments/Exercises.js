@@ -37,7 +37,6 @@ const Exercises = ({ route }) => {
       setSelectedVideos(initialSelectedVideos);
       }
     } catch (error) {
-      console.error('Error fetching video details from the database:', error);
     } finally {
       console.log('Videos accessed: ', videos);
       console.log('Videos not accessed: ', otherVideos);
@@ -122,7 +121,6 @@ const handlePress = async () => {
 
     console.log('Successfully updated access to the following videos: ', updatedVideos);
   } catch (error) {
-    console.error('Error updating videos in the database:', error);
   }
 };
 
