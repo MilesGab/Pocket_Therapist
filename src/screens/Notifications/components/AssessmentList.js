@@ -50,7 +50,6 @@ const AssessmentList = () => {
             console.log('No doctor found with the provided ID.');
           }
         } catch (error) {
-          console.error('Error fetching doctor: ', error);
         }
       };
 
@@ -74,12 +73,10 @@ const AssessmentList = () => {
             setAssessmentList(assessments);
             console.log(assessments);
           }, error => {
-            console.error('Failed to fetch approved assessments: ', error);
           });
     
         return unsubscribe;
       } catch (error) {
-        console.error('Failed to set up onSnapshot listener: ', error);
       }
     };
 

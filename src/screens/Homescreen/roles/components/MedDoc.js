@@ -43,6 +43,7 @@ const MedDoc = () => {
           email: reqMCEmail,
           note: reqMCNote,
           type: 'medical_certificate',
+          status: 'ongoing',
           patient: userData.uid
         });
   
@@ -55,7 +56,6 @@ const MedDoc = () => {
           setUploadSuccessMC(false);
         }, 5000);
       } else {
-        console.error('User data incomplete');
         setMCReqemail('');
         setMCReqnote('');
         setShowModal1(false);
@@ -65,7 +65,6 @@ const MedDoc = () => {
         }, 5000); 
       }
     } catch (error) {
-      console.error('Error saving document:', error);
     }
   };
 
@@ -86,6 +85,7 @@ const MedDoc = () => {
           email: reqLREmail,
           note: reqLRNote,
           type: 'laboratory_request',
+          status: 'ongoing',
           patient: userData.uid
         });
   
@@ -98,7 +98,6 @@ const MedDoc = () => {
           setUploadSuccessLR(false);
         }, 5000);
       } else {
-        console.error('User data incomplete');
         setLRReqemail('');
         setLRReqnote('');
         setShowModal2(false);
@@ -108,7 +107,6 @@ const MedDoc = () => {
         }, 5000);
       }
     } catch (error) {
-      console.error('Error saving document:', error);
     }
   };
 
@@ -126,6 +124,7 @@ const MedDoc = () => {
           createdAt: firestore.FieldValue.serverTimestamp(),
           email: reqMPEmail,
           note: reqMPNote,
+          status: 'ongoing',
           type: 'medical_prescription',
           patient: userData.uid
         });
@@ -139,7 +138,6 @@ const MedDoc = () => {
           setUploadSuccessMP(false);
         }, 5000);
       } else {
-        console.error('User data incomplete');
         setMPReqemail('');
         setMPReqnote('');
         setShowModal3(false);
@@ -150,7 +148,6 @@ const MedDoc = () => {
         
       }
     } catch (error) {
-      console.error('Error saving document:', error);
     }
   };
 

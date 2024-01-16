@@ -55,11 +55,10 @@ const Tickets = ({ route }) => {
             <Text style={styles.headerText}>Documents</Text>
             <ScrollView>
                 {list.map((ticket) => (
-                    <View>
+                    <View key={ticket.id}>
                         <TouchableOpacity 
                             style={styles.ticketContainer} 
-                            key={ticket.id}
-                            onPress={() => navigation.navigate('ViewUploaded', { fileData: ticket.uid })}
+                            onPress={() => navigation.navigate('ViewUploaded', { fileData: ticket.id })}
                         >
                             <Text style={styles.ticketText}>Task: {ticket.name.length > 2 ? ticket.name : ticket.name.join(', ').replace(/, (?=[^,]*$)/, ' and ')}</Text>
                             {mappedDocuments[ticket.id] && mappedDocuments[ticket.id].map(doc => (

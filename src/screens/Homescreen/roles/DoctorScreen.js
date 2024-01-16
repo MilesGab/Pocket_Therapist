@@ -120,7 +120,6 @@ const DoctorScreen = ({ navigation }) => {
       );
   
     } catch (error) {
-      console.error('Error updating FCM token:', error);
     }
   };
 
@@ -137,7 +136,6 @@ const DoctorScreen = ({ navigation }) => {
         const count = snapshot.size;
         setPatientCount(count);
       }, error => {
-        console.error('Error fetching patients: ', error);
       });
   };
   
@@ -158,7 +156,6 @@ const DoctorScreen = ({ navigation }) => {
         const count = snapshot.size;
         setAppointmentsCount(count);
       }, error => {
-        console.error('Error fetching appointments:', error);
       });
   };
   
@@ -203,7 +200,6 @@ const DoctorScreen = ({ navigation }) => {
         setAppointmentList(appointmentsData);
         setLoading(false);
       }, error => {
-        console.error('Error fetching appointments:', error);
         setLoading(false);
       });
   };
@@ -223,7 +219,6 @@ const DoctorScreen = ({ navigation }) => {
             
             setSecretary(fetchedSecretaries);
         } catch (error) {
-            console.error('Failed fetching secretary: ', error);
         }
     }
 

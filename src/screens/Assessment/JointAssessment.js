@@ -26,6 +26,7 @@ const WristAngleSensor = (props) =>{
       }, 1000);
     } else {
       clearInterval(countdownInterval);
+      handleNext();
     }
 
     return () => {
@@ -54,7 +55,7 @@ const WristAngleSensor = (props) =>{
         ) : (
           <>
             <Text style={{ textAlign: 'center', color: 'black', marginBottom: 12}}>Wrist assessment complete</Text>
-            <Button style={{marginBottom: 12}} onPress={handleNext} title="Next"/>
+            {/* <Button style={{marginBottom: 12}} onPress={handleNext} title="Next"/> */}
           </>
         )}
       </View>
@@ -77,7 +78,7 @@ const JointAssessment = () => {
         {isReady ? (<WristAngleSensor setAngleData={setAngleData}/>) : ( 
           <>
             {/* <Image style={styles.instructionImage} source={Instructions}/> */}
-            <Text style={styles.instructions}>Please hold your phone in a 90° angle and press start whenever ready</Text>
+            <Text style={styles.instructions}>Please hold your phone in a neutral position and press start whenever ready</Text>
             <Button onPress={()=>{setIsReady(true)}} title="Ready" backgroundColor='#65A89F' />
           </>
          )}
@@ -117,7 +118,9 @@ const styles = {
 
   instructions: {
     textAlign:'center',
-    fontSize: 16
+    fontSize: 16,
+    paddingHorizontal: 12,
+    marginBottom: 12
   },
 
   circle: {

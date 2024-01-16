@@ -29,11 +29,11 @@ const AppointmentCard = ({ doctor, date, status, message }) => {
       break;
     case 1:
       cardBackgroundColor = '#C8E6C9'; // Light green color
-      messages = `Your appointment on ${formattedDate} at ${formattedTime} has been approved by Dr. ${doctor?.firstName || '---'} ${doctor?.lastName || '---'}.`;
+      messages = `Your appointment on ${formattedDate} at ${formattedTime} has been approved.`;
       break;
     case 2:
       cardBackgroundColor = '#FFEBEE'; // Light red color
-      messages = `Your appointment on ${formattedDate} at ${formattedTime} has been rejected by Dr. ${doctor?.firstName || '---'} ${doctor?.lastName || '---'}. \n\nReason: ${message || 'No reason provided'}`;
+      messages = `Your appointment on ${formattedDate} at ${formattedTime} has been rejected. \n\nReason: ${message || 'No reason provided'}`;
       break;
     default:
       messages = 'Unknown status';
@@ -74,7 +74,6 @@ const AppointmentList = () => {
             console.log('No doctor found with the provided ID.');
           }
         } catch (error) {
-          console.error('Error fetching doctor: ', error);
         }
       };
 
@@ -106,7 +105,6 @@ const AppointmentList = () => {
     
         setAppointments(appointmentsData);
       } catch (error) {
-        console.error('Failed to fetch appointments: ', error);
       }
     };
   

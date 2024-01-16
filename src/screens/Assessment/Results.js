@@ -97,8 +97,8 @@ const Results = ({ painData, phyiscalData }) => {
             </Box>
 
             <View style={styles.decisionButtons}>
-                <Button color={'white'} onPress={handleReturn} title="Retake Assessment"/>
-                <Button color={'white'} onPress={handleSave} title="Confirm Results"/>
+                <Button style={{paddingVertical: 12}} color={'white'} onPress={handleReturn} title="Retake Assessment"/>
+                <Button style={{paddingVertical: 12}} color={'white'} onPress={handleSave} title="Confirm Results"/>
             </View>
         </View>
     )
@@ -119,7 +119,7 @@ const styles = {
         display:'flex',
         flexDirection:'row',
         gap: 8,
-        width: '50%'
+        width: '50%',
     },
 
     physicalResults: {

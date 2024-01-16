@@ -29,7 +29,6 @@ const MyExercises = ({ route }) => {
             setVideos(filteredVideos);
           }
         } catch (error) {
-          console.error('Error fetching video details from the database:', error);
         } finally {
           setLoading(false);
         }

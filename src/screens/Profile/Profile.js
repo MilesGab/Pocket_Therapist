@@ -67,7 +67,7 @@ const InformationSection = (props) => {
       <View style={styles.rowTxt}>
         <Text style={styles.userInfoTxt}>{userData?.firstName} {userData?.lastName}</Text>
       </View>
-      <View style={styles.row}>
+      {/* <View style={styles.row}>
         <Text style={styles.infoTxt}>Age</Text>
       </View>
       <View style={styles.rowTxt}>
@@ -78,7 +78,7 @@ const InformationSection = (props) => {
       </View>
       <View style={styles.rowTxt}>
         <Text style={styles.userInfoTxt}>{formattedDate || '---'}</Text>
-      </View>
+      </View> */}
       <View style={styles.row}>
         <Text style={styles.infoTxt}>Sex assigned at birth</Text>
       </View>
@@ -155,7 +155,6 @@ const EditSection = (props) => {
       firstName: firstName,
       lastName: lastName,
       sex: dropDownValue,
-      dateOfBirth: date,
       email: emailAddress,
       contact: contactNumber,
       profilePictureURL: image

@@ -168,7 +168,7 @@ const Questionnaire = ({ updatePainData, updatePhysicalData }) => {
   }
 
   return (
-    <ScrollView>
+    <ScrollView scrollEnabled={!isDropDownOpen}>
     <View style={styles.container}>
       <Text style={styles.title}>Assessment</Text>
       <Text style={isPainAssessment ? styles.titlePortion : styles.titlePortion}>

@@ -3,20 +3,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PermissionsAndroid} from 'react-native';
 
 export async function requestUserPermission() {
-  PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-  const authStatus = await messaging().requestPermission();
+  let authStatus;
+  if (Platform.OS === 'ios') {
+    authStatus = await messaging().requestPermission();
+  } else {
+    authStatus = messaging.AuthorizationStatus.AUTHORIZED;
+  }
+
   const enabled =
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    if (enabled){
-        console.log('Authorization:', authStatus);
-        GetFCMToken();
-    }
+  if (enabled) {
+    GetFCMToken();
+  }
 }
 
+
 async function GetFCMToken() {
-  console.log('GET TOKEN')
   let fcmtoken = await AsyncStorage.getItem('fcmtoken');
   console.log(fcmtoken, 'old token');
 

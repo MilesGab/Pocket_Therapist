@@ -41,7 +41,7 @@ const UploadDocu = () => {
   const fetchTickets = async () =>{
     try{
 
-      const ticketRef = firestore().collection("tickets").where("patient", '==', trimmedUid);
+      const ticketRef = firestore().collection("tickets").where("patient", '==', trimmedUid).where("status", "==", "ongoing");
       const querySnapshot = await ticketRef.get();
   
       const documents = querySnapshot.docs.map(doc => ({
@@ -56,14 +56,37 @@ const UploadDocu = () => {
       }
 
     } catch (e){
-      console.error('Error fetching tickets: ', e);
     }
   };
 
-  React.useEffect(()=>{
-    fetchTickets();
-  },[]);
+  React.useEffect(() => {
+    const ticketRef = firestore()
+      .collection("tickets")
+      .where("patient", '==', trimmedUid)
+      .where("status", "==", "ongoing");
 
+    const unsubscribe = ticketRef.onSnapshot(
+      (querySnapshot) => {
+        const documents = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        if (documents.length > 0) {
+          setList(documents);
+        } else {
+          console.log('No matching documents found');
+        }
+      },
+      error => {
+        console.error('Error fetching tickets:', error);
+      }
+    );
+
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
+  
   const handleImgUpload = async (docId) => {
     try {
       const res = await DocumentPicker.pickSingle({
@@ -90,7 +113,6 @@ const UploadDocu = () => {
           uploadTask.on('state_changed',
             (snapshot) => {},
             async (error) => {
-              console.error('Error uploading image:', error);
             },
             async () => {
               try {
@@ -112,7 +134,6 @@ const UploadDocu = () => {
                   setImgUploadSuccess(false);
                 }, 5000); 
               } catch (error) {
-                console.error('Error getting download URL:', error);
                 setShowModal1(false);
                 setImgUploadFail(true); 
                 setTimeout(() => {
@@ -122,13 +143,10 @@ const UploadDocu = () => {
             }
           );
         } else {
-          console.error('User data not found');
         }
       } else {
-        console.error('User data not found');
       }
     } catch (error) {
-      console.error('Error uploading document:', error);
     }
   };
   
@@ -159,7 +177,6 @@ const UploadDocu = () => {
             'state_changed',
             null,
             (error) => {
-              console.error('Error uploading document:', error);
             },
             async () => {
               try {
@@ -181,7 +198,6 @@ const UploadDocu = () => {
                   setDocuUploadSuccess(false);
                 }, 5000); 
               } catch (error) {
-                console.error('Error getting download URL:', error);
                 setShowModal1(false);
                 setDocuUploadFail(true); 
                 setTimeout(() => {
@@ -191,10 +207,8 @@ const UploadDocu = () => {
             }
           );
         } else {
-          console.error('User data not found');
         }
       } else {
-        console.error('User data not found');
       }
     } catch {
     }
@@ -221,7 +235,7 @@ const UploadDocu = () => {
             ))}
           </>
         ) : (
-          <Text>Loading...</Text>
+          <Text>No tickets</Text>
         )}
 
 

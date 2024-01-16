@@ -89,7 +89,6 @@ const PatientSearch = () => {
     
             setResultsList(resultsArray);
         } catch (error) {
-            console.error('Error fetching patient list: ', error);
         } finally {
         }
     }
@@ -104,7 +103,6 @@ const PatientSearch = () => {
     
             console.log(`Doctor field updated for user with UID: ${userUid}`);
         } catch (error) {
-            console.error('Error updating doctor field: ', error);
         } finally{
             searchPatient();
         }

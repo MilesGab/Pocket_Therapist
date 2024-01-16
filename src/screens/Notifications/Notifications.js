@@ -16,6 +16,7 @@ import {
 } from '@react-native-material/core';
 import AppointmentList from './components/AppointmentList';
 import AssessmentList from './components/AssessmentList';
+import MedDocList from './components/MedRequestList';
 
 const Notification = ({ item, fetchApptRequest }) => {
   const { userData, updateUser } = useUserContext();
@@ -59,7 +60,6 @@ const Notification = ({ item, fetchApptRequest }) => {
         status: 1
       });
     } catch (error) {
-      console.error('Error updating appointment: ', error);
     } finally {
       fetchApptRequest();
     }
@@ -76,7 +76,6 @@ const Notification = ({ item, fetchApptRequest }) => {
         message : message
       });
     } catch (error) {
-      console.error('Error updating appointment: ', error);
     } finally {
       fetchApptRequest();
     }
@@ -279,7 +278,6 @@ const Notifications = () => {
 
       setApptReqList(appointmentsData);
     } catch (error) {
-      console.error('Error fetching appointments:', error);
     } finally{
       setLoading(false);
     }
@@ -322,7 +320,6 @@ const Notifications = () => {
   
       setAssessmentList(assessments);
     } catch (error) {
-      console.error('Error fetching assessments:', error);
     }
   };
   
@@ -365,6 +362,10 @@ const Notifications = () => {
               <Text style={[styles.notifHeader, { color: 'black' }]}>Assessments</Text>
               <View>
                 <AssessmentList />
+              </View>
+              <Text style={[styles.notifHeader, { color: 'black' }]}>Medical Document Requests</Text>
+              <View>
+                <MedDocList />
               </View>
             </>
           )}

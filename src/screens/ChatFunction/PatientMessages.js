@@ -39,7 +39,6 @@ export default function PatientMessages() {
         const doctor = doctorDoc.data();
         setDoctor(doctor);
       } else {
-        console.log('No doctor found with the provided ID.');
       }
     } catch (error) {
     }
@@ -93,12 +92,14 @@ export default function PatientMessages() {
 
   const fetchApprovedAssessments = () => {
     const now = new Date();
-    const thirtyMinutesLater = new Date(now.getTime() + 30 * 60000);
+    const thirtyMinutesEarlier = new Date(now.getTime() - 30 * 60000); // 30 minutes earlier
+    const thirtyMinutesLater = new Date(now.getTime() + 30 * 60000); // 30 minutes later
+    
 
     const unsubscribe = firestore()
       .collection('appointments')
       .where('patient_assigned', '==', trimmedUid)
-      .where('date', '>=', now)
+      .where('date', '>=', thirtyMinutesEarlier)
       .where('date', '<=', thirtyMinutesLater)
       .where('status', '==', 1)
       .orderBy('date', 'desc')
@@ -115,8 +116,6 @@ export default function PatientMessages() {
           } else {
             setAppointmentState(false);
           }
-
-          console.log(assessments);
         },
         (error) => {
         }
@@ -200,7 +199,6 @@ export default function PatientMessages() {
         <View style={styles.header}>
           <View style={styles.profileOptions}>
             <TouchableOpacity
-              onPress={() => console.log(doctorData)}
               style={styles.profileAndOptions}
             >
               <Avatar 

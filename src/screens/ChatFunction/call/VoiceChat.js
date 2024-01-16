@@ -96,7 +96,9 @@ const VoiceChat = () => {
     };
 
     useEffect(() => {
-        setupVideoSDKEngine();
+        setupVideoSDKEngine().then(()=>{
+            agoraEngineRef.current.startPreview();
+        });
         retrieveToken();
     }, []);
 
@@ -107,6 +109,10 @@ const VoiceChat = () => {
             }
         };
     }, []);
+
+    useEffect(()=>{
+        console.log("Token", token);
+    },[token])
 
     const leave = () => {
         try {
@@ -120,11 +126,21 @@ const VoiceChat = () => {
         }
     };
 
+    const toggleCamera = () => {
+        agoraEngineRef.current?.switchCamera();
+    };
+
     return (
         <SafeAreaView style={styles.main}>
             <ScrollView
                 style={styles.scroll}
                 contentContainerStyle={styles.scrollContainer}>
+                {isVideoEnabled && (
+                    <RtcSurfaceView
+                        canvas={{ uid: 0 }}
+                        style={{position: 'absolute', top: 0, left: 0, zIndex: 1, width: '40%', height: 200, left: 20,top:20}}
+                    />
+                )}
                 {isJoined ? (
                     <>
                         {remoteUid !== 0 && (
@@ -133,25 +149,24 @@ const VoiceChat = () => {
                                 style={styles.videoView}
                             />
                         )}
-                        {isVideoEnabled && (
-                            <RtcSurfaceView
-                                canvas={{ uid: 0 }}
-                                style={{position: 'absolute', top: 0, left: 0, zIndex: 1, width: '40%', height: 200, left: 20,top:20}}
-                            />
-                        )}
                         <View style={styles.btnContainer}>
-                            <TouchableOpacity onPress={toggleVideo} style={styles.button}>
-                                <Icon name={isVideoEnabled ? "videocam-outline" : "videocam-off-outline"} color="white" size={40} />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={leave} style={[styles.button, { backgroundColor: 'red' }]}>
-                                <Icon name="call-outline" color="white" size={40} />
-                            </TouchableOpacity>
+                            <View style={{display:'flex', flexDirection:'row', height:90}}>
+                                <TouchableOpacity onPress={toggleCamera} style={styles.button}>
+                                <Icon name="camera-reverse-outline" color="white" size={40} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={toggleVideo} style={styles.button}>
+                                    <Icon name={isVideoEnabled ? "videocam-outline" : "videocam-off-outline"} color="white" size={40} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={leave} style={[styles.button, { backgroundColor: 'red' }]}>
+                                    <Icon name="call-outline" color="white" size={40} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </>
                 ) : (
                     <View style={{bottom: 0, height: 700, display:'flex',flexDirection:'column', justifyContent: 'flex-end',alignItems:'center'}}>
                         <Text>
-                            Are you ready to join the call?
+                            Are you ready to join the call? {message}
                         </Text>
                         <View style={{display:'flex', flexDirection:'row'}}>
                         <TouchableOpacity onPress={leave} style={[styles.button, { backgroundColor: 'red' }]}>
@@ -163,6 +178,9 @@ const VoiceChat = () => {
                         </View>
                     </View>
                 )}
+                <View style={{bottom: 0, height: 700, display:'flex',flexDirection:'column', justifyContent: 'flex-end',alignItems:'center'}}>
+                    <Text>{message}</Text>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -183,11 +201,12 @@ const styles = StyleSheet.create({
     main: {
         flex: 1, 
         alignItems: 'center',
+        backgroundColor:'#f5f5f5'
     },
 
     scroll: {
         flex: 1, 
-        width: '100%'
+        width: '100%',
     },
 
     scrollContainer: {
@@ -200,11 +219,11 @@ const styles = StyleSheet.create({
     },
 
     btnContainer: {
-        flexDirection: 'row', 
+        flexDirection: 'column', 
         justifyContent: 'center',
-        paddingVertical: 40,
+        bottom: 100,
         position:'absolute',
-        bottom: 0,
+        height: '100%'
     },
 
     head: {

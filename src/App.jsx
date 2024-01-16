@@ -4,6 +4,9 @@ import auth from '@react-native-firebase/auth';
 import Routes from './navigation/Routes.js';
 import { UserProvider } from '../contexts/UserContext.js';
 import { NotificationListener, requestUserPermission } from './utils/pushnotification_helper.js';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs();
 
 export default function App() {
   const [initializing, setInitializing] = React.useState(true);

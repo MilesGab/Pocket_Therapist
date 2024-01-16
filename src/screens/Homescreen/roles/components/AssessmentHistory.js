@@ -179,7 +179,8 @@ const AssessmentCard = ( item ) => {
                         <Text style={[styles.cardText, {fontWeight:'bold'}]}>Pain Data</Text>
                         <Text style={styles.cardText}>•Vas Score: {[item.painData[0]]}</Text>
                         <Text style={styles.cardText}>•Pain Description: {[item.painData[1]]}</Text>
-                        <Text style={styles.cardText}>•Pain Duration: {PainDurationMap[item.painData[2]]}</Text>
+                        <Text style={styles.cardText}>•Personal Description: {[item.painData[4]]}</Text>
+                        <Text style={styles.cardText}>•Pain Duration: {item.painData[2]}</Text>
                     </View>
 
                     <View>
@@ -242,7 +243,6 @@ const AssessmentHistory = () => {
     
             return unsubscribe;
         } catch (error) {
-            console.error('Error subscribing to assessments: ', error);
             setLoading(false);
         }
     }

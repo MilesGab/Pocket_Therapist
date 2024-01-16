@@ -58,7 +58,7 @@ const AppointmentCard = ( props ) => {
       >
       <View style={{display:'flex', flexDirection:'row', alignItems:'center', marginBottom:6}}>
         <View style={{flexDirection:'row', paddingVertical: 2, paddingHorizontal: 2}}>  
-          <Text style={{fontWeight:'bold', color:'#696969', fontSize:16, flex: 1}}>{props?.name === 'Consultation' ? 'Consulted With' : 'Assessed By'}</Text>
+          <Text style={{fontWeight:'bold', color:'#696969', fontSize:16, flex: 1}}>Date</Text>
           <Text style={{color:'#696969', fontSize:14}}>{formattedDate} {formattedTime}</Text>
         </View>
       </View>

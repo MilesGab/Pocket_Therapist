@@ -26,7 +26,6 @@ const ExerciseList = () => {
         }
 
       } catch (error) {
-        console.error('Error fetching video details from the database:', error);
       } finally {
         setLoading(false);
       }

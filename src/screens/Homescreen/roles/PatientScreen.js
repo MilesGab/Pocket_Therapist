@@ -119,7 +119,6 @@ const PatientScreen = ({ navigation }) => {
       );
   
     } catch (error) {
-      console.error('Error updating FCM token:', error);
     }
   };
 
@@ -170,7 +169,6 @@ const PatientScreen = ({ navigation }) => {
   
         setAppointmentList(appointmentsData);
       } catch (error) {
-        console.error('Error fetching appointments:', error);
       } finally {
         setLoading(false);
       }
@@ -193,7 +191,6 @@ const PatientScreen = ({ navigation }) => {
         const hasAppointment = querySnapshot.size > 0;
         setHasAppointmentStatus2(hasAppointment);
       } catch (error) {
-        console.error('Error fetching appointments:', error);
       } finally {
         setLoading(false);
       }
@@ -363,7 +360,6 @@ const LatestResults = () =>{
   
       return () => unsubscribe();
     } catch (error) {
-      console.error('Error fetching results:', error);
       setLoading(false);
     }
   };

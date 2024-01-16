@@ -24,6 +24,7 @@ const ViewUploaded = ({ route }) => {
     }
   }, [fileData]);
   
+
   const fetchUploadedData = async (ticketId) => {
     try {
       const patientDataRef = firestore().collection('uploadedDocuments').where('ticket', '==', ticketId);
