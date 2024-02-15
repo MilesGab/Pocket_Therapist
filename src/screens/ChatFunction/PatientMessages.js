@@ -19,40 +19,52 @@ export default function PatientMessages() {
   const { userData } = useUserContext();
   const trimmedUid = userData?.uid.trim();
   const doctorId = userData?.doctor.trim();
+  const [secId, setSecId] = React.useState('');
   const navigation = useNavigation();
+  const [senderData, setSenderData] = useState(null);
 
-  const senderData = {
-    _id: trimmedUid,
-    name: userData.firstName,
-    avatar: userData?.profilePictureURL,
-  };
-
-  const fetchDoctor = async () => {
-    try {
-      const querySnapshot = await firestore()
-        .collection('users')
-        .where('uid', '==', doctorId)
-        .get();
-
-      if (!querySnapshot.empty) {
-        const doctorDoc = querySnapshot.docs[0];
-        const doctor = doctorDoc.data();
-        setDoctor(doctor);
-      } else {
-      }
-    } catch (error) {
+  React.useEffect(() => {
+    if (userData && trimmedUid) {
+      setSenderData({
+        _id: trimmedUid,
+        name: userData.firstName,
+        avatar: userData.profilePictureURL,
+      });
     }
-  };
+  }, [userData, trimmedUid]);
+
+  const fetchSecretary = async () => {
+    try {
+        const secSnapshot = await firestore()
+            .collection('users')
+            .where('role', '==', 2)
+            .where('doctor', 'array-contains', doctorId)
+            .get();
+
+        if (!secSnapshot.empty) {
+            const secDoc = secSnapshot.docs[0]; // Assuming you only have one secretary per doctor
+            const sec = secDoc.data();
+            setDoctor(sec);
+            setSecId(sec.uid);
+        }
+    } catch (error) {
+        console.error("Error fetching secretary:", error);
+    }
+}
 
   useEffect(() => {
-    fetchDoctor();
+    console.log(userData);
   }, []);
+
+  useEffect(() => {
+    fetchSecretary();
+  }, [userData]);
 
   const retrieveMessagesFromFirestore = async () => {
     try {  
       const chatRef = firestore().collection('messages');
-      chatRef.where('sendTo', 'in', [trimmedUid, doctorId])
-             .where('user._id', 'in', [trimmedUid, doctorId])
+      chatRef.where('sendTo', 'in', [trimmedUid, secId])
+             .where('user._id', 'in', [trimmedUid, secId])
              .orderBy('createdAt', 'asc')
              .onSnapshot((snapshot) => {
               if (!snapshot) {
@@ -61,7 +73,6 @@ export default function PatientMessages() {
               snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
                   const messageData = change.doc.data();
-                  // Check if the user object is defined
                   if (!messageData.user || !messageData.user._id) {
                     return;
                   }
@@ -137,18 +148,25 @@ export default function PatientMessages() {
   const sendMessagesToFirestore = async (messages) => {
     try {
       for (const message of messages) {
+        if (!senderData || !message.text || !secId) {
+          console.error("One of the fields is undefined", { senderData, messageText: message.text, secId });
+          return;
+        }
+  
         await firestore()
           .collection('messages')
           .add({
             user: senderData,
             text: message.text,
             createdAt: firestore.FieldValue.serverTimestamp(),
-            sendTo: doctorId
+            sendTo: 'uYSNDSB0diRwEgwLaPWf5Wq2zYB3'
           });
       }
     } catch (error) {
+      console.log('Error', error);
     }
   };
+  
 
   /*toolbar customization*/
   const customInputToolbar = (props) => {
@@ -199,6 +217,7 @@ export default function PatientMessages() {
         <View style={styles.header}>
           <View style={styles.profileOptions}>
             <TouchableOpacity
+              onPress={()=>console.log(secId)}
               style={styles.profileAndOptions}
             >
               <Avatar 
@@ -221,7 +240,7 @@ export default function PatientMessages() {
                 size={55} />
               <View style={styles.nameAndClass}>
                 <Text style={styles.username}>
-                  Dr. {doctorData.firstName} {doctorData.lastName}
+                  {doctorData.firstName} {doctorData.lastName}
                 </Text>
               </View>
             </TouchableOpacity>

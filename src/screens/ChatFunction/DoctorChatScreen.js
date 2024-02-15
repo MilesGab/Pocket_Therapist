@@ -179,9 +179,16 @@ export default function DoctorChatScreen({ route }) {
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={{right: 12}} onPress={handleCall}>
-              <Icon name="phone" size={24} color={'black'}/>
-            </TouchableOpacity>
+            {patient?.role === 0 ? (
+              <TouchableOpacity style={{right: 12}} onPress={handleCall}>
+                <Icon name="phone" size={24} color={'black'}/>
+              </TouchableOpacity>
+             ) : (
+              <TouchableOpacity style={{right: 12}} onPress={handleCall}>
+                <Icon name="phone" size={24} color={'black'}/>
+              </TouchableOpacity>
+              )}
+
           </View>
         </View>
         <View style={styles.toolbarContainer}>

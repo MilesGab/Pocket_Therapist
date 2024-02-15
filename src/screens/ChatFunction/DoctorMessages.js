@@ -145,11 +145,11 @@ const DoctorMessages = ({navigation}) => {
                                   </View>
                                   <View>
                                     <View style={{display:'flex', flexDirection:'column'}}>
-                                      <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
+                                      {/* <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
                                         <Icon name="chatbox-ellipses-outline" size={18} color="gray"/>
                                         <Text style={styles.messagePreview}>{item.messageText} · </Text>
                                         <Text style={styles.timeReceived}>{item.messageTime}</Text>
-                                      </View>
+                                      </View> */}
                                       {/* <View style={{display:'flex', flexDirection:'row', alignContent:'center', alignItems:'center'}}>
                                         <Icon name="pulse-outline" size={18} color="gray"/>
                                         <Text style={[styles.messagePreview, {fontSize: 14}]}>New assessment available!</Text>
@@ -160,12 +160,12 @@ const DoctorMessages = ({navigation}) => {
                         </View>
                         {selectedItemIndex === index && dropMenu && (
                             <View style={styles.dropMenu}>
-                              <TouchableOpacity onPress={()=>handleMessage(item.id)}>
+                              {/* <TouchableOpacity onPress={()=>handleMessage(item.id)}>
                                 <View style={styles.menuContent}>
                                   <Icon name="chatbox-ellipses-outline" size={20} color="gray" />
                                   <Text style={{color: 'gray'}}>View Messages</Text>
                                 </View>
-                              </TouchableOpacity>
+                              </TouchableOpacity> */}
                               <TouchableOpacity onPress={()=>handleAssessments(item.id)} >
                                 <View style={styles.menuContent}>
                                   <Icon name="pulse-outline" size={20} color="gray" />

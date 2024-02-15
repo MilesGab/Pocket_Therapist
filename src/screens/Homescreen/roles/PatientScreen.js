@@ -275,6 +275,7 @@ const PatientScreen = ({ navigation }) => {
                   <Divider style={{marginVertical: 12}}/>
 
                   {hasAppointmentStatus2 && (
+                  <>
                   <TouchableOpacity onPress={() => handleMedDoc(trimmedUid)} style={styles.serviceBtn}>
                     <Icon name="document-text-outline" color={'#2F8D46'} size={36} style={{ right: 12 }} />
                     <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'black', flex: 1 }}>
@@ -282,8 +283,9 @@ const PatientScreen = ({ navigation }) => {
                     </Text>
                     <Icon name="chevron-forward-outline" size={20} />
                   </TouchableOpacity>
-                  )}
                   <Divider style={{marginVertical: 12}}/>
+                  </>
+                  )}
 
                   {hasAppointmentStatus2 && (
                   <TouchableOpacity onPress={() => handleUploadDocu(trimmedUid)} style={styles.serviceBtn}>

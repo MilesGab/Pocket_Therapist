@@ -19,8 +19,6 @@ import {
 } from "@react-native-material/core";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { FlatList } from 'react-native-gesture-handler';
-import Toast from 'react-native-toast-message';
-
 
 const AppointmentCard = ( props ) => {
   const { userData, updateUser } = useUserContext();
@@ -110,19 +108,61 @@ const AddAppointment = (props) => {
   const [open, setOpen] = React.useState(false);
 
   const [date, setDate] = React.useState(new Date());
+  const [allowedAppointment, setAllowedAppointment] = React.useState(true);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setDate(currentDate);
   };
 
-  const showMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: date,
-      onChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
+  const checkAppointmentLimit = async (date) => {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+  
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+  
+    const appointments = await firestore()
+      .collection('appointments')
+      .where('date', '>=', startOfDay)
+      .where('date', '<=', endOfDay)
+      .get();
+  
+    return appointments.docs.length;
+  };
+  
+  const showMode = async (currentMode) => {
+    if (currentMode === 'date') {
+      const currentDate = new Date();
+  
+      DateTimePickerAndroid.open({
+        value: date,
+        onChange: async (event, selectedDate) => {
+          const appointmentCount = await checkAppointmentLimit(selectedDate);
+          if (appointmentCount < 10) {
+            setAllowedAppointment(true);
+            onChange(event, selectedDate);
+          } else {
+            setAllowedAppointment(false);
+            ToastAndroid.showWithGravity(
+              'Selected date has reached the maximum number of appointments.',
+              ToastAndroid.LONG,
+              ToastAndroid.CENTER
+            );
+          }
+        },
+        mode: currentMode,
+        is24Hour: false,
+        minimumDate: currentDate,
+      });
+    } else {
+      DateTimePickerAndroid.open({
+        value: date,
+        onChange,
+        mode: currentMode,
+        is24Hour: false,
+      });
+    }
   };
 
   const showDatepicker = () => {
@@ -165,9 +205,17 @@ const AddAppointment = (props) => {
     };
 
     const onSetAppoint = () => {
-      props.setVisible(false); 
-      createAppointmentRequest(); 
-      setVisible(true)
+      if(!allowedAppointment){
+        ToastAndroid.showWithGravity(
+          'Selected date has reached the maximum number of appointments.',
+          ToastAndroid.LONG,
+          ToastAndroid.CENTER
+        );
+      } else {
+        props.setVisible(false); 
+        createAppointmentRequest(); 
+        setVisible(true)
+      }
     }
 
   return (

@@ -51,7 +51,9 @@ const WristAngleSensor = (props) =>{
 
       <View>
         {countdown > 0 ? (
+          <>
           <Text style={{ textAlign: 'center', color: 'black' }}>{countdown} seconds remaining</Text>
+          </>
         ) : (
           <>
             <Text style={{ textAlign: 'center', color: 'black', marginBottom: 12}}>Wrist assessment complete</Text>
@@ -77,8 +79,11 @@ const JointAssessment = () => {
       <View style={styles.content}>
         {isReady ? (<WristAngleSensor setAngleData={setAngleData}/>) : ( 
           <>
-            {/* <Image style={styles.instructionImage} source={Instructions}/> */}
             <Text style={styles.instructions}>Please hold your phone in a neutral position and press start whenever ready</Text>
+            <Text style={styles.instructions}>
+              Gently bend your wrist either forward or backwards. 
+              Find a comfortable angle without straining. 
+            </Text>
             <Button onPress={()=>{setIsReady(true)}} title="Ready" backgroundColor='#65A89F' />
           </>
          )}
